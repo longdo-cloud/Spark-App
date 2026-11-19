@@ -1,0 +1,94 @@
+
+/* ================= sheets: report, delete, paywall ================= */
+function reportSheet(){let sel=null;sheet(`<div class="rp"><h3>Report this creation</h3>${['It doesn\'t look like me','Offensive or unsafe','Poor quality','Something else'].map(r=>`<button class="ropt" data-r="${esc(r)}">${esc(r)}<span class="rad"></span></button>`).join('')}<textarea id="rnote" placeholder="Add a note (optional)"></textarea><button class="cta" id="rsend" disabled>Send report</button></div>`,{mount:sh=>{
+  sh.addEventListener('click',e=>{const o=e.target.closest('.ropt');if(o){sel=o.dataset.r;$$('.ropt',sh).forEach(x=>x.classList.toggle('on',x===o));$('#rsend',sh).disabled=false}if(e.target.closest('#rsend')&&sel){closeSheet();toast('Thanks. We will review it',`<span style="color:var(--green)">${I('checkC','ico')}</span>`)}})}})}
+function deleteSheet(key){sheet(`<div class="confirm"><h3>Delete this creation?</h3><p>It will be removed from Gallery. This can't be undone.</p><button class="btn-red" id="ddel">Delete</button><button class="btn-glass glass" id="dcancel">Cancel</button></div>`,{mount:sh=>{
+  $('#dcancel',sh).onclick=()=>closeSheet();$('#ddel',sh).onclick=()=>{S.created=S.created.filter(c=>c.key!==key);closeSheet();pop();toast('Deleted');renderGallery()}}})}
+function paywall(){let p='y';sheet(`<div class="paywall"><div style="display:flex;align-items:center;gap:10px"><img src="img/pro.png" width="79" height="29" alt="PRO" style="display:block"><span class="fn dim">Draft · not designed yet</span></div><h3>Make more, wait less</h3><p class="dim" style="margin:0">Coins every week, HD and 720p, priority in the queue.</p>
+  ${[['w','Weekly','$7.99 / week'],['m','Monthly','$19.99 / month'],['y','Yearly','$59.99 / year · best value']].map(([k,a,b])=>`<button class="plan ${k===p?'on':''}" data-p="${k}"><span><b>${a}</b><br><span>${b}</span></span><span class="rad"></span></button>`).join('')}
+  <button class="cta" id="pwgo">Continue</button><div class="consent">Prices are placeholders from the PRD and still need sign-off.</div></div>`,{mount:sh=>{sh.addEventListener('click',e=>{const b=e.target.closest('.plan');if(b){$$('.plan',sh).forEach(x=>x.classList.toggle('on',x===b))}if(e.target.closest('#pwgo')){closeSheet();toast('Purchase is outside this prototype')}})}})}
+
+/* ================= events ================= */
+const STATIC={};GV.forEach(([img,name,dur,v])=>STATIC['g_'+img]={key:'g_'+img,kind:'video',name,img,dur,v,tpl:'neon'});
+const findC=k=>S.created.find(c=>c.key===k)||STATIC[k];
+const TOOLMAP={Enhance:'beauty_1',Stylist:'y2k_2','Face Slim':'beauty_3','Body Slim':'selfie1','Skin Tone':'beauty_2','Remove BG':'selfie3'};
+const H={
+ tab:a=>{if(stack.length)popAll();setTab(a.dataset.id)},
+ paywall:()=>paywall(),
+ col:a=>openCollection(a.dataset.arg),
+ herocol:a=>{if($('#htrack')._drag)return;openCollection(HERO[+a.dataset.i||0].col)},
+ open:a=>{const id=a.dataset.id;if(a.dataset.direct)return startSetup(ALL[id]);const top=stack[stack.length-1];let col=top&&top.dataset.col;const sec=a.closest('section');if(!col&&sec){const h=sec.querySelector('.sec-h[data-arg]');col=h&&h.dataset.arg}openDetail(id,col)},
+ bm:a=>{const id=a.dataset.id;const on=!S.bookmarks.has(id);on?S.bookmarks.add(id):S.bookmarks.delete(id);
+   $$(`[data-a=bm][data-id="${id}"]`,app).forEach(b=>{b.classList.toggle('on',on);const svg=b.querySelector('svg');svg.innerHTML=P[on?'bookmarkF':'bookmark'];const lab=b.childNodes[b.childNodes.length-1];if(lab&&lab.nodeType===3)lab.textContent=on?'Saved':'Save'});
+   toast(on?'Saved to Bookmarks':'Removed from Bookmarks',on?`<span style="color:var(--lime)">${I('bookmarkF','ico')}</span>`:'')},
+ share:()=>toast('The share sheet opens here'),
+ use:a=>startSetup(ALL[a.dataset.id]),
+ cat:a=>{S.cat=a.dataset.cat;if(S.tab!=='video'||stack.length){popAll();setTab('video')}renderVideo();$('#vfeed').scrollTop=0},
+ catpanel:a=>{const p=$('#catpanel');const o=!p.classList.contains('in');p.classList.toggle('in',o);a.classList.toggle('open',o)},
+ colpanel:a=>{const top=stack[stack.length-1];const p=$('#colpanel',top);const o=!p.classList.contains('in');p.classList.toggle('in',o);a.classList.toggle('open',o)},
+ colswitch:a=>openCollection(a.dataset.arg),
+ catlink:a=>{const t=a.closest('.fitem')&&ALL[a.closest('.fitem').dataset.id];popAll();if(t&&t.kind==='video'){const c=CATS.find(c=>c[1].toLowerCase().includes(t.cat.toLowerCase()));S.cat=c?c[0]:'foryou';setTab('video');renderVideo()}else setTab(t&&/Hair|Beauty/.test(t.cat)?'tools':'photo')},
+ tool:a=>{const n=a.dataset.arg;if(n==='Hairstyle')return openCollection('hs');if(n==='Makeup')return openCollection('bt');const img=TOOLMAP[n];const t={id:'tool_'+n,name:n,cat:'AI Editing',kind:'photo',price:20,uses:'—',people:1,src:{img}};ALL[t.id]=t;startSetup(t)},
+ gtab:a=>{S.gtab=a.dataset.id;renderGallery()},
+ retry:a=>{const j=S.jobs.find(x=>x.id===a.dataset.id);if(!j)return;S.jobs=S.jobs.filter(x=>x!==j);const t=ALL[j.tpl]||ALL.neon;
+   const nj=startJob({stage:j.stage||(t.kind==='video'?'preview':'photo'),t,img:j.selfie||'selfie1',cost:j.cost||t.price});
+   const top=stack[stack.length-1];if(top&&top.dataset.screen==='failed'){replaceAt(top,makingHtml(nj),{modal:true},n=>{n.dataset.screen='making';n.dataset.job=nj.id})}else openMaking(nj);renderGallery()},
+ jobopen:a=>{const j=S.jobs.find(x=>x.id===a.dataset.id);if(j)openMaking(j)},
+ gopen:a=>{const c=findC(a.dataset.k);if(c){const el=push(resultHtml(c));el.dataset.screen='result'}},
+ gimg:a=>{const im=a.dataset.img,t=PT.find(x=>x.src.img===im)||PT[1];const c={key:'gi_'+im,kind:'photo',name:t.name,img:im,tpl:t.id};STATIC[c.key]=c;push(resultHtml(c))},
+ close:()=>{const top=stack[stack.length-1];if(top&&['result','preview','failed'].includes(top.dataset.screen)&&stack.some(s=>s.dataset.screen==='setup')){popAll();F=null;return}if(top&&top.dataset.screen==='setup')F=null;pop()},
+ back:()=>pop(),
+ addphoto:a=>{const s=+a.dataset.slot;if(!S.seenGuide)guidelines(()=>choosePhoto(s));else choosePhoto(s)},
+ 'gl-ok':()=>{S.seenGuide=true;const o=sheets[sheets.length-1];const after=o&&o.sh._after;closeSheet(()=>after&&after())},
+ info:()=>guidelines(null),
+ fullrules:()=>toast('The full content rules page opens here'),
+ sheetclose:()=>closeSheet(),
+ usephoto:()=>{const o=sheets[sheets.length-1];const img=o&&o.sh._sel;if(img)closeSheet(()=>usePhoto(img))},
+ seg:a=>{F.set[a.dataset.k]=a.dataset.v;renderSetup()},
+ sound:()=>{F.set.sound=!F.set.sound;renderSetup()},
+ create:()=>{const c=price();if(c>S.coins){toast('Not enough coins');return paywall()}const j=startJob({stage:F.v?'preview':'photo',t:F.t,img:F.photos[0].img,cost:c});openMaking(j)},
+ keep:a=>{const top=stack[stack.length-1];const on=top&&$('.notify button.on',top);popAll();F=null;toast(on?"We'll notify you when it's ready":'Still making it · find it in Gallery › Queue',`<span style="color:var(--lime)">${I('clock','ico')}</span>`)},
+ toqueue:()=>{popAll();F=null;S.gtab='queue';setTab('gallery')},
+ notify:a=>{a.classList.add('on');a.innerHTML=I('check','ico')+' On';a.style.display='flex';a.style.alignItems='center';a.style.gap='4px'},
+ makevideo:a=>{const top=stack[stack.length-1];const j0=top._j||S.previews?.find(x=>x.id===a.dataset.job);if(100>S.coins){toast('Not enough coins');return paywall()}
+   const nj=startJob({stage:'video',t:ALL[j0.tpl],img:j0.selfie,cost:100});replaceAt(top,makingHtml(nj),{modal:true},n=>{n.dataset.screen='making';n.dataset.job=nj.id})},
+ notnow:()=>{popAll();F=null;toast('Preview saved to Gallery')},
+ report:()=>reportSheet(),
+ playtoggle:a=>{const v=$('video',a);if(v){if(v.paused){v.play();a.classList.add('playing')}else{v.pause();a.classList.remove('playing')}}else{a.classList.toggle('playing');const im=$('img',a);im.style.animation=a.classList.contains('playing')?'kb 6s ease-in-out infinite alternate':''}},
+ shareres:()=>toast('The share sheet opens here'),
+ save:()=>toast('Saved to Photos',`<span style="color:var(--green)">${I('checkC','ico')}</span>`),
+ remake:a=>{const c=findC(a.dataset.k);const t=ALL[c.tpl]||ALL.neon;const cost=t.kind==='video'?100:t.price;if(cost>S.coins){toast('Not enough coins');return paywall()}
+   const nj=startJob({stage:t.kind==='video'?'video':'photo',t,img:c.selfie||'selfie1',cost});const top=stack[stack.length-1];replaceAt(top,makingHtml(nj),{modal:true},n=>{n.dataset.screen='making';n.dataset.job=nj.id})},
+ delete:a=>deleteSheet(a.dataset.k),
+ contact:()=>toast('Opens the support form'),
+ tcpaste:()=>{const inp=$('#tcin');inp.value='https://www.tiktok.com/@rainy.days/video/7312845510962';inp.focus({preventScroll:true});detectLink($('.tabview[data-id=discover]'),inp.value)}
+};
+app.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(!a||!app.contains(a))return;const f=H[a.dataset.a];if(f){e.preventDefault();e.stopPropagation();f(a,e)}});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(sheets.length)closeSheet();else if(stack.length)H.close()}});
+// close category panels when tapping elsewhere
+app.addEventListener('pointerdown',e=>{if(!e.target.closest('.catpanel,.chip-arrow')){$$('.catpanel.in',app).forEach(p=>p.classList.remove('in'));$$('.chip-arrow.open',app).forEach(b=>b.classList.remove('open'))}},true);
+
+/* ================= presenter jumps ================= */
+function resetAll(){while(sheets.length)closeSheet();popAll();F=null}
+const J={discover:()=>setTab('discover'),video:()=>setTab('video'),photo:()=>setTab('photo'),tools:()=>setTab('tools'),gallery:()=>setTab('gallery'),
+ 'flow-video':()=>{setTab('video');startSetup(ALL.neon)},'flow-video2':()=>{setTab('video');startSetup(ALL.pool)},
+ 'flow-image':()=>{setTab('photo');startSetup(ALL.santa)},'flow-image2':()=>{setTab('photo');startSetup(ALL.duo)},
+ trend:()=>{setTab('discover');const sc=$('#dscroll');const tc=$('#tc');sc.scrollTo({top:tc.offsetTop-130,behavior:'smooth'});setTimeout(()=>H.tcpaste(),600)},
+ collection:()=>{setTab('discover');openCollection('tv')},
+ reset:()=>{S.coins=1250;S.seenGuide=false;S.created=[];S.uploads=[];renderVideo();renderGallery();toast('Demo reset')}};
+$$('[data-jump]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.jump;if(k!=='reset')resetAll();setTimeout(()=>J[k](),k==='reset'?0:360)}));
+
+/* ================= seeded queue + coin pill refresh ================= */
+S.jobs.forEach(j=>{j.v=j.v||(ALL[j.tpl]&&ALL[j.tpl].src.v)||null});
+/* demo: seeded queue items stay in 'Making' forever, progress loops so the Queue always shows the in-progress state */
+S.jobs.filter(j=>j.status==='making').forEach(j=>{j.stage='video';j.cost=0;j.selfie='selfie3';j.loop=true;j.timer=setInterval(()=>{j.p=j.p>=96?4:j.p+1;j.eta=j.p>80?'Almost done':j.p>40?'~1 min':'~2 min';onJobUpdate(j)},450)});
+setInterval(()=>{$$('.balance',app).forEach(b=>{const t=S.coins.toLocaleString('en-US');if(!b.textContent.includes(t))b.innerHTML=`<img src="img/coin.png" alt="">${t}`})},800);
+
+/* ================= fit device to window ================= */
+function fit(){const d=$('#device'),w=$('#dwrap');const mobile=innerWidth<=860;const W=mobile?402:426,Hh=mobile?874:898;
+  const s=mobile?Math.min(innerWidth/W,innerHeight/Hh):Math.min(1,(innerHeight-40)/Hh);d.style.transform=`scale(${s})`;w.style.width=W*s+'px';w.style.height=Hh*s+'px'}
+addEventListener('resize',fit);fit();
+['scroll'].forEach(ev=>{app.addEventListener(ev,()=>{if(app.scrollTop||app.scrollLeft){app.scrollTop=0;app.scrollLeft=0}})});
+mountTabs();setTab('discover');
+})();
+</script>
