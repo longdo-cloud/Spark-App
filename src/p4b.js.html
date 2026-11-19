@@ -20,7 +20,7 @@ function sheet(html,{mount,onClose,cls=''}={}){
   const o={sc,sh,onClose};sheets.push(o);sc.addEventListener('click',()=>closeSheet());
   // drag down to dismiss on grabber
   let y0=null;const gb=sh.querySelector('.grabber');
-  sh.addEventListener('pointerdown',e=>{if(e.target===gb||e.offsetY<24){y0=e.clientY;sh.style.transition='none';sh.setPointerCapture(e.pointerId)}});
+  sh.addEventListener('pointerdown',e=>{if(e.target===gb||(!e.target.closest('button')&&e.clientY-sh.getBoundingClientRect().top<24)){y0=e.clientY;sh.style.transition='none';sh.setPointerCapture(e.pointerId)}});
   sh.addEventListener('pointermove',e=>{if(y0!==null){const d=Math.max(0,e.clientY-y0);sh.style.transform=`translateY(${d}px)`}});
   sh.addEventListener('pointerup',e=>{if(y0===null)return;const d=e.clientY-y0;y0=null;sh.style.transition='';sh.style.transform='';if(d>120)closeSheet()});
   mount&&mount(sh);return sh}
@@ -35,7 +35,9 @@ const vm={io:null,init(){this.io=new IntersectionObserver(es=>{es.forEach(e=>{co
 vm.init();
 
 /* ================= pieces ================= */
-const proBtn=()=>`<button class="pro-img" data-a="paywall" aria-label="Spark Pro"><img src="img/pro.png" width="79" height="29" alt="PRO"></button>`;
+/* Header right: Join Now until the user buys Pro, then the coin balance (REQ-76) */
+const headBtn=()=>S.pro?balBtn():proBtn();
+const proBtn=()=>`<button class="join" data-a="paywall">${I('crown')}Join Now</button>`;
 const balBtn=()=>`<button class="balance glass" data-a="paywall"><img src="img/coin.png" alt="">${S.coins.toLocaleString('en-US')}</button>`;
 const card=(t,w)=>`<button class="mcard" data-a="open" data-id="${t.id}" ${w?`style="width:${w}px"`:''}>${t.src.v?media(t,{small:true}):`<img src="${thumb(t)}" alt="" loading="lazy">`}<span class="t">${esc(t.name)}</span></button>`;
 const secHead=(title,act,arg)=>`<button class="sec-h" data-a="${act}" data-arg="${arg||''}">${title}${act?I('chev'):''}</button>`;
@@ -44,7 +46,54 @@ function row(col){return `<section class="sec">${secHead(col.name,'col',col.id)}
 /* ================= tabs ================= */
 const TABS=[['discover','Discover','compass'],['video','Video','play'],['photo','Photo','photo'],['tools','Tools','wand'],['gallery','Gallery','grid']];
 function renderTabbar(){$('#tabbar').innerHTML=TABS.map(([id,l,ic])=>`<button class="tab ${S.tab===id?'on':''}" data-a="tab" data-id="${id}" aria-label="${l}">${I(ic)}<span>${l}</span></button>`).join('')}
-function setTab(id){S.tab=id;$$('.tabview').forEach(t=>t.hidden=t.dataset.id!==id);renderTabbar();$('#edgefade').style.display=id==='video'?'none':'';if(id==='gallery')renderGallery();vm.scan()}
+/* First-time coach marks on a full-screen feed, each shown once (Reset demo shows them again):
+   swipe: a hand swipes up so a new user learns the feed scrolls; goes away on tap, or on a swipe that moves to the next item.
+   tap: the first time the UI hides, a hand taps so the user learns a tap brings the details back; tapping does exactly that. */
+function coach(host,kind,onDone){const key=kind==='swipe'?'seenSwipe':'seenTap';if(S[key]||!host||host.querySelector('.coach'))return onDone&&onDone();
+  const feed=host.querySelector('.feed');if(!feed)return onDone&&onDone();
+  const txt=kind==='swipe'?['Swipe up to see more styles','Tap anywhere to start']:['Tap the screen to show details','Price, Save and Share come back'];
+  const c=document.createElement('div');c.className='coach coach-'+kind;c.setAttribute('role','dialog');c.setAttribute('aria-label',txt[0]);
+  c.innerHTML=`<div class="coach-hand">${kind==='swipe'?'<span class="coach-trail"></span>':'<span class="coach-ring"></span>'}${I('hand')}</div><p class="coach-t">${txt[0]}</p><p class="coach-s">${txt[1]}</p>`;
+  host.appendChild(c);requestAnimationFrame(()=>c.classList.add('in'));
+  const done=()=>{if(!c.isConnected||c.dataset.done)return;c.dataset.done=1;S[key]=true;c.classList.remove('in');setTimeout(()=>{c.remove();onDone&&onDone()},300);feed.removeEventListener('scroll',onScroll)};
+  const y=feed.scrollTop;const onScroll=()=>{if(kind==='swipe'&&Math.abs(feed.scrollTop-y)>10)done()};
+  const next=()=>{done();feed.scrollBy({top:feed.clientHeight,behavior:'smooth'})};
+  const tap=()=>{done();if(kind==='tap'&&host.exitImmersive)host.exitImmersive()};
+  let y0=null;c.addEventListener('pointerdown',e=>{y0=e.clientY});
+  c.addEventListener('pointerup',e=>{const dy=y0==null?0:e.clientY-y0;y0=null;dy<-30?next():tap()});
+  c.addEventListener('wheel',e=>{if(e.deltaY>0)next()},{passive:true});
+  feed.addEventListener('scroll',onScroll,{passive:true})}
+const coachSwipe=(host,onDone)=>coach(host,'swipe',onDone);
+/* Spotlight coach marks: dim the app, leave the target lit, show the gesture and one line. Once each; tap to dismiss. */
+function spotlight(target,{key,title,sub,gesture,ring},onDone){
+  const app=$('#app');const skip=()=>onDone&&onDone();
+  if(S[key]||!target||!target.isConnected||app.querySelector('.spot'))return skip();
+  const ar=app.getBoundingClientRect(),k=ar.width/app.offsetWidth,r=target.getBoundingClientRect();if(!r.width||!r.height)return skip();
+  const pad=6,x=(r.left-ar.left)/k,y=(r.top-ar.top)/k,w=Math.min(r.width/k,app.offsetWidth-x),h=r.height/k,H=app.offsetHeight;
+  const fx=gesture==='swipeX'?x+w*.62:x+Math.min(w*.35,110),fy=y+h*.5;
+  let rg='';if(ring){const q=ring.getBoundingClientRect();rg=`<span class="spot-ring" style="left:${(q.left-ar.left)/k+q.width/k/2-22}px;top:${(q.top-ar.top)/k+q.height/k/2-22}px"></span>`}
+  const below=y+h+170<H;
+  const o=document.createElement('div');o.className='spot';o.setAttribute('role','dialog');o.setAttribute('aria-label',title);
+  o.innerHTML=`<div class="spot-hole" style="left:${x-pad}px;top:${y-pad}px;width:${w+pad*2}px;height:${h+pad*2}px"></div>${rg}
+   <div class="spot-hand ${gesture}" style="left:${fx-16}px;top:${fy-4}px">${I('hand')}</div>
+   <div class="spot-tip" style="${below?`top:${y+h+pad+64}px`:`bottom:${H-y+pad+20}px`}"><b>${title}</b><span>${sub}</span><em>Tap anywhere to continue</em></div>`;
+  app.appendChild(o);requestAnimationFrame(()=>o.classList.add('in'));
+  o.addEventListener('click',()=>{if(o.dataset.done)return;o.dataset.done=1;S[key]=true;o.classList.remove('in');setTimeout(()=>{o.remove();skip()},280)})}
+/* Chip row in a full-screen feed (Video, AI Photo detail, Discover detail) */
+function spotChips(host,onDone){const top=host&&host.querySelector('.ftop');const row=host&&host.querySelector('.catrow');
+  if(!row||host.classList.contains('immersive'))return onDone&&onDone();
+  if(top.classList.contains('collapsed')){const fab=host.querySelector('.catfab');
+    return spotlight(fab,{key:'seenChips',title:'Tap to change category',sub:'All categories open in one row',gesture:'tap'},onDone)}
+  spotlight(row,{key:'seenChips',title:'Swipe to browse categories',sub:'Tap the arrow to see them all',gesture:'swipeX',ring:host.querySelector('.chip-arrow')},onDone)}
+/* Discover: collection chips, then a collection name opens See all */
+function spotDiscover(){const el=$('.tabview[data-id=discover]');if(!el||S.tab!=='discover'||stack.length)return;
+  spotlight(el.querySelector('.chips'),{key:'seenColChips',title:'Swipe to browse collections',sub:'Tap one to open it',gesture:'swipeX'},()=>{
+    const h=[...el.querySelectorAll('.sec-h[data-a=col]')].find(b=>{const r=b.getBoundingClientRect(),a=$('#app').getBoundingClientRect();return r.top>a.top+80&&r.bottom<a.bottom-120});
+    spotlight(h,{key:'seenSeeAll',title:'Tap a collection name to see all',sub:'Every style in that collection, in one grid',gesture:'tap'})})}
+
+function setTab(id){S.tab=id;$$('.tabview').forEach(t=>t.hidden=t.dataset.id!==id);renderTabbar();$('#edgefade').style.display=id==='video'?'none':'';if(id==='gallery')renderGallery();vm.scan();syncTabbar();if(id==='video'){const h=$(`.tabview[data-id=video]`);coachSwipe(h,()=>spotChips(h))}if(id==='discover')setTimeout(spotDiscover,600)}
+/* The tab bar hides while the Video feed is in immersive mode */
+function syncTabbar(){const v=$(`.tabview[data-id=${S.tab}]`);$('#tabbar').classList.toggle('vhide',!!v&&(v.classList.contains('immersive')||v.classList.contains('paneling')))}
 function mountTabs(){const root=$('#tabs');root.innerHTML=TABS.map(([id])=>`<div class="tabview" data-id="${id}" ${id!==S.tab?'hidden':''}></div>`).join('');
   renderDiscover();renderVideo();renderPhoto();renderTools();renderGallery();renderTabbar();
   $$('.tabview .scroll').forEach(sc=>sc.addEventListener('scroll',()=>{const tb=sc.querySelector('.toolbar');tb&&tb.style.setProperty('--tbfade',Math.min(1,sc.scrollTop/120))}))}
@@ -53,7 +102,7 @@ function mountTabs(){const root=$('#tabs');root.innerHTML=TABS.map(([id])=>`<div
 const HERO=[{v:'03',k:'A little imagination',t:'Ordinary, meet art.',col:'tv'},{v:'12',k:'Action Video',t:'Grandma goes full blockbuster.',col:'av'},{v:'06',k:'Couple',t:'Two of you, one movie scene.',col:'cp'},{v:'14',k:'Funny',t:'Wake up to something big.',col:'tv'},{v:'08',k:'Trending AI Video',t:'Game day, main character.',col:'tv'}];
 function renderDiscover(){const el=$('.tabview[data-id=discover]');
   el.innerHTML=`<div class="scroll" id="dscroll">
-   <div class="toolbar fade"><h1 class="ltitle">Discover</h1><div class="tb-right">${proBtn()}</div></div>
+   <div class="toolbar fade"><h1 class="ltitle">Discover</h1><div class="tb-right">${headBtn()}</div></div>
    <div class="hero" style="margin-top:-111px" id="hero"><div class="hero-track" id="htrack">${HERO.map((h,i)=>`<div class="hero-slide"><video class="hv" src="v/${h.v}.mp4" poster="p/${h.v}.jpg" muted playsinline autoplay preload="metadata" data-auto></video>
      <div class="hero-copy"><span class="k">${h.k}</span><h2>${h.t}</h2><button class="cta" data-a="herocol" data-i="${i}">Explore collection ${I('arrowR','ico')}</button></div></div>`).join('')}</div>
     <div class="dots hero-dots" id="hdots">${HERO.map((_,i)=>`<i class="${i?'':'on'}"><b></b></i>`).join('')}</div></div>
@@ -94,20 +143,51 @@ function feedItem(t,{back=false}={}){const bm=S.bookmarks.has(t.id);return `<art
    <button class="cta fuse" data-a="use" data-id="${t.id}">${I('sparkles')}Use This Style</button></div>
   <div class="fside"><button class="sbtn ${bm?'on':''}" data-a="bm" data-id="${t.id}"><span class="circle glass">${I(bm?'bookmarkF':'bookmark')}</span>${bm?'Saved':'Save'}</button><button class="sbtn" data-a="share"><span class="circle glass">${I('share')}</span>Share</button></div></article>`}
 function feedList(cat){return V.filter(t=>t.cats.includes(cat))}
+/* Shared full-screen feed (Video tab, Photo tab, Discover detail).
+   Glance: Anna, swiping for an idea; in 2 s she sees the template playing and its coin price; the chrome recedes.
+   Swiping folds the category chips into one round button that rises next to the balance, hides the title,
+   the details and the tab bar; a floating row keeps the price, Use and Save. Tapping the video, the price
+   or the category button brings the full UI back. */
+function feedScreen(host,o){host.classList.add('vscreen');host.classList.toggle('hasback',!!o.back);host.classList.remove('immersive');
+  const has=o.cats&&o.cats.length,ci=has?Math.max(0,o.cats.findIndex(c=>c[0]===o.cur)):0,nm=has?o.cats[ci][1].replace(/^\S+\s/,''):'';
+  const chip=([id,l],i)=>`<button class="chip ${o.cur===id?'on':''}" ${i!=null?`style="--i:${i}"`:''} data-a="${o.act}" data-cat="${id}">${l}</button>`;
+  host.innerHTML=`<div class="feed">${o.items}</div>
+   <div class="vmini off"><div class="vp-left"><button class="vp-price" data-a="vfull" aria-label="Show details"><img src="img/coin.png" alt="coins"><b></b></button><button class="vp-use" data-a="use" data-id="">${I('sparkles')}Use this</button></div><button class="vp-bm" data-a="bm" data-id="" aria-label="Save">${I('bookmark')}</button></div>
+   <div class="ftop"><div class="toolbar">${o.back?`<button class="circle glass-dark tb-back" data-a="back" aria-label="Back">${I('back')}</button>`:''}<h1 class="ltitle${o.back?' sm':''}">${esc(o.title)}</h1><div class="tb-right">${headBtn()}</div></div>
+    ${has?`<div class="catrow"><div class="chips" style="padding-right:56px;-webkit-mask:linear-gradient(90deg,#000 80%,transparent 92%);mask:linear-gradient(90deg,#000 80%,transparent 92%)">${o.cats.map(chip).join('')}</div>
+     <button class="chip chip-arrow" style="position:absolute;right:16px" data-a="catpanel" aria-label="All ${o.noun}">${I('down')}</button>
+     <button class="catfab circle glass-dark" data-a="catexpand" aria-label="${esc(nm)}. Show ${o.noun}" tabindex="-1">${I('filter')}</button>
+     <button class="catname" data-a="catexpand" tabindex="-1" aria-hidden="true">${esc(nm)}</button></div>
+    <div class="catpanel glass-dark" style="top:164px"><h4>All ${o.noun}</h4><div class="wrap">${o.cats.map(c=>chip(c)).join('')}</div></div>`:''}</div>`;
+  vm.scan();
+  const feed=host.querySelector('.feed'),top=host.querySelector('.ftop'),fab=host.querySelector('.catfab'),panel=host.querySelector('.catpanel'),pill=host.querySelector('.vmini');
+  const fold=c=>{top.classList.toggle('collapsed',c);if(fab)fab.tabIndex=c?0:-1;if(panel&&c)panel.classList.remove('in')};
+  let restoredAt=0;
+  const syncPill=()=>{const it=feed.children[Math.round(feed.scrollTop/feed.clientHeight)];const t=it&&it.classList.contains('fitem')&&ALL[it.dataset.id];
+    pill.classList.toggle('off',!t);if(!t)return;const bm=S.bookmarks.has(t.id),b=pill.querySelector('.vp-bm');
+    pill.querySelector('b').textContent=t.price;b.dataset.id=t.id;pill.querySelector('.vp-use').dataset.id=t.id;b.classList.toggle('on',bm);b.querySelector('svg').innerHTML=P[bm?'bookmarkF':'bookmark'];b.setAttribute('aria-label',bm?'Saved':'Save')};
+  feed.addEventListener('scroll',()=>{const c=feed.scrollTop>feed.clientHeight*.4;if(!host.classList.contains('immersive')&&c!==top.classList.contains('collapsed'))fold(c);
+    syncPill();if(!host.classList.contains('immersive')&&Math.abs(feed.scrollTop-restoredAt)>40){host.classList.add('immersive');fold(true);syncTabbar();if(!S.seenTap)setTimeout(()=>{if(host.classList.contains('immersive')&&host.isConnected)coach(host,'tap')},900)}},{passive:true});
+  host.exitImmersive=()=>{restoredAt=feed.scrollTop;host.classList.remove('immersive');syncTabbar()};
+  /* Opening at item n is a jump, not a swipe: keep the full UI and the swipe hint */
+  host.setStart=i=>{feed.scrollTop=i*feed.clientHeight;restoredAt=feed.scrollTop;fold(feed.scrollTop>feed.clientHeight*.4)};
+  host.expandCats=()=>{host.exitImmersive();fold(false)};
+  feed.addEventListener('click',e=>{if(host.classList.contains('immersive')&&!e.target.closest('[data-a]'))host.exitImmersive()});
+  syncPill();return feed}
+const endCard=(nm,act,next)=>`<section class="fend"><div style="font-size:40px">🎬</div><h3 style="margin:0;font-size:22px">You've seen everything in ${esc(nm)}</h3><button class="cta" style="width:auto;padding:0 22px" data-a="${act}" data-cat="${next[0]}">Next: ${next[1]}</button></section>`;
 function renderVideo(){const el=$('.tabview[data-id=video]');const list=feedList(S.cat);
   const items=[];list.forEach((t,i)=>{items.push(feedItem(t));if(i===2)items.push(`<section class="cross"><div class="sec-h">📸 Photo styles you might like</div><div class="sub">Same selfie, a whole new photoshoot.</div><div class="hrow">${['cake','santa','lavender','flash'].map(id=>card(ALL[id],180)).join('')}</div><button class="textlink" data-a="tab" data-id="photo" style="align-self:flex-start;padding:0 16px">See all ›</button></section>`)});
-  const ci=CATS.findIndex(c=>c[0]===S.cat);const next=CATS[(ci+1)%CATS.length];
-  items.push(`<section class="fend"><div style="font-size:40px">🎬</div><h3 style="margin:0;font-size:22px">You've seen everything in ${CATS[ci][1].slice(2).trim()}</h3><button class="cta" style="width:auto;padding:0 22px" data-a="cat" data-cat="${next[0]}">Next: ${next[1]}</button></section>`);
-  el.innerHTML=`<div class="feed" id="vfeed">${items.join('')}</div>
-   <div class="ftop"><div class="toolbar"><h1 class="ltitle">Video</h1><div class="tb-right">${balBtn()}</div></div>
-    <div style="position:relative;display:flex;align-items:center"><div class="chips" style="padding-right:56px;-webkit-mask:linear-gradient(90deg,#000 80%,transparent 92%);mask:linear-gradient(90deg,#000 80%,transparent 92%)">${CATS.map(([id,l])=>`<button class="chip ${S.cat===id?'on':''}" data-a="cat" data-cat="${id}">${l}</button>`).join('')}</div>
-     <button class="chip chip-arrow" style="position:absolute;right:16px" data-a="catpanel" aria-label="All categories">${I('down')}</button></div>
-    <div class="catpanel glass-dark" id="catpanel" style="top:164px"><h4>All categories</h4><div class="wrap">${CATS.map(([id,l])=>`<button class="chip ${S.cat===id?'on':''}" data-a="cat" data-cat="${id}">${l}</button>`).join('')}</div></div></div>`;
-  vm.scan()}
+  const ci=CATS.findIndex(c=>c[0]===S.cat);items.push(endCard(CATS[ci][1].replace(/^\S+\s/,''),'cat',CATS[(ci+1)%CATS.length]));
+  feedScreen(el,{title:'Video',cats:CATS,cur:S.cat,act:'cat',noun:'categories',items:items.join('')});if($('#tabbar'))syncTabbar()}
 
 /* ---- Photo ---- */
+/* Photo categories for the AI Photo detail feed, from the wireframe (DATA.photo.cats); item lists are sample data */
+const PCATS=[['foryou','✨ For you'],['trending','🔥 Trending'],['birthday','🎂 Birthday'],['art','🎨 Art'],['cute','🎀 Cute'],['couple','💞 Couple']];
+const PFEED={foryou:['candle','santa','flash','cake','retro','snowp','lavender','film','thirty','duo'],trending:['santa','candle','cake','flash','snowp'],
+  birthday:['candle','cake','lavender','thirty'],art:['retro','flash','film'],cute:['cake','santa','snowp','lavender'],couple:['duo']};
+const PCAT_OF={Birthday:'birthday','2000s Vibe':'art',Holiday:'cute',Couple:'couple'};
 function renderPhoto(){const el=$('.tabview[data-id=photo]');
-  el.innerHTML=`<div class="scroll"><div class="toolbar fade"><h1 class="ltitle">Photo</h1><div class="tb-right">${proBtn()}</div></div>
+  el.innerHTML=`<div class="scroll"><div class="toolbar fade"><h1 class="ltitle">Photo</h1><div class="tb-right">${headBtn()}</div></div>
   <div class="ba" id="ba" style="margin-top:-111px;--x:50%"><img src="img/photo_before.jpg" alt="Your selfie"><img class="after" src="img/photo_after.jpg" alt="AI result"><span class="line"></span><span class="knob glass">${I('arrowsH')}</span><span class="lbl" style="left:16px">Your selfie</span><span class="lbl" style="right:16px">AI result</span>
    <div class="ba-copy"><div><h3>Candlelight Wish</h3><p>Birthday edit</p></div><button class="cta" data-a="use" data-id="candle">Try it!</button></div><div class="dots"><i class="on"></i><i></i><i></i><i></i><i></i></div></div>
   <div style="display:flex;flex-direction:column;gap:32px;padding:16px 0 140px">
@@ -124,7 +204,7 @@ function renderPhoto(){const el=$('.tabview[data-id=photo]');
 /* ---- Tools ---- */
 const TOOLS=[['sparkles','Enhance'],['brush','Stylist'],['scissors','Hairstyle','New'],['dropper','Makeup','Hot'],['face','Face Slim'],['person','Body Slim'],['sun','Skin Tone'],['halfc','Remove BG']];
 function renderTools(){const el=$('.tabview[data-id=tools]');
-  el.innerHTML=`<div class="scroll"><div class="toolbar fade"><h1 class="ltitle">Tools</h1><div class="tb-right">${proBtn()}</div></div>
+  el.innerHTML=`<div class="scroll"><div class="toolbar fade"><h1 class="ltitle">Tools</h1><div class="tb-right">${headBtn()}</div></div>
   <div style="display:flex;flex-direction:column;gap:32px;padding:12px 0 140px">
    <div class="tgrid">${TOOLS.map(([ic,l,b])=>`<button class="tool" data-a="tool" data-arg="${l}"><span class="circle glass">${I(ic)}</span>${b?`<span class="bdg">${b}</span>`:''}${l}</button>`).join('')}</div>
    <div class="banner" data-a="col" data-arg="hs" role="button"><img src="img/banner_hair.jpg" alt="Short hair to long hair"><div class="dots"><i class="on"></i><i></i><i></i><i></i><i></i></div></div>
@@ -149,7 +229,7 @@ function renderGallery(){const el=$('.tabview[data-id=gallery]');if(!el)return;c
     body=`<div class="gimg">${mine.map(c=>`<button data-a="gopen" data-k="${c.key}"><img src="${imgSrc(c.img)}" alt=""></button>`).join('')}${pre.map(p=>`<button data-a="gimg" data-img="${p}"><img src="img/${p}.jpg" alt=""></button>`).join('')}</div>`}
   else if(S.gtab==='uploads'){const all=[...S.uploads,...SELFIES];body=`<p class="fn dim" style="padding:0 16px;margin:0 0 12px">Photos you've added. Stored only on this phone.</p><div class="gimg">${all.map(p=>`<button><img src="${imgSrc(p)}" alt=""></button>`).join('')}</div>`}
   else{const b=[...S.bookmarks].map(id=>ALL[id]).filter(Boolean);body=b.length?`<div class="cgrid">${b.map(ccard).join('')}</div>`:`<div class="empty">${I('bookmark')}<b style="color:#fff">No bookmarks yet</b>Tap Save on a template to keep it here.</div>`}
-  el.innerHTML=`<div class="scroll"><div class="toolbar fade"><h1 class="ltitle">Gallery</h1><div class="tb-right">${proBtn()}<span class="avatar"><img src="img/avatar.jpg" alt="Profile" width="32" height="32"></span></div></div>
+  el.innerHTML=`<div class="scroll"><div class="toolbar fade"><h1 class="ltitle">Gallery</h1><div class="tb-right">${headBtn()}<span class="avatar"><img src="img/avatar.jpg" alt="Profile" width="32" height="32"></span></div></div>
    <div class="chips" style="margin-bottom:24px">${tabs.map(([id,l])=>`<button class="chip ${S.gtab===id?'on':''}" data-a="gtab" data-id="${id}">${l}</button>`).join('')}</div>
    <div style="display:flex;flex-direction:column;gap:32px;padding-bottom:140px">${body}</div></div>`;
   $('.scroll',el).scrollTop=keep;vm.scan()}

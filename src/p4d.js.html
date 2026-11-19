@@ -13,21 +13,31 @@ const STATIC={};GV.forEach(([img,name,dur,v])=>STATIC['g_'+img]={key:'g_'+img,ki
 const findC=k=>S.created.find(c=>c.key===k)||STATIC[k];
 const TOOLMAP={Enhance:'beauty_1',Stylist:'y2k_2','Face Slim':'beauty_3','Body Slim':'selfie1','Skin Tone':'beauty_2','Remove BG':'selfie3'};
 const H={
+ catexpand:a=>{const v=a.closest('.vscreen');v&&v.expandCats&&v.expandCats()},
+ vfull:a=>{const v=a.closest('.vscreen');v&&v.exitImmersive&&v.exitImmersive()},
+ pcat:a=>{const v=a.closest('.vscreen');const c=a.dataset.cat;photoDetailFeed(v,c,PFEED[c][0])},
+ dcol:a=>{const v=a.closest('.vscreen');const col=COLS.find(c=>c.id===a.dataset.cat);detailFeed(v,col,col.items[0])},
  tab:a=>{if(stack.length)popAll();setTab(a.dataset.id)},
  paywall:()=>paywall(),
  col:a=>openCollection(a.dataset.arg),
  herocol:a=>{if($('#htrack')._drag)return;openCollection(HERO[+a.dataset.i||0].col)},
- open:a=>{const id=a.dataset.id;if(a.dataset.direct)return startSetup(ALL[id]);const top=stack[stack.length-1];let col=top&&top.dataset.col;const sec=a.closest('section');if(!col&&sec){const h=sec.querySelector('.sec-h[data-arg]');col=h&&h.dataset.arg}openDetail(id,col)},
+ open:a=>{const id=a.dataset.id;if(a.dataset.direct)return startSetup(ALL[id]);if(a.closest('.tabview[data-id=photo]')&&ALL[id].kind==='photo'&&!/Hair|Beauty/.test(ALL[id].cat))return openPhotoDetail(id);const top=stack[stack.length-1];let col=top&&top.dataset.col;const sec=a.closest('section');if(!col&&sec){const h=sec.querySelector('.sec-h[data-arg]');col=h&&h.dataset.arg}openDetail(id,col)},
  bm:a=>{const id=a.dataset.id;const on=!S.bookmarks.has(id);on?S.bookmarks.add(id):S.bookmarks.delete(id);
    $$(`[data-a=bm][data-id="${id}"]`,app).forEach(b=>{b.classList.toggle('on',on);const svg=b.querySelector('svg');svg.innerHTML=P[on?'bookmarkF':'bookmark'];const lab=b.childNodes[b.childNodes.length-1];if(lab&&lab.nodeType===3)lab.textContent=on?'Saved':'Save'});
    toast(on?'Saved to Bookmarks':'Removed from Bookmarks',on?`<span style="color:var(--lime)">${I('bookmarkF','ico')}</span>`:'')},
  share:()=>toast('The share sheet opens here'),
- use:a=>startSetup(ALL[a.dataset.id]),
- cat:a=>{S.cat=a.dataset.cat;if(S.tab!=='video'||stack.length){popAll();setTab('video')}renderVideo();$('#vfeed').scrollTop=0},
- catpanel:a=>{const p=$('#catpanel');const o=!p.classList.contains('in');p.classList.toggle('in',o);a.classList.toggle('open',o)},
+ use:a=>startSetup(ALL[a.dataset.id],a.closest('.vscreen')),
+ cat:a=>{S.cat=a.dataset.cat;if(S.tab!=='video'||stack.length){popAll();setTab('video')}renderVideo()},
+ catpanel:a=>{const p=a.closest('.vscreen').querySelector('.catpanel');const o=!p.classList.contains('in');p.classList.toggle('in',o);a.classList.toggle('open',o)},
  colpanel:a=>{const top=stack[stack.length-1];const p=$('#colpanel',top);const o=!p.classList.contains('in');p.classList.toggle('in',o);a.classList.toggle('open',o)},
  colswitch:a=>openCollection(a.dataset.arg),
- catlink:a=>{const t=a.closest('.fitem')&&ALL[a.closest('.fitem').dataset.id];popAll();if(t&&t.kind==='video'){const c=CATS.find(c=>c[1].toLowerCase().includes(t.cat.toLowerCase()));S.cat=c?c[0]:'foryou';setTab('video');renderVideo()}else setTab(t&&/Hair|Beauty/.test(t.cat)?'tools':'photo')},
+ catlink:a=>{const it=a.closest('.fitem');const t=it&&ALL[it.dataset.id];if(!t)return;const host=a.closest('.vscreen');
+   /* Stay in a detail feed: switch the chips in place, or open the matching AI Video / AI Photo detail on top */
+   if(/Hair|Beauty/.test(t.cat)){popAll();return setTab('tools')}
+   if(t.kind==='video'){const c=CATS.find(c=>c[1].toLowerCase().includes(t.cat.toLowerCase()));const cat=c?c[0]:'foryou';
+     return host&&host.dataset.screen==='vdetail'?videoDetailFeed(host,cat,t.id):openVideoDetail(t.id,cat)}
+   const cat=PCAT_OF[t.cat]||'foryou';return host&&host.dataset.screen==='pdetail'?photoDetailFeed(host,cat,t.id):openPhotoDetail(t.id)},
+ vcat:a=>{const v=a.closest('.vscreen');const c=a.dataset.cat;videoDetailFeed(v,c,(feedList(c)[0]||{}).id)},
  tool:a=>{const n=a.dataset.arg;if(n==='Hairstyle')return openCollection('hs');if(n==='Makeup')return openCollection('bt');const img=TOOLMAP[n];const t={id:'tool_'+n,name:n,cat:'AI Editing',kind:'photo',price:20,uses:'—',people:1,src:{img}};ALL[t.id]=t;startSetup(t)},
  gtab:a=>{S.gtab=a.dataset.id;renderGallery()},
  retry:a=>{const j=S.jobs.find(x=>x.id===a.dataset.id);if(!j)return;S.jobs=S.jobs.filter(x=>x!==j);const t=ALL[j.tpl]||ALL.neon;
@@ -45,8 +55,11 @@ const H={
  sheetclose:()=>closeSheet(),
  usephoto:()=>{const o=sheets[sheets.length-1];const img=o&&o.sh._sel;if(img)closeSheet(()=>usePhoto(img))},
  seg:a=>{F.set[a.dataset.k]=a.dataset.v;renderSetup()},
+ gsettings:()=>{sheet(`<div class="gs">${gsBody()}</div>`,{cls:'gsheet'})},
+ gset:a=>{const k=a.dataset.k;let v=a.dataset.v;if(k==='sound')v=v==='true';F.set[k]=v;renderSetup();const b=$('.gsheet .gs');if(b)b.innerHTML=gsBody()},
+ gdone:()=>closeSheet(),
  sound:()=>{F.set.sound=!F.set.sound;renderSetup()},
- create:()=>{const c=price();if(c>S.coins){toast('Not enough coins');return paywall()}const j=startJob({stage:F.v?'preview':'photo',t:F.t,img:F.photos[0].img,cost:c});openMaking(j)},
+ create:()=>{const c=price();if(c>S.coins){toast('Not enough coins');return paywall()}const j=startJob({stage:F.v?'preview':'photo',t:F.t,img:F.photos[0].img,cost:c});if(F.host)closePanel({keep:true});openMaking(j)},
  keep:a=>{const top=stack[stack.length-1];const on=top&&$('.notify button.on',top);popAll();F=null;toast(on?"We'll notify you when it's ready":'Still making it · find it in Gallery › Queue',`<span style="color:var(--lime)">${I('clock','ico')}</span>`)},
  toqueue:()=>{popAll();F=null;S.gtab='queue';setTab('gallery')},
  notify:a=>{a.classList.add('on');a.innerHTML=I('check','ico')+' On';a.style.display='flex';a.style.alignItems='center';a.style.gap='4px'},
@@ -75,7 +88,7 @@ const J={discover:()=>setTab('discover'),video:()=>setTab('video'),photo:()=>set
  'flow-image':()=>{setTab('photo');startSetup(ALL.santa)},'flow-image2':()=>{setTab('photo');startSetup(ALL.duo)},
  trend:()=>{setTab('discover');const sc=$('#dscroll');const tc=$('#tc');sc.scrollTo({top:tc.offsetTop-130,behavior:'smooth'});setTimeout(()=>H.tcpaste(),600)},
  collection:()=>{setTab('discover');openCollection('tv')},
- reset:()=>{S.coins=1250;S.seenGuide=false;S.created=[];S.uploads=[];renderVideo();renderGallery();toast('Demo reset')}};
+ reset:()=>{S.coins=1250;S.seenGuide=false;S.seenSwipe=false;S.seenTap=false;S.seenChips=false;S.seenColChips=false;S.seenSeeAll=false;S.created=[];S.uploads=[];renderVideo();renderGallery();toast('Demo reset')}};
 $$('[data-jump]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.jump;if(k!=='reset')resetAll();setTimeout(()=>J[k](),k==='reset'?0:360)}));
 
 /* ================= seeded queue + coin pill refresh ================= */
@@ -89,6 +102,8 @@ function fit(){const d=$('#device'),w=$('#dwrap');const mobile=innerWidth<=860;c
   const s=mobile?Math.min(innerWidth/W,innerHeight/Hh):Math.min(1,(innerHeight-40)/Hh);d.style.transform=`scale(${s})`;w.style.width=W*s+'px';w.style.height=Hh*s+'px'}
 addEventListener('resize',fit);fit();
 ['scroll'].forEach(ev=>{app.addEventListener(ev,()=>{if(app.scrollTop||app.scrollLeft){app.scrollTop=0;app.scrollLeft=0}})});
+$('#sw-pro').addEventListener('change',e=>{S.pro=e.target.checked;renderDiscover();renderVideo();renderPhoto();renderTools();renderGallery();setTab(S.tab)});
 mountTabs();setTab('discover');
 })();
+
 </script>

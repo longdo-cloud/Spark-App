@@ -67,6 +67,10 @@ img{display:block}
 .tb-right{display:flex;gap:8px;align-items:center}
 .pro{height:32px;padding:0 12px 0 10px;border-radius:999px;display:flex;align-items:center;gap:5px;font-weight:700;font-size:15px;color:#111;background:linear-gradient(95deg,#F7C9EC 0%,#E6F5C9 50%,#C3E6FB 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.7),0 2px 10px rgba(0,0,0,.25)}
 .pro svg{width:18px;height:18px}
+/* Header upsell (REQ-76): brand lime, black text */
+.join{height:32px;padding:0 14px 0 10px;border-radius:999px;display:flex;align-items:center;gap:6px;font-weight:600;font-size:15px;color:#000;background:var(--lime);white-space:nowrap}
+.join svg{width:18px;height:18px}
+.join:active{transform:scale(.97)}
 .balance{height:32px;padding:0 12px 0 6px;border-radius:999px;display:flex;align-items:center;gap:6px;font-weight:600;font-size:15px}
 .balance img{width:22px;height:22px}
 .avatar{width:36px;height:36px;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,.2)}
@@ -242,6 +246,85 @@ img{display:block}
 .fend{height:874px;scroll-snap-align:start;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;text-align:center;padding:0 40px}
 
 /* category dropdown panel */
+/* Video category chips: collapse into one round floating button while swiping the feed */
+.catrow{position:relative;display:flex;align-items:center;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+/* Immersive: once the chips have folded into the round button, the row rises into the title's place */
+.immersive .ftop .catrow{transform:translateY(-46px);transition-delay:.45s}
+.immersive .ftop .catpanel{top:118px!important}
+/* Detail with Back: smaller title after the back button; the risen category button sits right of Back */
+.ftop .tb-back{width:40px;height:40px;flex:none;margin-right:12px}
+.ftop .tb-back svg{width:20px;height:20px}
+.ltitle.sm{font-size:24px;line-height:32px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hasback.immersive .ftop .catrow{transform:translate(52px,-46px)}
+.hasback .catname{max-width:150px}
+/* Detail has no tab bar: details sit just above the home indicator instead of leaving a tab-bar gap */
+.hasback .fmeta,.hasback .fside{bottom:48px}
+.catrow .chip{transition:transform .55s cubic-bezier(.2,.8,.2,1) calc(var(--i,0)*40ms),opacity .4s ease calc(var(--i,0)*40ms),background .15s,color .15s}
+.catrow .chip-arrow{transition:transform .45s cubic-bezier(.2,.8,.2,1),opacity .3s}
+.catfab{position:absolute;left:16px;top:-2px;width:40px;height:40px;border-radius:50%;color:#fff;display:grid;place-items:center;opacity:0;transform:scale(.6);pointer-events:none;transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .35s}
+.catfab svg{width:20px;height:20px}
+.ftop.collapsed .catrow .chips{pointer-events:none}
+.ftop.collapsed .catrow .chips .chip{opacity:0;transform:translateX(calc(var(--i,0)*-40px)) scale(.88);transition-delay:calc((7 - var(--i,0))*30ms)}
+.ftop.collapsed .catrow .chip-arrow{opacity:0;transform:translateX(-24px) scale(.8);pointer-events:none}
+.catname{position:absolute;left:64px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block!important;line-height:40px;top:-2px;height:40px;display:flex;align-items:center;font-size:17px;font-weight:600;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6);opacity:0;transform:translateX(-8px);pointer-events:none;transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .35s}
+.ftop.collapsed .catname{opacity:1;transform:none;pointer-events:auto;transition-delay:.35s}
+.ftop.collapsed .catfab{opacity:1;transform:none;pointer-events:auto;transition-delay:.3s}
+/* Video immersive mode: title, balance and the video's details hide; the category button stays */
+.vscreen .ftop .ltitle,.vscreen .fmeta,.vscreen .fside{transition:opacity .45s ease,transform .55s cubic-bezier(.2,.8,.2,1)}
+.vscreen .fitem::after,.vscreen .fitem::before{transition:opacity .5s ease}
+.immersive .ftop .ltitle{opacity:0;transform:translateY(-16px);pointer-events:none}
+.immersive .ftop .toolbar{pointer-events:none}
+.immersive .ftop .toolbar .tb-right,.immersive .ftop .toolbar .tb-back{pointer-events:auto}
+.immersive .fmeta{opacity:0;transform:translateY(24px) scale(.96);transform-origin:left bottom;pointer-events:none}
+.immersive .fside{opacity:0;transform:translateX(16px) scale(.9);pointer-events:none}
+.immersive .fitem::after{opacity:0}
+.vscreen .balance{transition:background .35s}
+.immersive .balance{background:rgba(30,30,34,.55)}
+.vmini{position:absolute;left:16px;right:16px;bottom:36px;z-index:61;display:flex;align-items:center;justify-content:space-between;pointer-events:none}
+.vmini>*{opacity:0;transition:opacity .35s ease,transform .5s cubic-bezier(.2,.8,.2,1)}
+.vp-left{display:flex;align-items:center;gap:12px;transform:translateY(12px)}
+.vp-price{height:44px;display:flex;align-items:center;gap:6px;font-size:17px;font-weight:600;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.6)}
+.vp-price img{width:20px;height:20px}
+.vp-price b{font-weight:600;font-variant-numeric:tabular-nums}
+/* Immersive: Join Now (marketing) keeps the only lime; Use this stays quiet so it does not pull the eye off the video */
+.vp-use{height:36px;padding:0 14px 0 12px;border-radius:999px;background:rgba(30,30,34,.5);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.14);color:#fff;font-size:15px;font-weight:600;display:flex;align-items:center;gap:6px}
+.vp-use svg{width:16px;height:16px}
+.vp-use:active{transform:scale(.97)}
+.vp-bm{width:44px;height:44px;display:grid;place-items:center;color:#fff;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6));transform:translateX(12px)}
+.vp-bm svg{width:26px;height:26px}
+.vp-bm.on svg{color:var(--lime)}
+.tabbar.vhide{transform:translateY(120px);opacity:0;pointer-events:none;transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .35s}
+.tabbar{transition:transform .5s cubic-bezier(.2,.8,.2,1),opacity .35s}
+.immersive .vmini:not(.off)>*{opacity:1;transform:none;pointer-events:auto;transition-delay:.25s}
+/* Coach mark: swipe-up hint on the first visit to a feed */
+.coach{position:absolute;inset:0;z-index:70;background:rgba(0,0,0,.6);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;opacity:0;transition:opacity .3s;cursor:pointer}
+.coach.in{opacity:1}
+.coach-hand{position:relative;width:64px;height:160px;color:#fff;margin-bottom:16px}
+.coach-hand svg{position:absolute;left:8px;bottom:0;width:48px;height:48px;filter:drop-shadow(0 2px 6px rgba(0,0,0,.5));animation:coachUp 1.8s cubic-bezier(.4,0,.2,1) infinite}
+.coach-trail{position:absolute;left:28px;bottom:40px;width:8px;height:100px;border-radius:4px;background:linear-gradient(rgba(255,255,255,0),rgba(255,255,255,.5));transform-origin:bottom;animation:coachTrail 1.8s cubic-bezier(.4,0,.2,1) infinite}
+.coach-tap .coach-hand{height:96px}
+.coach-tap .coach-hand svg{bottom:0;animation:coachTap 1.6s ease-in-out infinite}
+.coach-ring{position:absolute;left:4px;top:32px;width:40px;height:40px;border-radius:50%;border:2px solid rgba(255,255,255,.8);animation:coachRing 1.6s ease-out infinite}
+@keyframes coachTap{0%,100%{transform:translateY(0) scale(1)}30%{transform:translateY(-6px) scale(1)}45%{transform:translateY(0) scale(.92)}60%{transform:translateY(0) scale(1)}}
+@keyframes coachRing{0%,40%{transform:scale(.4);opacity:0}45%{opacity:1}100%{transform:scale(1.6);opacity:0}}
+.coach-t{margin:0;font-size:20px;font-weight:600;color:#fff}
+.coach-s{margin:0;font-size:15px;color:var(--fg2)}
+@keyframes coachUp{0%{transform:translateY(0);opacity:0}15%{opacity:1}70%{transform:translateY(-104px);opacity:1}100%{transform:translateY(-104px);opacity:0}}
+@keyframes coachTrail{0%,10%{transform:scaleY(0);opacity:0}70%{transform:scaleY(1);opacity:1}100%{transform:scaleY(1);opacity:0}}
+/* Spotlight coach marks */
+.spot{position:absolute;inset:0;z-index:150;opacity:0;transition:opacity .28s;cursor:pointer}
+.spot.in{opacity:1}
+.spot-hole{position:absolute;border-radius:24px;box-shadow:0 0 0 2px rgba(255,255,255,.7),0 0 0 9999px rgba(0,0,0,.68);pointer-events:none}
+.spot-hand{position:absolute;width:48px;height:48px;color:#fff;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6));z-index:2}
+.spot-hand svg{width:48px;height:48px}
+.spot-hand.swipeX{animation:spotSwipe 2s cubic-bezier(.4,0,.2,1) infinite}
+.spot-hand.tap{animation:coachTap 1.6s ease-in-out infinite}
+.spot-ring{position:absolute;width:44px;height:44px;border-radius:50%;border:2px solid var(--lime);animation:ripple 1.8s ease-out infinite}
+.spot-tip{position:absolute;left:24px;right:24px;display:flex;flex-direction:column;align-items:center;gap:4px;text-align:center;color:#fff}
+.spot-tip b{font-size:20px;font-weight:600}
+.spot-tip span{font-size:15px;color:rgba(255,255,255,.75)}
+.spot-tip em{font-style:normal;font-size:13px;color:rgba(255,255,255,.5);margin-top:8px}
+@keyframes spotSwipe{0%{transform:translateX(0);opacity:0}15%{opacity:1}70%{transform:translateX(-130px);opacity:1}100%{transform:translateX(-130px);opacity:0}}
 .catpanel{position:absolute;left:16px;right:16px;z-index:45;border-radius:28px;padding:16px;display:flex;flex-direction:column;gap:12px;transform-origin:top center;transform:scale(.96) translateY(-8px);opacity:0;pointer-events:none;transition:all .2s}
 .catpanel.in{transform:none;opacity:1;pointer-events:auto}
 .catpanel h4{margin:0;font-size:13px;font-weight:600;color:rgba(255,255,255,.6)}
@@ -304,6 +387,77 @@ img{display:block}
 .ccard .tag{position:absolute;top:10px;left:10px;font-size:11px;font-weight:700;padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.4)}
 
 /* ---------- Setup ---------- */
+/* Create screen (wireframe layout) */
+.sw{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg)}
+.sprev{position:relative;height:440px;flex:none;overflow:hidden;background:#000}
+.sprev>video,.sprev>img{width:100%;height:100%;object-fit:cover}
+.sprev>img.kb{animation:kb 10s ease-in-out infinite alternate}
+.sprev::before{content:"";position:absolute;inset:0 0 auto;height:140px;background:linear-gradient(rgba(0,0,0,.5),rgba(0,0,0,0));z-index:1;pointer-events:none}
+.sp-back{position:absolute;left:16px;top:60px;z-index:3}
+.sp-right{position:absolute;right:16px;top:64px;z-index:3}
+.ssheet{position:relative;z-index:2;margin-top:-20px;flex:1;min-height:0;overflow-y:auto;scrollbar-width:none;background:var(--bg);border-radius:20px 20px 0 0;padding:8px 16px 32px;display:flex;flex-direction:column;gap:12px}
+.ssheet .handle{display:block;flex:none;width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,.2);margin:0 auto 4px}
+.shead{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.shead h3{margin:0;font-size:24px;font-weight:700;line-height:1.2;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sbm{width:40px;height:40px;flex:none;display:grid;place-items:center;color:var(--fg2)}
+.sbm svg{width:24px;height:24px}
+.sbm.on svg{color:var(--lime)}
+#slist{display:flex;flex-direction:column;gap:12px}
+.sreq{margin:0;font-size:13px;color:var(--fg2);display:flex;align-items:center;gap:6px}
+.sreq svg{width:14px;height:14px;flex:none}
+.uslot{width:140px;height:140px;margin:0 auto;border-radius:16px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--fg2);font-size:14px}
+.uslot-ic{color:#fff;display:grid}
+.uslot-ic svg{width:36px;height:36px}
+.uslot:active{transform:scale(.98)}
+.udeck{position:relative;height:180px;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:4px;color:var(--fg2);font-size:14px}
+.ucard{position:absolute;top:4px;width:112px;height:148px;border-radius:16px;overflow:hidden;background:#222}
+.ucard img{width:100%;height:100%;object-fit:cover}
+.ucard.side{width:96px;height:128px;top:14px;opacity:.35;filter:grayscale(.4)}
+.ucard.side.l{transform:translateX(-78px) rotate(-8deg)}
+.ucard.side.r{transform:translateX(78px) rotate(8deg)}
+.ucard.front{z-index:2;box-shadow:0 0 0 1px rgba(255,255,255,.16),0 8px 24px rgba(0,0,0,.5);display:grid;place-items:center}
+.ucard.front img{position:absolute;inset:0;filter:brightness(.5) saturate(.8)}
+.uplus{position:relative;width:52px;height:52px;border-radius:50%;background:var(--lime);color:#000;display:grid;place-items:center;box-shadow:0 0 0 6px rgba(237,255,62,.2)}
+.uplus svg{width:26px;height:26px}
+.ucap{position:absolute;top:158px;left:0;right:0;text-align:center}
+.udeck:active .ucard.front{transform:scale(.97)}
+.udeck .ucard{transition:transform .2s}
+/* Create panel over the feed */
+.cpanel-wrap{position:absolute;inset:0;z-index:66;pointer-events:none}
+.cpanel-wrap.in{pointer-events:auto}
+.cp-scrim{position:absolute;inset:0;background:rgba(0,0,0,0);transition:background .3s}
+.cpanel-wrap.in .cp-scrim{background:rgba(0,0,0,.25)}
+.cpanel{position:absolute;left:0;right:0;bottom:0;height:454px;margin:0;transform:translateY(100%);transition:transform .38s cubic-bezier(.2,.8,.2,1);box-shadow:0 -1px 0 rgba(255,255,255,.08)}
+.cpanel-wrap.in .cpanel{transform:none}
+.paneling .feed{overflow:hidden}
+.paneling .fmeta,.paneling .fside,.paneling .vmini{opacity:0!important;pointer-events:none!important}
+/* + : heartbeat pulse with ripples spreading out */
+.uplus{isolation:isolate;animation:beat 2.4s ease-in-out infinite;box-shadow:none}
+.uplus::before,.uplus::after{content:"";position:absolute;inset:0;border-radius:50%;background:var(--lime);z-index:-1;animation:ripple 2.4s ease-out infinite}
+.uplus::after{animation-delay:.3s}
+@keyframes beat{0%,40%,100%{transform:scale(1)}10%{transform:scale(1.12)}20%{transform:scale(.98)}30%{transform:scale(1.08)}}
+@keyframes ripple{0%{transform:scale(1);opacity:.45}70%,100%{transform:scale(2);opacity:0}}
+.mslots{display:flex;justify-content:center;gap:24px;padding-top:4px}
+.mslot{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--fg2);font-size:14px}
+.mslot .ucard.front{position:relative;top:0}
+.mslot .uplus{width:44px;height:44px}
+.mslot .uplus svg{width:22px;height:22px}
+.uplus.still{animation:none}.uplus.still::before,.uplus.still::after{display:none}
+.mslot .pimg{position:relative;width:112px;height:148px;border-radius:16px;overflow:hidden;display:grid;place-items:center}
+.mslot .pimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.mslot .pimg.bad{box-shadow:0 0 0 2px var(--red)}
+.mcap{display:flex;align-items:center;gap:4px;font-weight:600;font-size:13px}
+.mcap svg{width:14px;height:14px}
+.mslot:active .ucard,.mslot:active .pimg{transform:scale(.97)}
+.picked{display:flex;flex-direction:column;align-items:center;gap:6px}
+.picked .pimg{position:relative;width:140px;height:140px;border-radius:16px;overflow:hidden;display:grid;place-items:center}
+.picked .pimg img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.picked.bad .pimg{box-shadow:0 0 0 2px var(--red)}
+.picked .pst{font-size:13px;font-weight:600;display:flex;gap:4px;align-items:center;text-align:center}
+.picked .pst svg{width:14px;height:14px;flex:none}
+.picked .chg{font-size:14px}
+#sbottom{margin-top:auto;padding-top:4px}
+#sbottom .cta{width:100%}
 .setup-prev{position:absolute;left:0;right:0;top:0;height:476px;overflow:hidden}
 .setup-prev video,.setup-prev img{width:100%;height:100%;object-fit:cover}
 .setup-prev img.kb{animation:kb 10s ease-in-out infinite alternate}
@@ -329,6 +483,30 @@ img{display:block}
 .spill.warn{background:rgba(255,204,0,.16);color:var(--yellow)}
 .pbtn2{height:36px;padding:0 14px;border-radius:999px;font-weight:600;font-size:15px;flex:none}
 .pbtn2.lime{background:var(--lime);color:#000}
+/* Add photo: whole card is the target, ringed + as the call to action */
+.pcard.padd{width:100%;text-align:left;color:#fff;min-height:120px}
+.padd-ic{width:64px;height:64px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--lime);color:#000;box-shadow:0 0 0 6px rgba(237,255,62,.18)}
+.padd-ic svg{width:28px;height:28px}
+.pcard.padd:active{transform:scale(.98)}
+/* Generation settings summary bar + sheet */
+.gbar{width:100%;height:52px;display:flex;align-items:center;border-radius:16px;background:rgba(255,255,255,.08);color:#fff;padding:0 8px 0 0}
+.gbar span{display:inline-flex;align-items:center;gap:6px;padding:0 14px;font-size:15px;font-weight:600;border-right:1px solid rgba(255,255,255,.14)}
+.gbar span:last-of-type{border-right:0}
+.gbar span i{display:grid;color:rgba(255,255,255,.5)}
+.gbar span svg{width:16px;height:16px}
+.gbar .chev{margin-left:auto;display:flex;color:rgba(255,255,255,.5)}
+.gbar .chev svg{width:18px;height:18px}
+.gs{display:flex;flex-direction:column;gap:8px;padding:0 20px 36px}
+.gshead{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.gshead h3{margin:0;font-size:20px;font-weight:600}
+.gdone{height:36px;padding:0 16px;border-radius:999px;background:rgba(255,255,255,.12);font-weight:600;font-size:15px}
+.gs h5{margin:12px 0 0;font-size:13px;font-weight:600;color:var(--fg2)}
+.grow{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px}
+.gopt{min-height:52px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border-radius:14px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);font-size:15px;font-weight:600;color:#fff;padding:8px}
+.gopt>svg{width:16px;height:16px;display:inline}
+.gopt small{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:400;color:var(--fg2)}
+.gopt small img{width:12px;height:12px}
+.gopt.on{background:rgba(255,255,255,.14);box-shadow:inset 0 0 0 2px #fff}
 .sgroup{border-radius:20px;background:rgba(255,255,255,.06);overflow:hidden}
 .srow{height:56px;display:flex;align-items:center;gap:12px;padding:0 16px}
 .srow+.srow{box-shadow:inset 52px 1px 0 -51px transparent}
@@ -479,8 +657,9 @@ img{display:block}
     <div class="pgroup"><h2>Demo switches</h2>
       <label class="ptoggle">Next photo is rejected <input type="checkbox" id="sw-reject"></label>
       <label class="ptoggle">Next generation fails <input type="checkbox" id="sw-fail"></label>
+      <label class="ptoggle">User has Pro <input type="checkbox" id="sw-pro"></label>
       <label class="ptoggle">Fast generation <input type="checkbox" id="sw-fast" checked></label>
-      <button class="pbtn" data-jump="reset">Reset demo <small>Coins, first-time guidelines</small></button>
+      <button class="pbtn" data-jump="reset">Reset demo <small>Coins, first-time hints</small></button>
     </div>
     <div class="pgroup"><h2>Not designed yet</h2>
       <ul class="missing">
@@ -518,6 +697,10 @@ const P={
  wand:'<path d="M4 20L15 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M15 9l2-2" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><path d="M18 2.5l.6 1.6 1.6.6-1.6.6-.6 1.6-.6-1.6-1.6-.6 1.6-.6zM8.5 3l.5 1.3 1.3.5-1.3.5-.5 1.3-.5-1.3-1.3-.5 1.3-.5zM20 11l.5 1.3 1.3.5-1.3.5-.5 1.3-.5-1.3-1.3-.5 1.3-.5z" fill="currentColor"/>',
  grid:'<rect x="3" y="3" width="8" height="8" rx="2" fill="currentColor"/><rect x="13" y="3" width="8" height="8" rx="2" fill="currentColor"/><rect x="3" y="13" width="8" height="8" rx="2" fill="currentColor"/><rect x="13" y="13" width="8" height="8" rx="2" fill="currentColor"/>',
  chev:'<path d="M9 5l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>',
+ filter:'<path d="M4 7h16M7 12h10M10 17h4" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>',
+ hand:'<path d="M10 9.5V4a2 2 0 0 0-4 0v10M14 10V9a2 2 0 0 0-4 0v1M18 11v-1a2 2 0 0 0-4 0M18 11a2 2 0 1 1 4 0v3a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.3l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
+ plus:'<path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>',
+ photoAdd:'<g fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="14" height="14" rx="2"/><path d="M7 15l3-3 3 3M19 3v6M16 6h6"/></g>',
  down:'<path d="M5 9l7 7 7-7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>',
  back:'<path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>',
  x:'<path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>',
@@ -656,7 +839,7 @@ function sheet(html,{mount,onClose,cls=''}={}){
   const o={sc,sh,onClose};sheets.push(o);sc.addEventListener('click',()=>closeSheet());
   // drag down to dismiss on grabber
   let y0=null;const gb=sh.querySelector('.grabber');
-  sh.addEventListener('pointerdown',e=>{if(e.target===gb||e.offsetY<24){y0=e.clientY;sh.style.transition='none';sh.setPointerCapture(e.pointerId)}});
+  sh.addEventListener('pointerdown',e=>{if(e.target===gb||(!e.target.closest('button')&&e.clientY-sh.getBoundingClientRect().top<24)){y0=e.clientY;sh.style.transition='none';sh.setPointerCapture(e.pointerId)}});
   sh.addEventListener('pointermove',e=>{if(y0!==null){const d=Math.max(0,e.clientY-y0);sh.style.transform=`translateY(${d}px)`}});
   sh.addEventListener('pointerup',e=>{if(y0===null)return;const d=e.clientY-y0;y0=null;sh.style.transition='';sh.style.transform='';if(d>120)closeSheet()});
   mount&&mount(sh);return sh}
@@ -671,7 +854,9 @@ const vm={io:null,init(){this.io=new IntersectionObserver(es=>{es.forEach(e=>{co
 vm.init();
 
 /* ================= pieces ================= */
-const proBtn=()=>`<button class="pro-img" data-a="paywall" aria-label="Spark Pro"><img src="img/pro.png" width="79" height="29" alt="PRO"></button>`;
+/* Header right: Join Now until the user buys Pro, then the coin balance (REQ-76) */
+const headBtn=()=>S.pro?balBtn():proBtn();
+const proBtn=()=>`<button class="join" data-a="paywall">${I('crown')}Join Now</button>`;
 const balBtn=()=>`<button class="balance glass" data-a="paywall"><img src="img/coin.png" alt="">${S.coins.toLocaleString('en-US')}</button>`;
 const card=(t,w)=>`<button class="mcard" data-a="open" data-id="${t.id}" ${w?`style="width:${w}px"`:''}>${t.src.v?media(t,{small:true}):`<img src="${thumb(t)}" alt="" loading="lazy">`}<span class="t">${esc(t.name)}</span></button>`;
 const secHead=(title,act,arg)=>`<button class="sec-h" data-a="${act}" data-arg="${arg||''}">${title}${act?I('chev'):''}</button>`;
@@ -680,7 +865,54 @@ function row(col){return `<section class="sec">${secHead(col.name,'col',col.id)}
 /* ================= tabs ================= */
 const TABS=[['discover','Discover','compass'],['video','Video','play'],['photo','Photo','photo'],['tools','Tools','wand'],['gallery','Gallery','grid']];
 function renderTabbar(){$('#tabbar').innerHTML=TABS.map(([id,l,ic])=>`<button class="tab ${S.tab===id?'on':''}" data-a="tab" data-id="${id}" aria-label="${l}">${I(ic)}<span>${l}</span></button>`).join('')}
-function setTab(id){S.tab=id;$$('.tabview').forEach(t=>t.hidden=t.dataset.id!==id);renderTabbar();$('#edgefade').style.display=id==='video'?'none':'';if(id==='gallery')renderGallery();vm.scan()}
+/* First-time coach marks on a full-screen feed, each shown once (Reset demo shows them again):
+   swipe: a hand swipes up so a new user learns the feed scrolls; goes away on tap, or on a swipe that moves to the next item.
+   tap: the first time the UI hides, a hand taps so the user learns a tap brings the details back; tapping does exactly that. */
+function coach(host,kind,onDone){const key=kind==='swipe'?'seenSwipe':'seenTap';if(S[key]||!host||host.querySelector('.coach'))return onDone&&onDone();
+  const feed=host.querySelector('.feed');if(!feed)return onDone&&onDone();
+  const txt=kind==='swipe'?['Swipe up to see more styles','Tap anywhere to start']:['Tap the screen to show details','Price, Save and Share come back'];
+  const c=document.createElement('div');c.className='coach coach-'+kind;c.setAttribute('role','dialog');c.setAttribute('aria-label',txt[0]);
+  c.innerHTML=`<div class="coach-hand">${kind==='swipe'?'<span class="coach-trail"></span>':'<span class="coach-ring"></span>'}${I('hand')}</div><p class="coach-t">${txt[0]}</p><p class="coach-s">${txt[1]}</p>`;
+  host.appendChild(c);requestAnimationFrame(()=>c.classList.add('in'));
+  const done=()=>{if(!c.isConnected||c.dataset.done)return;c.dataset.done=1;S[key]=true;c.classList.remove('in');setTimeout(()=>{c.remove();onDone&&onDone()},300);feed.removeEventListener('scroll',onScroll)};
+  const y=feed.scrollTop;const onScroll=()=>{if(kind==='swipe'&&Math.abs(feed.scrollTop-y)>10)done()};
+  const next=()=>{done();feed.scrollBy({top:feed.clientHeight,behavior:'smooth'})};
+  const tap=()=>{done();if(kind==='tap'&&host.exitImmersive)host.exitImmersive()};
+  let y0=null;c.addEventListener('pointerdown',e=>{y0=e.clientY});
+  c.addEventListener('pointerup',e=>{const dy=y0==null?0:e.clientY-y0;y0=null;dy<-30?next():tap()});
+  c.addEventListener('wheel',e=>{if(e.deltaY>0)next()},{passive:true});
+  feed.addEventListener('scroll',onScroll,{passive:true})}
+const coachSwipe=(host,onDone)=>coach(host,'swipe',onDone);
+/* Spotlight coach marks: dim the app, leave the target lit, show the gesture and one line. Once each; tap to dismiss. */
+function spotlight(target,{key,title,sub,gesture,ring},onDone){
+  const app=$('#app');const skip=()=>onDone&&onDone();
+  if(S[key]||!target||!target.isConnected||app.querySelector('.spot'))return skip();
+  const ar=app.getBoundingClientRect(),k=ar.width/app.offsetWidth,r=target.getBoundingClientRect();if(!r.width||!r.height)return skip();
+  const pad=6,x=(r.left-ar.left)/k,y=(r.top-ar.top)/k,w=Math.min(r.width/k,app.offsetWidth-x),h=r.height/k,H=app.offsetHeight;
+  const fx=gesture==='swipeX'?x+w*.62:x+Math.min(w*.35,110),fy=y+h*.5;
+  let rg='';if(ring){const q=ring.getBoundingClientRect();rg=`<span class="spot-ring" style="left:${(q.left-ar.left)/k+q.width/k/2-22}px;top:${(q.top-ar.top)/k+q.height/k/2-22}px"></span>`}
+  const below=y+h+170<H;
+  const o=document.createElement('div');o.className='spot';o.setAttribute('role','dialog');o.setAttribute('aria-label',title);
+  o.innerHTML=`<div class="spot-hole" style="left:${x-pad}px;top:${y-pad}px;width:${w+pad*2}px;height:${h+pad*2}px"></div>${rg}
+   <div class="spot-hand ${gesture}" style="left:${fx-16}px;top:${fy-4}px">${I('hand')}</div>
+   <div class="spot-tip" style="${below?`top:${y+h+pad+64}px`:`bottom:${H-y+pad+20}px`}"><b>${title}</b><span>${sub}</span><em>Tap anywhere to continue</em></div>`;
+  app.appendChild(o);requestAnimationFrame(()=>o.classList.add('in'));
+  o.addEventListener('click',()=>{if(o.dataset.done)return;o.dataset.done=1;S[key]=true;o.classList.remove('in');setTimeout(()=>{o.remove();skip()},280)})}
+/* Chip row in a full-screen feed (Video, AI Photo detail, Discover detail) */
+function spotChips(host,onDone){const top=host&&host.querySelector('.ftop');const row=host&&host.querySelector('.catrow');
+  if(!row||host.classList.contains('immersive'))return onDone&&onDone();
+  if(top.classList.contains('collapsed')){const fab=host.querySelector('.catfab');
+    return spotlight(fab,{key:'seenChips',title:'Tap to change category',sub:'All categories open in one row',gesture:'tap'},onDone)}
+  spotlight(row,{key:'seenChips',title:'Swipe to browse categories',sub:'Tap the arrow to see them all',gesture:'swipeX',ring:host.querySelector('.chip-arrow')},onDone)}
+/* Discover: collection chips, then a collection name opens See all */
+function spotDiscover(){const el=$('.tabview[data-id=discover]');if(!el||S.tab!=='discover'||stack.length)return;
+  spotlight(el.querySelector('.chips'),{key:'seenColChips',title:'Swipe to browse collections',sub:'Tap one to open it',gesture:'swipeX'},()=>{
+    const h=[...el.querySelectorAll('.sec-h[data-a=col]')].find(b=>{const r=b.getBoundingClientRect(),a=$('#app').getBoundingClientRect();return r.top>a.top+80&&r.bottom<a.bottom-120});
+    spotlight(h,{key:'seenSeeAll',title:'Tap a collection name to see all',sub:'Every style in that collection, in one grid',gesture:'tap'})})}
+
+function setTab(id){S.tab=id;$$('.tabview').forEach(t=>t.hidden=t.dataset.id!==id);renderTabbar();$('#edgefade').style.display=id==='video'?'none':'';if(id==='gallery')renderGallery();vm.scan();syncTabbar();if(id==='video'){const h=$(`.tabview[data-id=video]`);coachSwipe(h,()=>spotChips(h))}if(id==='discover')setTimeout(spotDiscover,600)}
+/* The tab bar hides while the Video feed is in immersive mode */
+function syncTabbar(){const v=$(`.tabview[data-id=${S.tab}]`);$('#tabbar').classList.toggle('vhide',!!v&&(v.classList.contains('immersive')||v.classList.contains('paneling')))}
 function mountTabs(){const root=$('#tabs');root.innerHTML=TABS.map(([id])=>`<div class="tabview" data-id="${id}" ${id!==S.tab?'hidden':''}></div>`).join('');
   renderDiscover();renderVideo();renderPhoto();renderTools();renderGallery();renderTabbar();
   $$('.tabview .scroll').forEach(sc=>sc.addEventListener('scroll',()=>{const tb=sc.querySelector('.toolbar');tb&&tb.style.setProperty('--tbfade',Math.min(1,sc.scrollTop/120))}))}
@@ -689,7 +921,7 @@ function mountTabs(){const root=$('#tabs');root.innerHTML=TABS.map(([id])=>`<div
 const HERO=[{v:'03',k:'A little imagination',t:'Ordinary, meet art.',col:'tv'},{v:'12',k:'Action Video',t:'Grandma goes full blockbuster.',col:'av'},{v:'06',k:'Couple',t:'Two of you, one movie scene.',col:'cp'},{v:'14',k:'Funny',t:'Wake up to something big.',col:'tv'},{v:'08',k:'Trending AI Video',t:'Game day, main character.',col:'tv'}];
 function renderDiscover(){const el=$('.tabview[data-id=discover]');
   el.innerHTML=`<div class="scroll" id="dscroll">
-   <div class="toolbar fade"><h1 class="ltitle">Discover</h1><div class="tb-right">${proBtn()}</div></div>
+   <div class="toolbar fade"><h1 class="ltitle">Discover</h1><div class="tb-right">${headBtn()}</div></div>
    <div class="hero" style="margin-top:-111px" id="hero"><div class="hero-track" id="htrack">${HERO.map((h,i)=>`<div class="hero-slide"><video class="hv" src="v/${h.v}.mp4" poster="p/${h.v}.jpg" muted playsinline autoplay preload="metadata" data-auto></video>
      <div class="hero-copy"><span class="k">${h.k}</span><h2>${h.t}</h2><button class="cta" data-a="herocol" data-i="${i}">Explore collection ${I('arrowR','ico')}</button></div></div>`).join('')}</div>
     <div class="dots hero-dots" id="hdots">${HERO.map((_,i)=>`<i class="${i?'':'on'}"><b></b></i>`).join('')}</div></div>
@@ -730,20 +962,51 @@ function feedItem(t,{back=false}={}){const bm=S.bookmarks.has(t.id);return `<art
    <button class="cta fuse" data-a="use" data-id="${t.id}">${I('sparkles')}Use This Style</button></div>
   <div class="fside"><button class="sbtn ${bm?'on':''}" data-a="bm" data-id="${t.id}"><span class="circle glass">${I(bm?'bookmarkF':'bookmark')}</span>${bm?'Saved':'Save'}</button><button class="sbtn" data-a="share"><span class="circle glass">${I('share')}</span>Share</button></div></article>`}
 function feedList(cat){return V.filter(t=>t.cats.includes(cat))}
+/* Shared full-screen feed (Video tab, Photo tab, Discover detail).
+   Glance: Anna, swiping for an idea; in 2 s she sees the template playing and its coin price; the chrome recedes.
+   Swiping folds the category chips into one round button that rises next to the balance, hides the title,
+   the details and the tab bar; a floating row keeps the price, Use and Save. Tapping the video, the price
+   or the category button brings the full UI back. */
+function feedScreen(host,o){host.classList.add('vscreen');host.classList.toggle('hasback',!!o.back);host.classList.remove('immersive');
+  const has=o.cats&&o.cats.length,ci=has?Math.max(0,o.cats.findIndex(c=>c[0]===o.cur)):0,nm=has?o.cats[ci][1].replace(/^\S+\s/,''):'';
+  const chip=([id,l],i)=>`<button class="chip ${o.cur===id?'on':''}" ${i!=null?`style="--i:${i}"`:''} data-a="${o.act}" data-cat="${id}">${l}</button>`;
+  host.innerHTML=`<div class="feed">${o.items}</div>
+   <div class="vmini off"><div class="vp-left"><button class="vp-price" data-a="vfull" aria-label="Show details"><img src="img/coin.png" alt="coins"><b></b></button><button class="vp-use" data-a="use" data-id="">${I('sparkles')}Use this</button></div><button class="vp-bm" data-a="bm" data-id="" aria-label="Save">${I('bookmark')}</button></div>
+   <div class="ftop"><div class="toolbar">${o.back?`<button class="circle glass-dark tb-back" data-a="back" aria-label="Back">${I('back')}</button>`:''}<h1 class="ltitle${o.back?' sm':''}">${esc(o.title)}</h1><div class="tb-right">${headBtn()}</div></div>
+    ${has?`<div class="catrow"><div class="chips" style="padding-right:56px;-webkit-mask:linear-gradient(90deg,#000 80%,transparent 92%);mask:linear-gradient(90deg,#000 80%,transparent 92%)">${o.cats.map(chip).join('')}</div>
+     <button class="chip chip-arrow" style="position:absolute;right:16px" data-a="catpanel" aria-label="All ${o.noun}">${I('down')}</button>
+     <button class="catfab circle glass-dark" data-a="catexpand" aria-label="${esc(nm)}. Show ${o.noun}" tabindex="-1">${I('filter')}</button>
+     <button class="catname" data-a="catexpand" tabindex="-1" aria-hidden="true">${esc(nm)}</button></div>
+    <div class="catpanel glass-dark" style="top:164px"><h4>All ${o.noun}</h4><div class="wrap">${o.cats.map(c=>chip(c)).join('')}</div></div>`:''}</div>`;
+  vm.scan();
+  const feed=host.querySelector('.feed'),top=host.querySelector('.ftop'),fab=host.querySelector('.catfab'),panel=host.querySelector('.catpanel'),pill=host.querySelector('.vmini');
+  const fold=c=>{top.classList.toggle('collapsed',c);if(fab)fab.tabIndex=c?0:-1;if(panel&&c)panel.classList.remove('in')};
+  let restoredAt=0;
+  const syncPill=()=>{const it=feed.children[Math.round(feed.scrollTop/feed.clientHeight)];const t=it&&it.classList.contains('fitem')&&ALL[it.dataset.id];
+    pill.classList.toggle('off',!t);if(!t)return;const bm=S.bookmarks.has(t.id),b=pill.querySelector('.vp-bm');
+    pill.querySelector('b').textContent=t.price;b.dataset.id=t.id;pill.querySelector('.vp-use').dataset.id=t.id;b.classList.toggle('on',bm);b.querySelector('svg').innerHTML=P[bm?'bookmarkF':'bookmark'];b.setAttribute('aria-label',bm?'Saved':'Save')};
+  feed.addEventListener('scroll',()=>{const c=feed.scrollTop>feed.clientHeight*.4;if(!host.classList.contains('immersive')&&c!==top.classList.contains('collapsed'))fold(c);
+    syncPill();if(!host.classList.contains('immersive')&&Math.abs(feed.scrollTop-restoredAt)>40){host.classList.add('immersive');fold(true);syncTabbar();if(!S.seenTap)setTimeout(()=>{if(host.classList.contains('immersive')&&host.isConnected)coach(host,'tap')},900)}},{passive:true});
+  host.exitImmersive=()=>{restoredAt=feed.scrollTop;host.classList.remove('immersive');syncTabbar()};
+  /* Opening at item n is a jump, not a swipe: keep the full UI and the swipe hint */
+  host.setStart=i=>{feed.scrollTop=i*feed.clientHeight;restoredAt=feed.scrollTop;fold(feed.scrollTop>feed.clientHeight*.4)};
+  host.expandCats=()=>{host.exitImmersive();fold(false)};
+  feed.addEventListener('click',e=>{if(host.classList.contains('immersive')&&!e.target.closest('[data-a]'))host.exitImmersive()});
+  syncPill();return feed}
+const endCard=(nm,act,next)=>`<section class="fend"><div style="font-size:40px">🎬</div><h3 style="margin:0;font-size:22px">You've seen everything in ${esc(nm)}</h3><button class="cta" style="width:auto;padding:0 22px" data-a="${act}" data-cat="${next[0]}">Next: ${next[1]}</button></section>`;
 function renderVideo(){const el=$('.tabview[data-id=video]');const list=feedList(S.cat);
   const items=[];list.forEach((t,i)=>{items.push(feedItem(t));if(i===2)items.push(`<section class="cross"><div class="sec-h">📸 Photo styles you might like</div><div class="sub">Same selfie, a whole new photoshoot.</div><div class="hrow">${['cake','santa','lavender','flash'].map(id=>card(ALL[id],180)).join('')}</div><button class="textlink" data-a="tab" data-id="photo" style="align-self:flex-start;padding:0 16px">See all ›</button></section>`)});
-  const ci=CATS.findIndex(c=>c[0]===S.cat);const next=CATS[(ci+1)%CATS.length];
-  items.push(`<section class="fend"><div style="font-size:40px">🎬</div><h3 style="margin:0;font-size:22px">You've seen everything in ${CATS[ci][1].slice(2).trim()}</h3><button class="cta" style="width:auto;padding:0 22px" data-a="cat" data-cat="${next[0]}">Next: ${next[1]}</button></section>`);
-  el.innerHTML=`<div class="feed" id="vfeed">${items.join('')}</div>
-   <div class="ftop"><div class="toolbar"><h1 class="ltitle">Video</h1><div class="tb-right">${balBtn()}</div></div>
-    <div style="position:relative;display:flex;align-items:center"><div class="chips" style="padding-right:56px;-webkit-mask:linear-gradient(90deg,#000 80%,transparent 92%);mask:linear-gradient(90deg,#000 80%,transparent 92%)">${CATS.map(([id,l])=>`<button class="chip ${S.cat===id?'on':''}" data-a="cat" data-cat="${id}">${l}</button>`).join('')}</div>
-     <button class="chip chip-arrow" style="position:absolute;right:16px" data-a="catpanel" aria-label="All categories">${I('down')}</button></div>
-    <div class="catpanel glass-dark" id="catpanel" style="top:164px"><h4>All categories</h4><div class="wrap">${CATS.map(([id,l])=>`<button class="chip ${S.cat===id?'on':''}" data-a="cat" data-cat="${id}">${l}</button>`).join('')}</div></div></div>`;
-  vm.scan()}
+  const ci=CATS.findIndex(c=>c[0]===S.cat);items.push(endCard(CATS[ci][1].replace(/^\S+\s/,''),'cat',CATS[(ci+1)%CATS.length]));
+  feedScreen(el,{title:'Video',cats:CATS,cur:S.cat,act:'cat',noun:'categories',items:items.join('')});if($('#tabbar'))syncTabbar()}
 
 /* ---- Photo ---- */
+/* Photo categories for the AI Photo detail feed, from the wireframe (DATA.photo.cats); item lists are sample data */
+const PCATS=[['foryou','✨ For you'],['trending','🔥 Trending'],['birthday','🎂 Birthday'],['art','🎨 Art'],['cute','🎀 Cute'],['couple','💞 Couple']];
+const PFEED={foryou:['candle','santa','flash','cake','retro','snowp','lavender','film','thirty','duo'],trending:['santa','candle','cake','flash','snowp'],
+  birthday:['candle','cake','lavender','thirty'],art:['retro','flash','film'],cute:['cake','santa','snowp','lavender'],couple:['duo']};
+const PCAT_OF={Birthday:'birthday','2000s Vibe':'art',Holiday:'cute',Couple:'couple'};
 function renderPhoto(){const el=$('.tabview[data-id=photo]');
-  el.innerHTML=`<div class="scroll"><div class="toolbar fade"><h1 class="ltitle">Photo</h1><div class="tb-right">${proBtn()}</div></div>
+  el.innerHTML=`<div class="scroll"><div class="toolbar fade"><h1 class="ltitle">Photo</h1><div class="tb-right">${headBtn()}</div></div>
   <div class="ba" id="ba" style="margin-top:-111px;--x:50%"><img src="img/photo_before.jpg" alt="Your selfie"><img class="after" src="img/photo_after.jpg" alt="AI result"><span class="line"></span><span class="knob glass">${I('arrowsH')}</span><span class="lbl" style="left:16px">Your selfie</span><span class="lbl" style="right:16px">AI result</span>
    <div class="ba-copy"><div><h3>Candlelight Wish</h3><p>Birthday edit</p></div><button class="cta" data-a="use" data-id="candle">Try it!</button></div><div class="dots"><i class="on"></i><i></i><i></i><i></i><i></i></div></div>
   <div style="display:flex;flex-direction:column;gap:32px;padding:16px 0 140px">
@@ -760,7 +1023,7 @@ function renderPhoto(){const el=$('.tabview[data-id=photo]');
 /* ---- Tools ---- */
 const TOOLS=[['sparkles','Enhance'],['brush','Stylist'],['scissors','Hairstyle','New'],['dropper','Makeup','Hot'],['face','Face Slim'],['person','Body Slim'],['sun','Skin Tone'],['halfc','Remove BG']];
 function renderTools(){const el=$('.tabview[data-id=tools]');
-  el.innerHTML=`<div class="scroll"><div class="toolbar fade"><h1 class="ltitle">Tools</h1><div class="tb-right">${proBtn()}</div></div>
+  el.innerHTML=`<div class="scroll"><div class="toolbar fade"><h1 class="ltitle">Tools</h1><div class="tb-right">${headBtn()}</div></div>
   <div style="display:flex;flex-direction:column;gap:32px;padding:12px 0 140px">
    <div class="tgrid">${TOOLS.map(([ic,l,b])=>`<button class="tool" data-a="tool" data-arg="${l}"><span class="circle glass">${I(ic)}</span>${b?`<span class="bdg">${b}</span>`:''}${l}</button>`).join('')}</div>
    <div class="banner" data-a="col" data-arg="hs" role="button"><img src="img/banner_hair.jpg" alt="Short hair to long hair"><div class="dots"><i class="on"></i><i></i><i></i><i></i><i></i></div></div>
@@ -785,7 +1048,7 @@ function renderGallery(){const el=$('.tabview[data-id=gallery]');if(!el)return;c
     body=`<div class="gimg">${mine.map(c=>`<button data-a="gopen" data-k="${c.key}"><img src="${imgSrc(c.img)}" alt=""></button>`).join('')}${pre.map(p=>`<button data-a="gimg" data-img="${p}"><img src="img/${p}.jpg" alt=""></button>`).join('')}</div>`}
   else if(S.gtab==='uploads'){const all=[...S.uploads,...SELFIES];body=`<p class="fn dim" style="padding:0 16px;margin:0 0 12px">Photos you've added. Stored only on this phone.</p><div class="gimg">${all.map(p=>`<button><img src="${imgSrc(p)}" alt=""></button>`).join('')}</div>`}
   else{const b=[...S.bookmarks].map(id=>ALL[id]).filter(Boolean);body=b.length?`<div class="cgrid">${b.map(ccard).join('')}</div>`:`<div class="empty">${I('bookmark')}<b style="color:#fff">No bookmarks yet</b>Tap Save on a template to keep it here.</div>`}
-  el.innerHTML=`<div class="scroll"><div class="toolbar fade"><h1 class="ltitle">Gallery</h1><div class="tb-right">${proBtn()}<span class="avatar"><img src="img/avatar.jpg" alt="Profile" width="32" height="32"></span></div></div>
+  el.innerHTML=`<div class="scroll"><div class="toolbar fade"><h1 class="ltitle">Gallery</h1><div class="tb-right">${headBtn()}<span class="avatar"><img src="img/avatar.jpg" alt="Profile" width="32" height="32"></span></div></div>
    <div class="chips" style="margin-bottom:24px">${tabs.map(([id,l])=>`<button class="chip ${S.gtab===id?'on':''}" data-a="gtab" data-id="${id}">${l}</button>`).join('')}</div>
    <div style="display:flex;flex-direction:column;gap:32px;padding-bottom:140px">${body}</div></div>`;
   $('.scroll',el).scrollTop=keep;vm.scan()}
@@ -801,45 +1064,89 @@ function openCollection(cid){const col=COLS.find(c=>c.id===cid)||COLS[0];
    <div class="catpanel glass-dark" id="colpanel" style="top:168px;z-index:40"><h4>All collections</h4><div class="wrap">${COLS.map(c=>`<button class="chip ${c.id===col.id?'on':''}" data-a="colswitch" data-arg="${c.id}">${c.name}</button>`).join('')}</div></div>`;
   const top=stack[stack.length-1];if(top&&top.dataset.screen==='col'){const el=replaceTop(html,{});el.dataset.screen='col';el.classList.add('in');return}
   const el=push(html);el.dataset.screen='col';el.dataset.col=col.id}
-function openDetail(id,colId){const col=COLS.find(c=>c.id===colId);const ids=col?col.items:[id];
-  const list=ids.map(i=>ALL[i]);const start=Math.max(0,ids.indexOf(id));
-  const el=push(`<div class="feed">${list.map(t=>feedItem(t,{back:true})).join('')}</div><div class="navbar" style="z-index:40"><button class="circle glass" data-a="back" aria-label="Back">${I('back')}</button><div class="nt">${col?col.name.replace(/^\S+\s/,''):''}</div></div>`);
-  const f=$('.feed',el);f.scrollTop=start*874}
+/* Discover detail: the same full-screen feed, with Back and the collections as its categories */
+function detailFeed(host,col,startId){const ids=col?col.items:[startId];const ci=col?COLS.indexOf(col):-1;
+  const items=ids.map(i=>feedItem(ALL[i],{back:true})).join('')+(col?endCard(col.name.replace(/^\S+\s/,''),'dcol',(()=>{const n=COLS[(ci+1)%COLS.length];return [n.id,n.name]})()):'');
+  host.dataset.col=col?col.id:'';
+  feedScreen(host,{title:col?col.name.replace(/^\S+\s/,''):ALL[startId].name,back:true,cats:col?COLS.map(c=>[c.id,c.name]):[],cur:col&&col.id,act:'dcol',noun:'collections',items});
+  host.setStart(Math.max(0,ids.indexOf(startId)))}
+/* AI Photo detail (opened from the Photo tab): the same full-screen feed, with the photo categories as its chips */
+function photoDetailFeed(host,cat,startId){const ci=PCATS.findIndex(c=>c[0]===cat);const ids=PFEED[cat];
+  const items=ids.map(i=>feedItem(ALL[i],{back:true})).join('')+endCard(PCATS[ci][1].replace(/^\S+\s/,''),'pcat',PCATS[(ci+1)%PCATS.length]);
+  feedScreen(host,{title:'AI Photo',back:true,cats:PCATS,cur:cat,act:'pcat',noun:'categories',items});
+  host.setStart(Math.max(0,ids.indexOf(startId)))}
+function openPhotoDetail(id){const t=ALL[id];let cat=PCAT_OF[t.cat]||'foryou';if(!PFEED[cat].includes(id))cat='foryou';
+  const el=push('');el.dataset.screen='pdetail';photoDetailFeed(el,cat,PFEED[cat].includes(id)?id:PFEED[cat][0]);setTimeout(()=>coachSwipe(el,()=>spotChips(el)),400)}
+/* AI Video detail (from a video's category label in Discover detail): same feed, with the video categories as chips */
+function videoDetailFeed(host,cat,startId){const ci=CATS.findIndex(c=>c[0]===cat);const ids=feedList(cat).map(t=>t.id);
+  const items=ids.map(i=>feedItem(ALL[i],{back:true})).join('')+endCard(CATS[ci][1].replace(/^\S+\s/,''),'vcat',CATS[(ci+1)%CATS.length]);
+  feedScreen(host,{title:'AI Video',back:true,cats:CATS,cur:cat,act:'vcat',noun:'categories',items});
+  host.setStart(Math.max(0,ids.indexOf(startId)))}
+function openVideoDetail(id,cat){const el=push('');el.dataset.screen='vdetail';videoDetailFeed(el,cat,id)}
+function openDetail(id,colId){const col=COLS.find(c=>c.id===colId);const el=push('');el.dataset.screen='detail';detailFeed(el,col,id);setTimeout(()=>coachSwipe(el,()=>spotChips(el)),400)}
 
 /* ================= setup (create video / image) ================= */
 let F=null;
-function startSetup(t){const v=t.kind==='video';
+/* Create screen, laid out as the wireframe (wireframe-app.html, openT): sample on top with Back and Join Now / balance,
+   a sheet below with title + Save, the settings summary bar, the photo requirement, the upload slot and Create.
+   Glance: Anna, about to make one; in 2 s she sees where her photo goes and what it costs; settings recede into the bar. */
+function startSetup(t,host){const v=t.kind==='video';if(F&&F.host)closePanel();
   F={t,v,photos:Array(t.people).fill(null),slot:0,set:{sound:true,dur:'10s',res:'480p',ratio:'4:5',q:'Standard'}};
-  const prevH=v?476:532,listTop=v?400:456;
-  const el=push(`<div class="setup-prev" style="height:${prevH}px">${media(t,{kb:true})}</div>
-   <button class="circle glass" style="position:absolute;left:16px;top:64px;z-index:10" data-a="close" aria-label="Close">${I('x')}</button>
-   <div style="position:absolute;left:72px;right:72px;top:78px;z-index:10;text-align:center;font-weight:600;font-size:17px">${esc(t.name)}</div>
-   <span class="sample" style="top:${prevH-108}px">Sample result</span>
-   <div class="setup-list" style="top:${listTop}px" id="slist"></div>
-   <div class="bottomfade"></div><div class="bottom" id="sbottom"></div>`,{modal:true});
+  const bm=S.bookmarks.has(t.id);
+  const sheetInner=`<i class="handle"></i>
+     <div class="shead"><h3>${esc(t.name)}</h3><button class="sbm ${bm?'on':''}" data-a="bm" data-id="${t.id}" aria-label="Save">${I(bm?'bookmarkF':'bookmark')}</button></div>
+     <div id="slist"></div><div id="sbottom"></div>`;
+  if(host&&host.classList.contains('vscreen'))return openPanel(host,sheetInner);
+  const el=push(`<div class="sw"><div class="sprev">${media(t,{kb:true})}
+     <button class="circle glass-dark tb-back sp-back" data-a="close" aria-label="Back">${I('back')}</button><div class="tb-right sp-right">${headBtn()}</div></div>
+    <div class="ssheet">${sheetInner}</div></div>`,{modal:true});
   el.dataset.screen='setup';F.el=el;renderSetup()}
+/* From a feed, Use this raises the create panel over the playing video instead of opening a new view.
+   Not interested: tap the video above, drag the panel down, or swipe up (the panel drops and the feed moves on). */
+function openPanel(host,inner){const feed=host.querySelector('.feed');
+  const w=document.createElement('div');w.className='cpanel-wrap';
+  w.innerHTML=`<div class="cp-scrim" aria-label="Close"></div><div class="ssheet cpanel" role="dialog" aria-label="${esc(F.t.name)}">${inner}</div>`;
+  host.appendChild(w);host.classList.add('paneling');F.el=w;F.host=host;renderSetup();syncTabbar();
+  requestAnimationFrame(()=>w.classList.add('in'));
+  const sc=w.querySelector('.cp-scrim'),pn=w.querySelector('.cpanel');let y0=null;
+  sc.addEventListener('pointerdown',e=>{y0=e.clientY});
+  sc.addEventListener('pointerup',e=>{const dy=y0==null?0:e.clientY-y0;y0=null;closePanel({next:dy<-30})});
+  sc.addEventListener('wheel',e=>closePanel({next:e.deltaY>0}),{passive:true});
+  let d0=null;pn.addEventListener('pointerdown',e=>{if(e.target.closest('button,input'))return;if(e.clientY-pn.getBoundingClientRect().top>72)return;d0=e.clientY;pn.style.transition='none';pn.setPointerCapture(e.pointerId)});
+  pn.addEventListener('pointermove',e=>{if(d0!=null)pn.style.transform=`translateY(${Math.max(0,e.clientY-d0)}px)`});
+  pn.addEventListener('pointerup',e=>{if(d0==null)return;const dy=e.clientY-d0;d0=null;pn.style.transition='';pn.style.transform='';if(dy>60)closePanel()})}
+function closePanel({next=false,keep=false}={}){if(!F||!F.host)return;const host=F.host,w=F.el,feed=host.querySelector('.feed');
+  w.classList.remove('in');host.classList.remove('paneling');setTimeout(()=>w.remove(),320);
+  if(keep){F.host=null}else F=null;syncTabbar();
+  if(next)feed.scrollBy({top:feed.clientHeight,behavior:'smooth'})}
 const price=()=>F.v?F.t.price+(F.set.res==='720p'?30:0):F.t.price+(F.set.q==='HD'?20:0);
 function photoCard(){const p=F.photos[0];
-  if(F.t.people>1){const done=F.photos.filter(x=>x&&x.st==='ok').length;const nextIdx=F.photos.findIndex(x=>!x);
-    const slot=(x,i)=>{let th,sub;
-      if(!x){const nx=i===nextIdx&&done>0;th=`<span class="pthumb empty ${nx?'next':''}">${I('photo')}</span>`;sub=nx?`<span style="color:var(--lime)">Add next</span>`:`<span class="dim">Tap to add</span>`}
-      else{th=`<span class="pthumb ${x.st==='bad'?'reject':''} ${x.st==='checking'?'checking':''}"><img src="${imgSrc(x.img)}" alt="">${x.st==='checking'?'<i class="spin"></i>':''}</span>`;
-        sub=x.st==='ok'?`<span style="color:var(--green)">${I('checkC')}Ready</span>`:x.st==='bad'?`<span style="color:var(--red)">${I('xC')}No face</span>`:`<span class="dim">Checking…</span>`}
-      return `<button class="slot" data-a="addphoto" data-slot="${i}">${th}<span style="min-width:0"><b>Person ${i+1}</b>${sub}</span></button>`};
-    return `<div class="pcard" style="flex-direction:column;align-items:stretch;gap:12px;min-height:0"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:17px">Add ${F.t.people} photos</b><span class="fn" style="color:${done===F.t.people?'var(--green)':'var(--fg2)'};font-weight:600">${done} of ${F.t.people}</span></div><div class="slots">${F.photos.map(slot).join('')}</div></div>`}
-  if(!p)return `<div class="pcard"><button class="pthumb empty" data-a="addphoto" data-slot="0" aria-label="Add your photo">${I('photo')}</button><div class="ptext"><h4>Add your photo</h4><p>A clear, front-facing selfie works best</p></div><button class="pbtn2 lime" data-a="addphoto" data-slot="0">Add</button></div>`;
-  if(p.st==='checking')return `<div class="pcard"><span class="pthumb checking"><img src="${imgSrc(p.img)}" alt=""><i class="spin"></i></span><div class="ptext"><h4>Checking photo…</h4><p>Making sure your face is clear</p></div></div>`;
-  if(p.st==='bad')return `<div class="pcard"><span class="pthumb reject"><img src="${imgSrc(p.img)}" alt=""></span><div class="ptext"><h4>Your photo</h4><span class="spill bad">${I('xC')}No clear face</span><p>Try one person facing the camera</p></div><button class="pbtn2 lime" data-a="addphoto" data-slot="0">Change</button></div>`;
-  return `<div class="pcard"><span class="pthumb"><img src="${imgSrc(p.img)}" alt=""></span><div class="ptext"><h4>Your photo</h4><span class="spill ok">${I('checkC')}Looks good</span></div><button class="pbtn2 glass" data-a="addphoto" data-slot="0">Change</button></div>`}
-function settingsCard(){const s=F.set;const seg=(k,opts)=>`<div class="segm">${opts.map(o=>`<button class="${s[k]===o?'on':''}" data-a="seg" data-k="${k}" data-v="${o}">${o}</button>`).join('')}</div>`;
-  if(F.v)return `<div class="sgroup"><div class="srow"><span class="ic">${I('speaker')}</span><span class="lb">Sound</span><button class="switch ${s.sound?'on':''}" data-a="sound" role="switch" aria-checked="${s.sound}" aria-label="Sound"></button></div><div class="sdiv"></div>
-   <div class="srow"><span class="ic">${I('clock')}</span><span class="lb">Duration</span>${seg('dur',['5s','10s'])}</div><div class="sdiv"></div>
-   <div class="srow"><span class="ic">${I('film')}</span><span class="lb">Resolution</span>${seg('res',['480p','720p'])}</div></div>`;
-  return `<div class="sgroup"><div class="srow"><span class="ic">${I('photo')}</span><span class="lb">Ratio</span>${seg('ratio',['4:5','1:1','9:16'])}</div><div class="sdiv"></div><div class="srow"><span class="ic">${I('sparkles')}</span><span class="lb">Quality</span>${seg('q',['Standard','HD'])}</div></div>`}
-function renderSetup(){if(!F||!F.el)return;$('#slist',F.el).innerHTML=photoCard()+settingsCard();
+  /* Several people: one card per person, same look as the single upload slot; only the next empty card pulses */
+  if(F.t.people>1){const nextIdx=F.photos.findIndex(x=>!x);const ex=['selfie1','selfie3','selfie5'];
+    const slot=(x,i)=>{if(!x)return `<button class="mslot" data-a="addphoto" data-slot="${i}" aria-label="Add Person ${i+1}"><span class="ucard front"><img src="img/${ex[i%3]}.jpg" alt=""><span class="uplus ${i===nextIdx?'':'still'}">${I('plus')}</span></span><span class="mcap">Person ${i+1}</span></button>`;
+      const st=x.st==='ok'?`<span class="mcap" style="color:var(--green)">${I('checkC')}Person ${i+1}</span>`:x.st==='bad'?`<span class="mcap" style="color:var(--red)">${I('xC')}No clear face</span>`:`<span class="mcap dim">Checking…</span>`;
+      return `<button class="mslot" data-a="addphoto" data-slot="${i}" aria-label="Change Person ${i+1}"><span class="pimg ${x.st==='bad'?'bad':''}"><img src="${imgSrc(x.img)}" alt="">${x.st==='checking'?'<i class="spin"></i>':''}</span>${st}</button>`};
+    return `<div class="mslots">${F.photos.map(slot).join('')}</div>`}
+  /* Single photo (wireframe .slot / .picked): an empty slot with a photo-plus glyph, then the picked photo with its check state */
+  /* Empty slot as a small deck of example selfies: the front one carries the lime +, so the target reads as "a photo like this goes here" */
+  if(!p)return `<button class="udeck" data-a="addphoto" data-slot="0" aria-label="Tap to add a photo"><span class="ucard side l"><img src="img/selfie3.jpg" alt=""></span><span class="ucard side r"><img src="img/selfie5.jpg" alt=""></span><span class="ucard front"><img src="img/selfie1.jpg" alt=""><span class="uplus">${I('plus')}</span></span><span class="ucap">Tap to add a photo</span></button>`;
+  const st=p.st==='checking'?`<span class="pst dim">Checking photo…</span>`:p.st==='bad'?`<span class="pst" style="color:var(--red)">${I('xC')}No clear face · try one person facing the camera</span>`:`<span class="pst" style="color:var(--green)">${I('checkC')}Looks good</span>`;
+  return `<div class="picked ${p.st==='bad'?'bad':''}"><span class="pimg"><img src="${imgSrc(p.img)}" alt="Your photo">${p.st==='checking'?'<i class="spin"></i>':''}</span>${st}${p.st==='checking'?'':`<button class="textlink chg" data-a="addphoto" data-slot="0">Change photo</button>`}</div>`}
+function settingsCard(){const s=F.set;const seg=(ic,x)=>`<span><i>${I(ic)}</i>${x}</span>`;
+  const vals=F.v?[seg('speaker',s.sound?'On':'Off'),seg('clock',s.dur),seg('film',s.res)]:[seg('photo',s.ratio),seg('sparkles',s.q)];
+  return `<button class="gbar" data-a="gsettings" aria-label="Generation settings">${vals.join('')}<i class="chev">${I('chev')}</i></button>`}
+function gsBody(){const s=F.set;const save=Object.assign({},s);
+  const cost=(k,v)=>{F.set[k]=v;const c=price();F.set[k]=save[k];return c};
+  const opt=(k,v,label,showCost)=>`<button class="gopt ${String(s[k])===String(v)?'on':''}" data-a="gset" data-k="${k}" data-v="${v}">${label}${showCost?`<small><img src="img/coin.png" alt="">${cost(k,v)} coins</small>`:''}</button>`;
+  const grp=(h,inner)=>`<h5>${h}</h5><div class="grow">${inner}</div>`;
+  return `<div class="gshead"><h3>Generation settings</h3><button class="gdone" data-a="gdone">Done</button></div>`+
+   (F.v?grp('Sound',opt('sound',true,`${I('speaker')}On`)+opt('sound',false,'Off'))+grp('Duration',opt('dur','5s','5s')+opt('dur','10s','10s'))+grp('Resolution',opt('res','480p','480p',1)+opt('res','720p','720p',1))
+       :grp('Ratio',opt('ratio','4:5','4:5')+opt('ratio','1:1','1:1')+opt('ratio','9:16','9:16'))+grp('Quality',opt('q','Standard','Standard',1)+opt('q','HD','HD',1)))}
+const reqText=()=>`${F.t.people>1?F.t.people+' photos':'1 photo'} · ${F.v?'Portrait, face clear':/Birthday|Holiday/.test(F.t.cat)?'Full body, head to toe':'Portrait, face clear'}`;
+function renderSetup(){if(!F||!F.el)return;$('#slist',F.el).innerHTML=settingsCard()+`<p class="sreq">${I('person')}${reqText()}</p>`+photoCard();
   const ok=F.photos.every(x=>x&&x.st==='ok');const anyBad=F.photos.some(x=>x&&x.st==='bad');const checking=F.photos.some(x=>x&&x.st==='checking');const left=F.photos.filter(x=>!x).length;
   let cap;if(ok)cap=`You have ${COIN} ${S.coins.toLocaleString('en-US')}`;else if(checking)cap='Checking your photo…';else if(anyBad)cap=F.t.people>1?'No coins used · change Person '+(F.photos.findIndex(x=>x&&x.st==='bad')+1):'No coins used · choose another photo';else if(F.t.people>1)cap=left===F.t.people?`Add ${F.t.people} photos to continue`:`Add ${left} more photo`;else cap='Add a photo to continue';
-  $('#sbottom',F.el).innerHTML=`<button class="cta" data-a="create" ${ok?'':'disabled'}>Create <span class="sep">·</span> <img src="img/coin.png" alt="coins"> ${price()}</button><span class="cap">${cap}</span>`}
+  $('#sbottom',F.el).innerHTML=`<button class="cta" data-a="create" ${ok?'':'disabled'}>Create <span class="sep">·</span> <img src="img/coin.png" alt="coins"> ${price()}</button>`}
 
 /* ---- guidelines + choose photo ---- */
 const BLOCK=[['i_breast','Nudity'],['i_baby','Minors'],['i_error','Violence'],['i_cuffs','Illegal activity'],['i_bomb','Weapons'],['i_unlike','Hate & abuse'],['i_star','Celebrities'],['i_fraud','Fraud']];
@@ -922,21 +1229,31 @@ const STATIC={};GV.forEach(([img,name,dur,v])=>STATIC['g_'+img]={key:'g_'+img,ki
 const findC=k=>S.created.find(c=>c.key===k)||STATIC[k];
 const TOOLMAP={Enhance:'beauty_1',Stylist:'y2k_2','Face Slim':'beauty_3','Body Slim':'selfie1','Skin Tone':'beauty_2','Remove BG':'selfie3'};
 const H={
+ catexpand:a=>{const v=a.closest('.vscreen');v&&v.expandCats&&v.expandCats()},
+ vfull:a=>{const v=a.closest('.vscreen');v&&v.exitImmersive&&v.exitImmersive()},
+ pcat:a=>{const v=a.closest('.vscreen');const c=a.dataset.cat;photoDetailFeed(v,c,PFEED[c][0])},
+ dcol:a=>{const v=a.closest('.vscreen');const col=COLS.find(c=>c.id===a.dataset.cat);detailFeed(v,col,col.items[0])},
  tab:a=>{if(stack.length)popAll();setTab(a.dataset.id)},
  paywall:()=>paywall(),
  col:a=>openCollection(a.dataset.arg),
  herocol:a=>{if($('#htrack')._drag)return;openCollection(HERO[+a.dataset.i||0].col)},
- open:a=>{const id=a.dataset.id;if(a.dataset.direct)return startSetup(ALL[id]);const top=stack[stack.length-1];let col=top&&top.dataset.col;const sec=a.closest('section');if(!col&&sec){const h=sec.querySelector('.sec-h[data-arg]');col=h&&h.dataset.arg}openDetail(id,col)},
+ open:a=>{const id=a.dataset.id;if(a.dataset.direct)return startSetup(ALL[id]);if(a.closest('.tabview[data-id=photo]')&&ALL[id].kind==='photo'&&!/Hair|Beauty/.test(ALL[id].cat))return openPhotoDetail(id);const top=stack[stack.length-1];let col=top&&top.dataset.col;const sec=a.closest('section');if(!col&&sec){const h=sec.querySelector('.sec-h[data-arg]');col=h&&h.dataset.arg}openDetail(id,col)},
  bm:a=>{const id=a.dataset.id;const on=!S.bookmarks.has(id);on?S.bookmarks.add(id):S.bookmarks.delete(id);
    $$(`[data-a=bm][data-id="${id}"]`,app).forEach(b=>{b.classList.toggle('on',on);const svg=b.querySelector('svg');svg.innerHTML=P[on?'bookmarkF':'bookmark'];const lab=b.childNodes[b.childNodes.length-1];if(lab&&lab.nodeType===3)lab.textContent=on?'Saved':'Save'});
    toast(on?'Saved to Bookmarks':'Removed from Bookmarks',on?`<span style="color:var(--lime)">${I('bookmarkF','ico')}</span>`:'')},
  share:()=>toast('The share sheet opens here'),
- use:a=>startSetup(ALL[a.dataset.id]),
- cat:a=>{S.cat=a.dataset.cat;if(S.tab!=='video'||stack.length){popAll();setTab('video')}renderVideo();$('#vfeed').scrollTop=0},
- catpanel:a=>{const p=$('#catpanel');const o=!p.classList.contains('in');p.classList.toggle('in',o);a.classList.toggle('open',o)},
+ use:a=>startSetup(ALL[a.dataset.id],a.closest('.vscreen')),
+ cat:a=>{S.cat=a.dataset.cat;if(S.tab!=='video'||stack.length){popAll();setTab('video')}renderVideo()},
+ catpanel:a=>{const p=a.closest('.vscreen').querySelector('.catpanel');const o=!p.classList.contains('in');p.classList.toggle('in',o);a.classList.toggle('open',o)},
  colpanel:a=>{const top=stack[stack.length-1];const p=$('#colpanel',top);const o=!p.classList.contains('in');p.classList.toggle('in',o);a.classList.toggle('open',o)},
  colswitch:a=>openCollection(a.dataset.arg),
- catlink:a=>{const t=a.closest('.fitem')&&ALL[a.closest('.fitem').dataset.id];popAll();if(t&&t.kind==='video'){const c=CATS.find(c=>c[1].toLowerCase().includes(t.cat.toLowerCase()));S.cat=c?c[0]:'foryou';setTab('video');renderVideo()}else setTab(t&&/Hair|Beauty/.test(t.cat)?'tools':'photo')},
+ catlink:a=>{const it=a.closest('.fitem');const t=it&&ALL[it.dataset.id];if(!t)return;const host=a.closest('.vscreen');
+   /* Stay in a detail feed: switch the chips in place, or open the matching AI Video / AI Photo detail on top */
+   if(/Hair|Beauty/.test(t.cat)){popAll();return setTab('tools')}
+   if(t.kind==='video'){const c=CATS.find(c=>c[1].toLowerCase().includes(t.cat.toLowerCase()));const cat=c?c[0]:'foryou';
+     return host&&host.dataset.screen==='vdetail'?videoDetailFeed(host,cat,t.id):openVideoDetail(t.id,cat)}
+   const cat=PCAT_OF[t.cat]||'foryou';return host&&host.dataset.screen==='pdetail'?photoDetailFeed(host,cat,t.id):openPhotoDetail(t.id)},
+ vcat:a=>{const v=a.closest('.vscreen');const c=a.dataset.cat;videoDetailFeed(v,c,(feedList(c)[0]||{}).id)},
  tool:a=>{const n=a.dataset.arg;if(n==='Hairstyle')return openCollection('hs');if(n==='Makeup')return openCollection('bt');const img=TOOLMAP[n];const t={id:'tool_'+n,name:n,cat:'AI Editing',kind:'photo',price:20,uses:'—',people:1,src:{img}};ALL[t.id]=t;startSetup(t)},
  gtab:a=>{S.gtab=a.dataset.id;renderGallery()},
  retry:a=>{const j=S.jobs.find(x=>x.id===a.dataset.id);if(!j)return;S.jobs=S.jobs.filter(x=>x!==j);const t=ALL[j.tpl]||ALL.neon;
@@ -954,8 +1271,11 @@ const H={
  sheetclose:()=>closeSheet(),
  usephoto:()=>{const o=sheets[sheets.length-1];const img=o&&o.sh._sel;if(img)closeSheet(()=>usePhoto(img))},
  seg:a=>{F.set[a.dataset.k]=a.dataset.v;renderSetup()},
+ gsettings:()=>{sheet(`<div class="gs">${gsBody()}</div>`,{cls:'gsheet'})},
+ gset:a=>{const k=a.dataset.k;let v=a.dataset.v;if(k==='sound')v=v==='true';F.set[k]=v;renderSetup();const b=$('.gsheet .gs');if(b)b.innerHTML=gsBody()},
+ gdone:()=>closeSheet(),
  sound:()=>{F.set.sound=!F.set.sound;renderSetup()},
- create:()=>{const c=price();if(c>S.coins){toast('Not enough coins');return paywall()}const j=startJob({stage:F.v?'preview':'photo',t:F.t,img:F.photos[0].img,cost:c});openMaking(j)},
+ create:()=>{const c=price();if(c>S.coins){toast('Not enough coins');return paywall()}const j=startJob({stage:F.v?'preview':'photo',t:F.t,img:F.photos[0].img,cost:c});if(F.host)closePanel({keep:true});openMaking(j)},
  keep:a=>{const top=stack[stack.length-1];const on=top&&$('.notify button.on',top);popAll();F=null;toast(on?"We'll notify you when it's ready":'Still making it · find it in Gallery › Queue',`<span style="color:var(--lime)">${I('clock','ico')}</span>`)},
  toqueue:()=>{popAll();F=null;S.gtab='queue';setTab('gallery')},
  notify:a=>{a.classList.add('on');a.innerHTML=I('check','ico')+' On';a.style.display='flex';a.style.alignItems='center';a.style.gap='4px'},
@@ -984,7 +1304,7 @@ const J={discover:()=>setTab('discover'),video:()=>setTab('video'),photo:()=>set
  'flow-image':()=>{setTab('photo');startSetup(ALL.santa)},'flow-image2':()=>{setTab('photo');startSetup(ALL.duo)},
  trend:()=>{setTab('discover');const sc=$('#dscroll');const tc=$('#tc');sc.scrollTo({top:tc.offsetTop-130,behavior:'smooth'});setTimeout(()=>H.tcpaste(),600)},
  collection:()=>{setTab('discover');openCollection('tv')},
- reset:()=>{S.coins=1250;S.seenGuide=false;S.created=[];S.uploads=[];renderVideo();renderGallery();toast('Demo reset')}};
+ reset:()=>{S.coins=1250;S.seenGuide=false;S.seenSwipe=false;S.seenTap=false;S.seenChips=false;S.seenColChips=false;S.seenSeeAll=false;S.created=[];S.uploads=[];renderVideo();renderGallery();toast('Demo reset')}};
 $$('[data-jump]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.jump;if(k!=='reset')resetAll();setTimeout(()=>J[k](),k==='reset'?0:360)}));
 
 /* ================= seeded queue + coin pill refresh ================= */
@@ -998,8 +1318,10 @@ function fit(){const d=$('#device'),w=$('#dwrap');const mobile=innerWidth<=860;c
   const s=mobile?Math.min(innerWidth/W,innerHeight/Hh):Math.min(1,(innerHeight-40)/Hh);d.style.transform=`scale(${s})`;w.style.width=W*s+'px';w.style.height=Hh*s+'px'}
 addEventListener('resize',fit);fit();
 ['scroll'].forEach(ev=>{app.addEventListener(ev,()=>{if(app.scrollTop||app.scrollLeft){app.scrollTop=0;app.scrollLeft=0}})});
+$('#sw-pro').addEventListener('change',e=>{S.pro=e.target.checked;renderDiscover();renderVideo();renderPhoto();renderTools();renderGallery();setTab(S.tab)});
 mountTabs();setTab('discover');
 })();
+
 </script>
 
 </body></html>

@@ -10,45 +10,89 @@ function openCollection(cid){const col=COLS.find(c=>c.id===cid)||COLS[0];
    <div class="catpanel glass-dark" id="colpanel" style="top:168px;z-index:40"><h4>All collections</h4><div class="wrap">${COLS.map(c=>`<button class="chip ${c.id===col.id?'on':''}" data-a="colswitch" data-arg="${c.id}">${c.name}</button>`).join('')}</div></div>`;
   const top=stack[stack.length-1];if(top&&top.dataset.screen==='col'){const el=replaceTop(html,{});el.dataset.screen='col';el.classList.add('in');return}
   const el=push(html);el.dataset.screen='col';el.dataset.col=col.id}
-function openDetail(id,colId){const col=COLS.find(c=>c.id===colId);const ids=col?col.items:[id];
-  const list=ids.map(i=>ALL[i]);const start=Math.max(0,ids.indexOf(id));
-  const el=push(`<div class="feed">${list.map(t=>feedItem(t,{back:true})).join('')}</div><div class="navbar" style="z-index:40"><button class="circle glass" data-a="back" aria-label="Back">${I('back')}</button><div class="nt">${col?col.name.replace(/^\S+\s/,''):''}</div></div>`);
-  const f=$('.feed',el);f.scrollTop=start*874}
+/* Discover detail: the same full-screen feed, with Back and the collections as its categories */
+function detailFeed(host,col,startId){const ids=col?col.items:[startId];const ci=col?COLS.indexOf(col):-1;
+  const items=ids.map(i=>feedItem(ALL[i],{back:true})).join('')+(col?endCard(col.name.replace(/^\S+\s/,''),'dcol',(()=>{const n=COLS[(ci+1)%COLS.length];return [n.id,n.name]})()):'');
+  host.dataset.col=col?col.id:'';
+  feedScreen(host,{title:col?col.name.replace(/^\S+\s/,''):ALL[startId].name,back:true,cats:col?COLS.map(c=>[c.id,c.name]):[],cur:col&&col.id,act:'dcol',noun:'collections',items});
+  host.setStart(Math.max(0,ids.indexOf(startId)))}
+/* AI Photo detail (opened from the Photo tab): the same full-screen feed, with the photo categories as its chips */
+function photoDetailFeed(host,cat,startId){const ci=PCATS.findIndex(c=>c[0]===cat);const ids=PFEED[cat];
+  const items=ids.map(i=>feedItem(ALL[i],{back:true})).join('')+endCard(PCATS[ci][1].replace(/^\S+\s/,''),'pcat',PCATS[(ci+1)%PCATS.length]);
+  feedScreen(host,{title:'AI Photo',back:true,cats:PCATS,cur:cat,act:'pcat',noun:'categories',items});
+  host.setStart(Math.max(0,ids.indexOf(startId)))}
+function openPhotoDetail(id){const t=ALL[id];let cat=PCAT_OF[t.cat]||'foryou';if(!PFEED[cat].includes(id))cat='foryou';
+  const el=push('');el.dataset.screen='pdetail';photoDetailFeed(el,cat,PFEED[cat].includes(id)?id:PFEED[cat][0]);setTimeout(()=>coachSwipe(el,()=>spotChips(el)),400)}
+/* AI Video detail (from a video's category label in Discover detail): same feed, with the video categories as chips */
+function videoDetailFeed(host,cat,startId){const ci=CATS.findIndex(c=>c[0]===cat);const ids=feedList(cat).map(t=>t.id);
+  const items=ids.map(i=>feedItem(ALL[i],{back:true})).join('')+endCard(CATS[ci][1].replace(/^\S+\s/,''),'vcat',CATS[(ci+1)%CATS.length]);
+  feedScreen(host,{title:'AI Video',back:true,cats:CATS,cur:cat,act:'vcat',noun:'categories',items});
+  host.setStart(Math.max(0,ids.indexOf(startId)))}
+function openVideoDetail(id,cat){const el=push('');el.dataset.screen='vdetail';videoDetailFeed(el,cat,id)}
+function openDetail(id,colId){const col=COLS.find(c=>c.id===colId);const el=push('');el.dataset.screen='detail';detailFeed(el,col,id);setTimeout(()=>coachSwipe(el,()=>spotChips(el)),400)}
 
 /* ================= setup (create video / image) ================= */
 let F=null;
-function startSetup(t){const v=t.kind==='video';
+/* Create screen, laid out as the wireframe (wireframe-app.html, openT): sample on top with Back and Join Now / balance,
+   a sheet below with title + Save, the settings summary bar, the photo requirement, the upload slot and Create.
+   Glance: Anna, about to make one; in 2 s she sees where her photo goes and what it costs; settings recede into the bar. */
+function startSetup(t,host){const v=t.kind==='video';if(F&&F.host)closePanel();
   F={t,v,photos:Array(t.people).fill(null),slot:0,set:{sound:true,dur:'10s',res:'480p',ratio:'4:5',q:'Standard'}};
-  const prevH=v?476:532,listTop=v?400:456;
-  const el=push(`<div class="setup-prev" style="height:${prevH}px">${media(t,{kb:true})}</div>
-   <button class="circle glass" style="position:absolute;left:16px;top:64px;z-index:10" data-a="close" aria-label="Close">${I('x')}</button>
-   <div style="position:absolute;left:72px;right:72px;top:78px;z-index:10;text-align:center;font-weight:600;font-size:17px">${esc(t.name)}</div>
-   <span class="sample" style="top:${prevH-108}px">Sample result</span>
-   <div class="setup-list" style="top:${listTop}px" id="slist"></div>
-   <div class="bottomfade"></div><div class="bottom" id="sbottom"></div>`,{modal:true});
+  const bm=S.bookmarks.has(t.id);
+  const sheetInner=`<i class="handle"></i>
+     <div class="shead"><h3>${esc(t.name)}</h3><button class="sbm ${bm?'on':''}" data-a="bm" data-id="${t.id}" aria-label="Save">${I(bm?'bookmarkF':'bookmark')}</button></div>
+     <div id="slist"></div><div id="sbottom"></div>`;
+  if(host&&host.classList.contains('vscreen'))return openPanel(host,sheetInner);
+  const el=push(`<div class="sw"><div class="sprev">${media(t,{kb:true})}
+     <button class="circle glass-dark tb-back sp-back" data-a="close" aria-label="Back">${I('back')}</button><div class="tb-right sp-right">${headBtn()}</div></div>
+    <div class="ssheet">${sheetInner}</div></div>`,{modal:true});
   el.dataset.screen='setup';F.el=el;renderSetup()}
+/* From a feed, Use this raises the create panel over the playing video instead of opening a new view.
+   Not interested: tap the video above, drag the panel down, or swipe up (the panel drops and the feed moves on). */
+function openPanel(host,inner){const feed=host.querySelector('.feed');
+  const w=document.createElement('div');w.className='cpanel-wrap';
+  w.innerHTML=`<div class="cp-scrim" aria-label="Close"></div><div class="ssheet cpanel" role="dialog" aria-label="${esc(F.t.name)}">${inner}</div>`;
+  host.appendChild(w);host.classList.add('paneling');F.el=w;F.host=host;renderSetup();syncTabbar();
+  requestAnimationFrame(()=>w.classList.add('in'));
+  const sc=w.querySelector('.cp-scrim'),pn=w.querySelector('.cpanel');let y0=null;
+  sc.addEventListener('pointerdown',e=>{y0=e.clientY});
+  sc.addEventListener('pointerup',e=>{const dy=y0==null?0:e.clientY-y0;y0=null;closePanel({next:dy<-30})});
+  sc.addEventListener('wheel',e=>closePanel({next:e.deltaY>0}),{passive:true});
+  let d0=null;pn.addEventListener('pointerdown',e=>{if(e.target.closest('button,input'))return;if(e.clientY-pn.getBoundingClientRect().top>72)return;d0=e.clientY;pn.style.transition='none';pn.setPointerCapture(e.pointerId)});
+  pn.addEventListener('pointermove',e=>{if(d0!=null)pn.style.transform=`translateY(${Math.max(0,e.clientY-d0)}px)`});
+  pn.addEventListener('pointerup',e=>{if(d0==null)return;const dy=e.clientY-d0;d0=null;pn.style.transition='';pn.style.transform='';if(dy>60)closePanel()})}
+function closePanel({next=false,keep=false}={}){if(!F||!F.host)return;const host=F.host,w=F.el,feed=host.querySelector('.feed');
+  w.classList.remove('in');host.classList.remove('paneling');setTimeout(()=>w.remove(),320);
+  if(keep){F.host=null}else F=null;syncTabbar();
+  if(next)feed.scrollBy({top:feed.clientHeight,behavior:'smooth'})}
 const price=()=>F.v?F.t.price+(F.set.res==='720p'?30:0):F.t.price+(F.set.q==='HD'?20:0);
 function photoCard(){const p=F.photos[0];
-  if(F.t.people>1){const done=F.photos.filter(x=>x&&x.st==='ok').length;const nextIdx=F.photos.findIndex(x=>!x);
-    const slot=(x,i)=>{let th,sub;
-      if(!x){const nx=i===nextIdx&&done>0;th=`<span class="pthumb empty ${nx?'next':''}">${I('photo')}</span>`;sub=nx?`<span style="color:var(--lime)">Add next</span>`:`<span class="dim">Tap to add</span>`}
-      else{th=`<span class="pthumb ${x.st==='bad'?'reject':''} ${x.st==='checking'?'checking':''}"><img src="${imgSrc(x.img)}" alt="">${x.st==='checking'?'<i class="spin"></i>':''}</span>`;
-        sub=x.st==='ok'?`<span style="color:var(--green)">${I('checkC')}Ready</span>`:x.st==='bad'?`<span style="color:var(--red)">${I('xC')}No face</span>`:`<span class="dim">Checking…</span>`}
-      return `<button class="slot" data-a="addphoto" data-slot="${i}">${th}<span style="min-width:0"><b>Person ${i+1}</b>${sub}</span></button>`};
-    return `<div class="pcard" style="flex-direction:column;align-items:stretch;gap:12px;min-height:0"><div style="display:flex;justify-content:space-between;align-items:center"><b style="font-size:17px">Add ${F.t.people} photos</b><span class="fn" style="color:${done===F.t.people?'var(--green)':'var(--fg2)'};font-weight:600">${done} of ${F.t.people}</span></div><div class="slots">${F.photos.map(slot).join('')}</div></div>`}
-  if(!p)return `<div class="pcard"><button class="pthumb empty" data-a="addphoto" data-slot="0" aria-label="Add your photo">${I('photo')}</button><div class="ptext"><h4>Add your photo</h4><p>A clear, front-facing selfie works best</p></div><button class="pbtn2 lime" data-a="addphoto" data-slot="0">Add</button></div>`;
-  if(p.st==='checking')return `<div class="pcard"><span class="pthumb checking"><img src="${imgSrc(p.img)}" alt=""><i class="spin"></i></span><div class="ptext"><h4>Checking photo…</h4><p>Making sure your face is clear</p></div></div>`;
-  if(p.st==='bad')return `<div class="pcard"><span class="pthumb reject"><img src="${imgSrc(p.img)}" alt=""></span><div class="ptext"><h4>Your photo</h4><span class="spill bad">${I('xC')}No clear face</span><p>Try one person facing the camera</p></div><button class="pbtn2 lime" data-a="addphoto" data-slot="0">Change</button></div>`;
-  return `<div class="pcard"><span class="pthumb"><img src="${imgSrc(p.img)}" alt=""></span><div class="ptext"><h4>Your photo</h4><span class="spill ok">${I('checkC')}Looks good</span></div><button class="pbtn2 glass" data-a="addphoto" data-slot="0">Change</button></div>`}
-function settingsCard(){const s=F.set;const seg=(k,opts)=>`<div class="segm">${opts.map(o=>`<button class="${s[k]===o?'on':''}" data-a="seg" data-k="${k}" data-v="${o}">${o}</button>`).join('')}</div>`;
-  if(F.v)return `<div class="sgroup"><div class="srow"><span class="ic">${I('speaker')}</span><span class="lb">Sound</span><button class="switch ${s.sound?'on':''}" data-a="sound" role="switch" aria-checked="${s.sound}" aria-label="Sound"></button></div><div class="sdiv"></div>
-   <div class="srow"><span class="ic">${I('clock')}</span><span class="lb">Duration</span>${seg('dur',['5s','10s'])}</div><div class="sdiv"></div>
-   <div class="srow"><span class="ic">${I('film')}</span><span class="lb">Resolution</span>${seg('res',['480p','720p'])}</div></div>`;
-  return `<div class="sgroup"><div class="srow"><span class="ic">${I('photo')}</span><span class="lb">Ratio</span>${seg('ratio',['4:5','1:1','9:16'])}</div><div class="sdiv"></div><div class="srow"><span class="ic">${I('sparkles')}</span><span class="lb">Quality</span>${seg('q',['Standard','HD'])}</div></div>`}
-function renderSetup(){if(!F||!F.el)return;$('#slist',F.el).innerHTML=photoCard()+settingsCard();
+  /* Several people: one card per person, same look as the single upload slot; only the next empty card pulses */
+  if(F.t.people>1){const nextIdx=F.photos.findIndex(x=>!x);const ex=['selfie1','selfie3','selfie5'];
+    const slot=(x,i)=>{if(!x)return `<button class="mslot" data-a="addphoto" data-slot="${i}" aria-label="Add Person ${i+1}"><span class="ucard front"><img src="img/${ex[i%3]}.jpg" alt=""><span class="uplus ${i===nextIdx?'':'still'}">${I('plus')}</span></span><span class="mcap">Person ${i+1}</span></button>`;
+      const st=x.st==='ok'?`<span class="mcap" style="color:var(--green)">${I('checkC')}Person ${i+1}</span>`:x.st==='bad'?`<span class="mcap" style="color:var(--red)">${I('xC')}No clear face</span>`:`<span class="mcap dim">Checking…</span>`;
+      return `<button class="mslot" data-a="addphoto" data-slot="${i}" aria-label="Change Person ${i+1}"><span class="pimg ${x.st==='bad'?'bad':''}"><img src="${imgSrc(x.img)}" alt="">${x.st==='checking'?'<i class="spin"></i>':''}</span>${st}</button>`};
+    return `<div class="mslots">${F.photos.map(slot).join('')}</div>`}
+  /* Single photo (wireframe .slot / .picked): an empty slot with a photo-plus glyph, then the picked photo with its check state */
+  /* Empty slot as a small deck of example selfies: the front one carries the lime +, so the target reads as "a photo like this goes here" */
+  if(!p)return `<button class="udeck" data-a="addphoto" data-slot="0" aria-label="Tap to add a photo"><span class="ucard side l"><img src="img/selfie3.jpg" alt=""></span><span class="ucard side r"><img src="img/selfie5.jpg" alt=""></span><span class="ucard front"><img src="img/selfie1.jpg" alt=""><span class="uplus">${I('plus')}</span></span><span class="ucap">Tap to add a photo</span></button>`;
+  const st=p.st==='checking'?`<span class="pst dim">Checking photo…</span>`:p.st==='bad'?`<span class="pst" style="color:var(--red)">${I('xC')}No clear face · try one person facing the camera</span>`:`<span class="pst" style="color:var(--green)">${I('checkC')}Looks good</span>`;
+  return `<div class="picked ${p.st==='bad'?'bad':''}"><span class="pimg"><img src="${imgSrc(p.img)}" alt="Your photo">${p.st==='checking'?'<i class="spin"></i>':''}</span>${st}${p.st==='checking'?'':`<button class="textlink chg" data-a="addphoto" data-slot="0">Change photo</button>`}</div>`}
+function settingsCard(){const s=F.set;const seg=(ic,x)=>`<span><i>${I(ic)}</i>${x}</span>`;
+  const vals=F.v?[seg('speaker',s.sound?'On':'Off'),seg('clock',s.dur),seg('film',s.res)]:[seg('photo',s.ratio),seg('sparkles',s.q)];
+  return `<button class="gbar" data-a="gsettings" aria-label="Generation settings">${vals.join('')}<i class="chev">${I('chev')}</i></button>`}
+function gsBody(){const s=F.set;const save=Object.assign({},s);
+  const cost=(k,v)=>{F.set[k]=v;const c=price();F.set[k]=save[k];return c};
+  const opt=(k,v,label,showCost)=>`<button class="gopt ${String(s[k])===String(v)?'on':''}" data-a="gset" data-k="${k}" data-v="${v}">${label}${showCost?`<small><img src="img/coin.png" alt="">${cost(k,v)} coins</small>`:''}</button>`;
+  const grp=(h,inner)=>`<h5>${h}</h5><div class="grow">${inner}</div>`;
+  return `<div class="gshead"><h3>Generation settings</h3><button class="gdone" data-a="gdone">Done</button></div>`+
+   (F.v?grp('Sound',opt('sound',true,`${I('speaker')}On`)+opt('sound',false,'Off'))+grp('Duration',opt('dur','5s','5s')+opt('dur','10s','10s'))+grp('Resolution',opt('res','480p','480p',1)+opt('res','720p','720p',1))
+       :grp('Ratio',opt('ratio','4:5','4:5')+opt('ratio','1:1','1:1')+opt('ratio','9:16','9:16'))+grp('Quality',opt('q','Standard','Standard',1)+opt('q','HD','HD',1)))}
+const reqText=()=>`${F.t.people>1?F.t.people+' photos':'1 photo'} · ${F.v?'Portrait, face clear':/Birthday|Holiday/.test(F.t.cat)?'Full body, head to toe':'Portrait, face clear'}`;
+function renderSetup(){if(!F||!F.el)return;$('#slist',F.el).innerHTML=settingsCard()+`<p class="sreq">${I('person')}${reqText()}</p>`+photoCard();
   const ok=F.photos.every(x=>x&&x.st==='ok');const anyBad=F.photos.some(x=>x&&x.st==='bad');const checking=F.photos.some(x=>x&&x.st==='checking');const left=F.photos.filter(x=>!x).length;
   let cap;if(ok)cap=`You have ${COIN} ${S.coins.toLocaleString('en-US')}`;else if(checking)cap='Checking your photo…';else if(anyBad)cap=F.t.people>1?'No coins used · change Person '+(F.photos.findIndex(x=>x&&x.st==='bad')+1):'No coins used · choose another photo';else if(F.t.people>1)cap=left===F.t.people?`Add ${F.t.people} photos to continue`:`Add ${left} more photo`;else cap='Add a photo to continue';
-  $('#sbottom',F.el).innerHTML=`<button class="cta" data-a="create" ${ok?'':'disabled'}>Create <span class="sep">·</span> <img src="img/coin.png" alt="coins"> ${price()}</button><span class="cap">${cap}</span>`}
+  $('#sbottom',F.el).innerHTML=`<button class="cta" data-a="create" ${ok?'':'disabled'}>Create <span class="sep">·</span> <img src="img/coin.png" alt="coins"> ${price()}</button>`}
 
 /* ---- guidelines + choose photo ---- */
 const BLOCK=[['i_breast','Nudity'],['i_baby','Minors'],['i_error','Violence'],['i_cuffs','Illegal activity'],['i_bomb','Weapons'],['i_unlike','Hate & abuse'],['i_star','Celebrities'],['i_fraud','Fraud']];
