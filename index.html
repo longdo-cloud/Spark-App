@@ -93,6 +93,7 @@ img{display:block}
 .mcard img,.mcard video{width:100%;height:100%;object-fit:cover}
 .mcard .t{position:absolute;left:0;right:0;bottom:0;padding:28px 10px 10px;font-weight:600;font-size:15px;line-height:1.15;background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.72))}
 .mcard:active{transform:scale(.98)}
+.hrow>.mcard{width:160px;height:252px}
 .badge-dur{position:absolute;left:8px;bottom:8px;font-size:12px;font-weight:600;padding:2px 6px;border-radius:6px;background:rgba(0,0,0,.45)}
 
 /* buttons */
@@ -641,8 +642,8 @@ img{display:block}
       <p>Clickable build of Option 2 and the agreed Create video / Create image flows. Content and copy follow the Figma file and the PRD on spark-docs.</p>
     </div>
     <div class="pgroup"><h2>Tabs</h2>
-      <button class="pbtn" data-jump="discover">Discover <small>Collections, Trend Clone</small></button>
-      <button class="pbtn" data-jump="video">Video <small>Vertical feed</small></button>
+      <button class="pbtn" data-jump="discover">Video tab <small>Collections (former Discover)</small></button>
+      <button class="pbtn" data-jump="video">Video feed <small>Full-screen detail</small></button>
       <button class="pbtn" data-jump="photo">Photo <small>Before / after</small></button>
       <button class="pbtn" data-jump="tools">Tools <small>AI Editing</small></button>
       <button class="pbtn" data-jump="gallery">Gallery <small>Queue · Video</small></button>
@@ -798,7 +799,8 @@ const COLS=[
  {id:'y2',name:'🪩 2000s Vibe',items:['retro','flash','film']},
  {id:'bt',name:'💄 Beauty Tools',items:['clean','glam','pearl']},
  {id:'hg',name:'🎄 Holiday Glow',items:['santa','snowp','candle','cake']},
- {id:'cp',name:'💞 Couple',items:['pool','moon','duo']}
+ {id:'cp',name:'💞 Couple',items:['pool','moon','duo']},
+ {id:'fv',name:'✨ Fantasy Video',items:['cosmic','space','neon','storm','moss']}
 ];
 const CATS=[['foryou','💖 For you'],['trending','🔥 Trending'],['dance','💃 Dance'],['couple','💑 Couple'],['cinematic','🎬 Cinematic'],['action','💥 Action'],['romance','💕 Romance'],['funny','😂 Funny']];
 const SELFIES=['selfie1','selfie2','selfie3','selfie4','selfie5'];
@@ -863,7 +865,8 @@ const secHead=(title,act,arg)=>`<button class="sec-h" data-a="${act}" data-arg="
 function row(col){return `<section class="sec">${secHead(col.name,'col',col.id)}<div class="hrow">${col.items.map(id=>card(ALL[id])).join('')}</div></section>`}
 
 /* ================= tabs ================= */
-const TABS=[['discover','Discover','compass'],['video','Video','play'],['photo','Photo','photo'],['tools','Tools','wand'],['gallery','Gallery','grid']];
+const /* 4 tabs (20/11): the Video tab is the former Discover screen, video content only */
+TABS=[['discover','Video','play'],['photo','Photo','photo'],['tools','Tools','wand'],['gallery','Gallery','grid']];
 function renderTabbar(){$('#tabbar').innerHTML=TABS.map(([id,l,ic])=>`<button class="tab ${S.tab===id?'on':''}" data-a="tab" data-id="${id}" aria-label="${l}">${I(ic)}<span>${l}</span></button>`).join('')}
 /* First-time coach marks on a full-screen feed, each shown once (Reset demo shows them again):
    swipe: a hand swipes up so a new user learns the feed scrolls; goes away on tap, or on a swipe that moves to the next item.
@@ -921,15 +924,13 @@ function mountTabs(){const root=$('#tabs');root.innerHTML=TABS.map(([id])=>`<div
 const HERO=[{v:'03',k:'A little imagination',t:'Ordinary, meet art.',col:'tv'},{v:'12',k:'Action Video',t:'Grandma goes full blockbuster.',col:'av'},{v:'06',k:'Couple',t:'Two of you, one movie scene.',col:'cp'},{v:'14',k:'Funny',t:'Wake up to something big.',col:'tv'},{v:'08',k:'Trending AI Video',t:'Game day, main character.',col:'tv'}];
 function renderDiscover(){const el=$('.tabview[data-id=discover]');
   el.innerHTML=`<div class="scroll" id="dscroll">
-   <div class="toolbar fade"><h1 class="ltitle">Discover</h1><div class="tb-right">${headBtn()}</div></div>
+   <div class="toolbar fade"><h1 class="ltitle">Video</h1><div class="tb-right">${headBtn()}</div></div>
    <div class="hero" style="margin-top:-111px" id="hero"><div class="hero-track" id="htrack">${HERO.map((h,i)=>`<div class="hero-slide"><video class="hv" src="v/${h.v}.mp4" poster="p/${h.v}.jpg" muted playsinline autoplay preload="metadata" data-auto></video>
      <div class="hero-copy"><span class="k">${h.k}</span><h2>${h.t}</h2><button class="cta" data-a="herocol" data-i="${i}">Explore collection ${I('arrowR','ico')}</button></div></div>`).join('')}</div>
     <div class="dots hero-dots" id="hdots">${HERO.map((_,i)=>`<i class="${i?'':'on'}"><b></b></i>`).join('')}</div></div>
    <div style="display:flex;flex-direction:column;gap:32px;padding:24px 0 140px">
-    <div class="chips">${COLS.slice(0,7).map(c=>`<button class="chip" data-a="col" data-arg="${c.id}">${c.name}</button>`).join('')}</div>
-    ${row(COLS[0])}${row(COLS[3])}
-    <div class="banner" data-a="col" data-arg="hs" role="button"><img src="img/banner_hair.jpg" alt="Short hair to long hair, AI Hair Transform"><div class="dots"><i class="on"></i><i></i><i></i><i></i></div></div>
-    ${row(COLS[4])}${row(COLS[5])}${row(COLS[6])}
+    <div class="chips">${['tv','av','fv','cp'].map(id=>COLS.find(c=>c.id===id)).map(c=>`<button class="chip" data-a="col" data-arg="${c.id}">${c.name}</button>`).join('')}</div>
+    ${row(COLS[0])}${row(COLS[3])}${row(COLS.find(c=>c.id==='fv'))}${row(COLS.find(c=>c.id==='cp'))}
    </div></div>`;
   $('.toolbar',el).style.marginBottom='0';
   let hi=0,last=0;const tr=$('#htrack',el);
@@ -994,7 +995,7 @@ function feedScreen(host,o){host.classList.add('vscreen');host.classList.toggle(
   feed.addEventListener('click',e=>{if(host.classList.contains('immersive')&&!e.target.closest('[data-a]'))host.exitImmersive()});
   syncPill();return feed}
 const endCard=(nm,act,next)=>`<section class="fend"><div style="font-size:40px">🎬</div><h3 style="margin:0;font-size:22px">You've seen everything in ${esc(nm)}</h3><button class="cta" style="width:auto;padding:0 22px" data-a="${act}" data-cat="${next[0]}">Next: ${next[1]}</button></section>`;
-function renderVideo(){const el=$('.tabview[data-id=video]');const list=feedList(S.cat);
+function renderVideo(){const el=$('.tabview[data-id=video]');if(!el)return;/* no Video feed tab since the 4-tab change */const list=feedList(S.cat);
   const items=[];list.forEach((t,i)=>{items.push(feedItem(t));if(i===2)items.push(`<section class="cross"><div class="sec-h">📸 Photo styles you might like</div><div class="sub">Same selfie, a whole new photoshoot.</div><div class="hrow">${['cake','santa','lavender','flash'].map(id=>card(ALL[id],180)).join('')}</div><button class="textlink" data-a="tab" data-id="photo" style="align-self:flex-start;padding:0 16px">See all ›</button></section>`)});
   const ci=CATS.findIndex(c=>c[0]===S.cat);items.push(endCard(CATS[ci][1].replace(/^\S+\s/,''),'cat',CATS[(ci+1)%CATS.length]));
   feedScreen(el,{title:'Video',cats:CATS,cur:S.cat,act:'cat',noun:'categories',items:items.join('')});if($('#tabbar'))syncTabbar()}
@@ -1243,7 +1244,7 @@ const H={
    toast(on?'Saved to Bookmarks':'Removed from Bookmarks',on?`<span style="color:var(--lime)">${I('bookmarkF','ico')}</span>`:'')},
  share:()=>toast('The share sheet opens here'),
  use:a=>startSetup(ALL[a.dataset.id],a.closest('.vscreen')),
- cat:a=>{S.cat=a.dataset.cat;if(S.tab!=='video'||stack.length){popAll();setTab('video')}renderVideo()},
+ cat:a=>{S.cat=a.dataset.cat;popAll();openVideoDetail(feedList(S.cat)[0].id,S.cat)},
  catpanel:a=>{const p=a.closest('.vscreen').querySelector('.catpanel');const o=!p.classList.contains('in');p.classList.toggle('in',o);a.classList.toggle('open',o)},
  colpanel:a=>{const top=stack[stack.length-1];const p=$('#colpanel',top);const o=!p.classList.contains('in');p.classList.toggle('in',o);a.classList.toggle('open',o)},
  colswitch:a=>openCollection(a.dataset.arg),
@@ -1299,8 +1300,8 @@ app.addEventListener('pointerdown',e=>{if(!e.target.closest('.catpanel,.chip-arr
 
 /* ================= presenter jumps ================= */
 function resetAll(){while(sheets.length)closeSheet();popAll();F=null}
-const J={discover:()=>setTab('discover'),video:()=>setTab('video'),photo:()=>setTab('photo'),tools:()=>setTab('tools'),gallery:()=>setTab('gallery'),
- 'flow-video':()=>{setTab('video');startSetup(ALL.neon)},'flow-video2':()=>{setTab('video');startSetup(ALL.pool)},
+const J={discover:()=>setTab('discover'),video:()=>{setTab('discover');openVideoDetail(feedList('foryou')[0].id,'foryou')},photo:()=>setTab('photo'),tools:()=>setTab('tools'),gallery:()=>setTab('gallery'),
+ 'flow-video':()=>{setTab('discover');startSetup(ALL.neon)},'flow-video2':()=>{setTab('discover');startSetup(ALL.pool)},
  'flow-image':()=>{setTab('photo');startSetup(ALL.santa)},'flow-image2':()=>{setTab('photo');startSetup(ALL.duo)},
  trend:()=>{setTab('discover');const sc=$('#dscroll');const tc=$('#tc');sc.scrollTo({top:tc.offsetTop-130,behavior:'smooth'});setTimeout(()=>H.tcpaste(),600)},
  collection:()=>{setTab('discover');openCollection('tv')},

@@ -27,7 +27,7 @@ const H={
    toast(on?'Saved to Bookmarks':'Removed from Bookmarks',on?`<span style="color:var(--lime)">${I('bookmarkF','ico')}</span>`:'')},
  share:()=>toast('The share sheet opens here'),
  use:a=>startSetup(ALL[a.dataset.id],a.closest('.vscreen')),
- cat:a=>{S.cat=a.dataset.cat;if(S.tab!=='video'||stack.length){popAll();setTab('video')}renderVideo()},
+ cat:a=>{S.cat=a.dataset.cat;popAll();openVideoDetail(feedList(S.cat)[0].id,S.cat)},
  catpanel:a=>{const p=a.closest('.vscreen').querySelector('.catpanel');const o=!p.classList.contains('in');p.classList.toggle('in',o);a.classList.toggle('open',o)},
  colpanel:a=>{const top=stack[stack.length-1];const p=$('#colpanel',top);const o=!p.classList.contains('in');p.classList.toggle('in',o);a.classList.toggle('open',o)},
  colswitch:a=>openCollection(a.dataset.arg),
@@ -83,8 +83,8 @@ app.addEventListener('pointerdown',e=>{if(!e.target.closest('.catpanel,.chip-arr
 
 /* ================= presenter jumps ================= */
 function resetAll(){while(sheets.length)closeSheet();popAll();F=null}
-const J={discover:()=>setTab('discover'),video:()=>setTab('video'),photo:()=>setTab('photo'),tools:()=>setTab('tools'),gallery:()=>setTab('gallery'),
- 'flow-video':()=>{setTab('video');startSetup(ALL.neon)},'flow-video2':()=>{setTab('video');startSetup(ALL.pool)},
+const J={discover:()=>setTab('discover'),video:()=>{setTab('discover');openVideoDetail(feedList('foryou')[0].id,'foryou')},photo:()=>setTab('photo'),tools:()=>setTab('tools'),gallery:()=>setTab('gallery'),
+ 'flow-video':()=>{setTab('discover');startSetup(ALL.neon)},'flow-video2':()=>{setTab('discover');startSetup(ALL.pool)},
  'flow-image':()=>{setTab('photo');startSetup(ALL.santa)},'flow-image2':()=>{setTab('photo');startSetup(ALL.duo)},
  trend:()=>{setTab('discover');const sc=$('#dscroll');const tc=$('#tc');sc.scrollTo({top:tc.offsetTop-130,behavior:'smooth'});setTimeout(()=>H.tcpaste(),600)},
  collection:()=>{setTab('discover');openCollection('tv')},
