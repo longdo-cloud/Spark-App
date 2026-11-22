@@ -801,6 +801,14 @@ img{display:block}
 .ct-row.on .ct-l{color:var(--lime);font-weight:600}
 .ct-ck{display:grid;color:var(--lime)}.ct-ck svg{width:20px;height:20px}
 .ct-row:active{background:rgba(255,255,255,.06)}
+
+/* Liquid Glass sheets (iOS 27 look): translucent tinted glass, specular rim, soft lift */
+.sheet{background:rgba(32,32,36,.46);-webkit-backdrop-filter:blur(26px) saturate(190%) brightness(1.04);backdrop-filter:blur(26px) saturate(190%) brightness(1.04);box-shadow:inset 0 1px 0 rgba(255,255,255,.38),inset 1px 0 0 rgba(255,255,255,.08),inset -1px 0 0 rgba(255,255,255,.08),0 -10px 40px rgba(0,0,0,.35);isolation:isolate}
+.sheet::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:-1;background:radial-gradient(120% 60px at 50% 0,rgba(255,255,255,.14),rgba(255,255,255,0) 70%),linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,0) 30%)}
+.sheet::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;padding:1px;background:linear-gradient(180deg,rgba(255,255,255,.5),rgba(255,255,255,.08) 24%,rgba(255,255,255,0) 60%);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
+.sheet.lg-on{background:rgba(32,32,36,.38)}
+.scrim{background:rgba(0,0,0,.28)}
+.ct-list,.sheet .cp2-src label{background:rgba(255,255,255,.08)}
 </style>
 <div class="stage">
   <aside class="panel" aria-label="Presenter controls">
@@ -1500,6 +1508,23 @@ H2.catpanel=a=>{const host=a.closest('.vscreen');const o=host&&host._cf;if(!o||!
   catSheet(nm,o.cats,o.cur,id=>H[o.act]({dataset:{cat:id},closest:()=>host}))};
 H2.colpanel=()=>{const top=stack[stack.length-1];const cur=(COLS.find(c=>top&&top.innerHTML.includes(`chip on" data-a="colswitch" data-arg="${c.id}"`))||{}).id;
   catSheet('Categories',COLS.map(c=>[c.id,c.name]),cur,id=>openCollection(id))};
+
+/* ===== Liquid Glass sheet: CSS glass everywhere; on Chromium the rim also refracts the backdrop (SVG displacement map, idea from zakisheriff/Liquid-Glass, MIT) ===== */
+const LG_REFRACT=/Chrome\//.test(navigator.userAgent)&&!/Firefox|FxiOS|CriOS/.test(navigator.userAgent);
+let lgN=0;const lgSvg=()=>{let s=document.getElementById('lg-defs');if(!s){s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.id='lg-defs';s.setAttribute('width','0');s.setAttribute('height','0');s.style.cssText='position:absolute;width:0;height:0;overflow:hidden';document.body.appendChild(s)}return s};
+function lgMap(W,H,R,B){const k=.5,w=Math.ceil(W*k),h=Math.ceil(H*k);const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');if(!g)return null;const im=g.createImageData(w,h),D=im.data;
+  /* sheet = rounded top corners, flush sides/bottom extended past the frame so only the top rim and top corners bend */
+  const sdf=(x,y)=>{const cx=W/2,cy=H/2+R,hx=W/2-R,hy=H/2+R-R;const qx=Math.abs(x-cx)-hx,qy=Math.abs(y-cy)-hy;return Math.hypot(Math.max(qx,0),Math.max(qy,0))+Math.min(Math.max(qx,qy),0)-R};
+  for(let j=0;j<h;j++)for(let i=0;i<w;i++){const x=i/k,y=j/k;const d=-sdf(x,y);let dx=0,dy=0;
+    if(d>=0&&d<B){const t=1-d/B;const s=t*t*(3-2*t);const nx=sdf(x+1,y)-sdf(x-1,y),ny=sdf(x,y+1)-sdf(x,y-1);const L=Math.hypot(nx,ny)||1;dx=nx/L*s;dy=ny/L*s}
+    const o=(j*w+i)*4;D[o]=128+dx*127;D[o+1]=128+dy*127;D[o+2]=128;D[o+3]=255}
+  g.putImageData(im,0,0);return c.toDataURL()}
+function lgApply(el,{radius=32,bevel=36,scale=46,blur=12}={}){if(!LG_REFRACT||!el||el._lg)return;const W=Math.round(el.offsetWidth),H=Math.round(el.offsetHeight);if(!W||!H)return;
+  const url=lgMap(W,H,radius,bevel);if(!url)return;const id='lg'+(++lgN);const NS='http://www.w3.org/2000/svg';
+  const f=document.createElementNS(NS,'filter');f.id=id;[['x',0],['y',0],['width',W],['height',H],['filterUnits','userSpaceOnUse'],['primitiveUnits','userSpaceOnUse'],['color-interpolation-filters','sRGB']].forEach(([a,v])=>f.setAttribute(a,v));
+  f.innerHTML=`<feImage href="${url}" x="0" y="0" width="${W}" height="${H}" preserveAspectRatio="none" result="m"/><feDisplacementMap in="SourceGraphic" in2="m" scale="${scale}" xChannelSelector="R" yChannelSelector="G"/>`;
+  lgSvg().appendChild(f);el._lg=id;el.classList.add('lg-on');el.style.backdropFilter=el.style.webkitBackdropFilter=`url(#${id}) blur(${blur}px) saturate(185%)`}
+new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(n=>{if(n.nodeType===1&&n.classList.contains('sheet'))requestAnimationFrame(()=>requestAnimationFrame(()=>lgApply(n)))}))).observe($('#sheets'),{childList:true});
 
 /* ================= sheets: report, delete, paywall ================= */
 function reportSheet(){let sel=null;sheet(`<div class="rp"><h3>Report this creation</h3>${['It doesn\'t look like me','Offensive or unsafe','Poor quality','Something else'].map(r=>`<button class="ropt" data-r="${esc(r)}">${esc(r)}<span class="rad"></span></button>`).join('')}<textarea id="rnote" placeholder="Add a note (optional)"></textarea><button class="cta" id="rsend" disabled>Send report</button></div>`,{mount:sh=>{
