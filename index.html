@@ -1064,7 +1064,8 @@ function spotlight(target,{key,title,sub,gesture,ring},onDone){
   let rg='';if(ring){const q=ring.getBoundingClientRect();rg=`<span class="spot-ring" style="left:${(q.left-ar.left)/k+q.width/k/2-22}px;top:${(q.top-ar.top)/k+q.height/k/2-22}px"></span>`}
   const below=y+h+170<H;
   const o=document.createElement('div');o.className='spot';o.setAttribute('role','dialog');o.setAttribute('aria-label',title);
-  o.innerHTML=`<div class="spot-hole" style="left:${x-pad}px;top:${y-pad}px;width:${w+pad*2}px;height:${h+pad*2}px"></div>${rg}
+  const W0=app.offsetWidth,hl=Math.max(8,x-pad),hr=Math.min(W0-8,x+w+pad);
+  o.innerHTML=`<div class="spot-hole" style="left:${hl}px;top:${y-pad}px;width:${hr-hl}px;height:${h+pad*2}px"></div>${rg}
    <div class="spot-hand ${gesture}" style="left:${fx-16}px;top:${fy-4}px">${I('hand')}</div>
    <div class="spot-tip" style="${below?`top:${y+h+pad+64}px`:`bottom:${H-y+pad+20}px`}"><b>${title}</b><span>${sub}</span><em>Tap anywhere to continue</em></div>`;
   app.appendChild(o);requestAnimationFrame(()=>o.classList.add('in'));
