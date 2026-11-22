@@ -13,9 +13,9 @@ function multiCard(){const nextIdx=F.photos.findIndex(x=>!x);
   return `<div class="pc pc-multi">${F.photos.map((x,i)=>{const st=x?x.st:'';
     const inner=x?`<img src="${imgSrc(x.img)}" alt="">${st==='checking'?'<i class="pc-dim"></i><i class="spin"></i>':''}`:`<span class="uplus ${i===nextIdx?'':'still'}">${I('plus')}</span>`;
     const lab=st==='bad'?'No clear face':st==='ok'?`Person ${i+1} ✓`:st==='checking'?'Checking…':`Person ${i+1}`;
-    return `<button class="pm" data-a="addphoto" data-slot="${i}"><span class="pc-th ${x?'':'empty'} ${st==='bad'?'bad':''}">${inner}</span><span class="pm-l ${st}">${lab}</span></button>`}).join('')}</div>`}
+    return `<button class="pm" data-a="addphoto" data-slot="${i}"><span class="pc-th ${x?'':'pce'} ${st==='bad'?'bad':''}">${inner}</span><span class="pm-l ${st}">${lab}</span></button>`}).join('')}</div>`}
 function photoCard(){if(F.t.people>1)return multiCard();const p=F.photos[0];
-  if(!p)return `<button class="pc" data-a="addphoto" data-slot="0" aria-label="Add your photo"><span class="pc-th empty"><span class="uplus">${I('plus')}</span></span><span class="pc-tx"><b>Add your photo</b><small>${reqSub()}</small></span></button>`;
+  if(!p)return `<button class="pc" data-a="addphoto" data-slot="0" aria-label="Add your photo"><span class="pc-th pce"><span class="uplus">${I('plus')}</span></span><span class="pc-tx"><b>Add your photo</b><small>${reqSub()}</small></span></button>`;
   const th=`<span class="pc-th"><img src="${imgSrc(p.img)}" alt="Your photo">${p.st==='checking'?'<i class="pc-dim"></i><i class="spin"></i>':''}</span>`;
   if(p.st==='checking')return `<div class="pc">${th}<span class="pc-tx"><b>Checking photo…</b><small>Making sure your face is clear</small></span></div>`;
   if(p.st==='bad')return `<div class="pc bad">${th}<span class="pc-tx"><b>Choose another photo</b><small class="red">No clear face · no coins used</small></span><button class="pc-chg" data-a="addphoto" data-slot="0">Change</button></div>`;
@@ -27,7 +27,7 @@ function settingsList(){const s=F.set;
   const rows=F.v?[row('speaker','Sound',`<button class="tg ${s.sound?'on':''}" data-a="gset2" data-k="sound" data-v="${!s.sound}" aria-label="Sound"><i></i></button>`),row('clock','Duration',segc('dur',['5s','10s'])),row('film','Resolution',segc('res',['480p','720p']))]
     :[row('photo','Ratio',segc('ratio',['4:5','1:1','9:16'])),row('sparkles','Quality',segc('q',['Standard','HD']))];
   const note=F.v?(s.res==='720p'?'720p adds 30 coins':''):(s.q==='HD'?'HD adds 20 coins':'');
-  return `<div class="gs-h">Generation settings</div><div class="gcard">${rows.join('<i class="gdiv"></i>')}</div>${note?`<div class="gs-note"><img src="img/coin.png" alt="">${note}</div>`:''}`}
+  return `<div class="gs-h">Generation settings</div><div class="gs2card">${rows.join('<i class="gdiv"></i>')}</div>${note?`<div class="gs-note"><img src="img/coin.png" alt="">${note}</div>`:''}`}
 function renderSetup(){if(!F||!F.el)return;const L=$('#slist',F.el),B=$('#sbottom',F.el);if(!L)return;
   if(F.mode==='settings'){L.innerHTML=settingsList();B.innerHTML=`<button class="cta" data-a="gsave">Save</button>`;return}
   L.innerHTML=photoCard()+settingsCard();
@@ -54,7 +54,7 @@ function usePhoto(img){const slot=F.slot||0;const bad=$('#sw-reject').checked;if
 /* 05b · Crop photo: free crop, no ratio presets, Save */
 function openCrop(src){
   const el=push(`<div class="crop"><div class="crop-tb"><button class="circle glass" data-a="cropx" aria-label="Close">${I('x')}</button><b>Crop photo</b><span></span></div>
-    <div class="crop-area"><img src="${src}" alt=""><div class="crop-box"><i class="g v1"></i><i class="g v2"></i><i class="g h1"></i><i class="g h2"></i>${['tl','tr','bl','br'].map(k=>`<i class="hd ${k}" data-h="${k}"></i>`).join('')}${['t','b','l','r'].map(k=>`<i class="eh ${k}" data-h="${k}"></i>`).join('')}</div></div>
+    <div class="crop-area"><img src="${src}" alt=""><div class="crop-box"><i class="g v1"></i><i class="g v2"></i><i class="g h1"></i><i class="g h2"></i>${['tl','tr','bl','br'].map(k=>`<i class="ch ${k}" data-h="${k}"></i>`).join('')}${['t','b','l','r'].map(k=>`<i class="ce e${k}" data-h="${k}"></i>`).join('')}</div></div>
     <div class="crop-hint">Drag the corners to crop · Pinch to zoom</div><button class="cta crop-save" data-a="cropsave">Save</button></div>`,{modal:true});
   el.dataset.screen='crop';
   const area=$('.crop-area',el),im=$('img',area),box=$('.crop-box',el);const AW=402,AH=588;let R=null,B=null;
