@@ -627,4 +627,14 @@
 .hasback .catrow .chip-arrow{background:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
 .hasback .catrow .chip-arrow svg{width:20px;height:20px}
 .hasback.immersive .ftop .catpanel{top:120px!important}
+
+.ct{padding:0 16px 32px;display:flex;flex-direction:column;gap:12px}
+.ct-list{border-radius:16px;background:rgba(255,255,255,.06);overflow:hidden;display:flex;flex-direction:column;max-height:420px;overflow-y:auto;scrollbar-width:none}
+.ct-row{position:relative;height:52px;flex:none;display:flex;align-items:center;gap:12px;padding:0 16px;text-align:left;color:#fff;font:inherit}
+.ct-row+.ct-row::before{content:"";position:absolute;left:48px;right:0;top:0;height:1px;background:rgba(255,255,255,.09)}
+.ct-e{width:20px;font-size:18px;line-height:20px;text-align:center;flex:none}
+.ct-l{flex:1;font-size:17px}
+.ct-row.on .ct-l{color:var(--lime);font-weight:600}
+.ct-ck{display:grid;color:var(--lime)}.ct-ck svg{width:20px;height:20px}
+.ct-row:active{background:rgba(255,255,255,.06)}
 </style>

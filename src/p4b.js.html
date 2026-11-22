@@ -147,7 +147,7 @@ function feedList(cat){return V.filter(t=>t.cats.includes(cat))}
    Swiping folds the category chips into one round button that rises next to the balance, hides the title,
    the details and the tab bar; a floating row keeps the price, Use and Save. Tapping the video, the price
    or the category button brings the full UI back. */
-function feedScreen(host,o){host.classList.add('vscreen');host.classList.toggle('hasback',!!o.back);host.classList.remove('immersive');
+function feedScreen(host,o){host._cf=o;host.classList.add('vscreen');host.classList.toggle('hasback',!!o.back);host.classList.remove('immersive');
   const has=o.cats&&o.cats.length,ci=has?Math.max(0,o.cats.findIndex(c=>c[0]===o.cur)):0,nm=has?o.cats[ci][1].replace(/^\S+\s/,''):'';
   const chip=([id,l],i)=>`<button class="chip ${o.cur===id?'on':''}" ${i!=null?`style="--i:${i}"`:''} data-a="${o.act}" data-cat="${id}">${l}</button>`;
   host.innerHTML=`<div class="feed">${o.items}</div>

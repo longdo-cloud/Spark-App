@@ -791,6 +791,16 @@ img{display:block}
 .hasback .catrow .chip-arrow{background:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
 .hasback .catrow .chip-arrow svg{width:20px;height:20px}
 .hasback.immersive .ftop .catpanel{top:120px!important}
+
+.ct{padding:0 16px 32px;display:flex;flex-direction:column;gap:12px}
+.ct-list{border-radius:16px;background:rgba(255,255,255,.06);overflow:hidden;display:flex;flex-direction:column;max-height:420px;overflow-y:auto;scrollbar-width:none}
+.ct-row{position:relative;height:52px;flex:none;display:flex;align-items:center;gap:12px;padding:0 16px;text-align:left;color:#fff;font:inherit}
+.ct-row+.ct-row::before{content:"";position:absolute;left:48px;right:0;top:0;height:1px;background:rgba(255,255,255,.09)}
+.ct-e{width:20px;font-size:18px;line-height:20px;text-align:center;flex:none}
+.ct-l{flex:1;font-size:17px}
+.ct-row.on .ct-l{color:var(--lime);font-weight:600}
+.ct-ck{display:grid;color:var(--lime)}.ct-ck svg{width:20px;height:20px}
+.ct-row:active{background:rgba(255,255,255,.06)}
 </style>
 <div class="stage">
   <aside class="panel" aria-label="Presenter controls">
@@ -1127,7 +1137,7 @@ function feedList(cat){return V.filter(t=>t.cats.includes(cat))}
    Swiping folds the category chips into one round button that rises next to the balance, hides the title,
    the details and the tab bar; a floating row keeps the price, Use and Save. Tapping the video, the price
    or the category button brings the full UI back. */
-function feedScreen(host,o){host.classList.add('vscreen');host.classList.toggle('hasback',!!o.back);host.classList.remove('immersive');
+function feedScreen(host,o){host._cf=o;host.classList.add('vscreen');host.classList.toggle('hasback',!!o.back);host.classList.remove('immersive');
   const has=o.cats&&o.cats.length,ci=has?Math.max(0,o.cats.findIndex(c=>c[0]===o.cur)):0,nm=has?o.cats[ci][1].replace(/^\S+\s/,''):'';
   const chip=([id,l],i)=>`<button class="chip ${o.cur===id?'on':''}" ${i!=null?`style="--i:${i}"`:''} data-a="${o.act}" data-cat="${id}">${l}</button>`;
   host.innerHTML=`<div class="feed">${o.items}</div>
@@ -1216,7 +1226,7 @@ function renderGallery(){const el=$('.tabview[data-id=gallery]');if(!el)return;c
 /* ================= collection grid + discovery detail ================= */
 function ccard(t){const bm=S.bookmarks.has(t.id);return `<button class="ccard" data-a="open" data-id="${t.id}">${t.src.v?media(t,{small:true}):`<img src="${thumb(t)}" alt="" loading="lazy">`}<span class="tag">${t.kind==='video'?'Video':t.cat==='Hairstyle'||t.cat==='Beauty Tools'?'AI Editing':'Photo'}</span><span class="bm glass-dark ${bm?'on':''}" data-a="bm" data-id="${t.id}">${I(bm?'bookmarkF':'bookmark')}</span><span class="cap"><b>${esc(t.name)}</b><span><img src="img/coin.png" alt="">${t.price} · ${t.uses} uses</span></span></button>`}
 function openCollection(cid){const col=COLS.find(c=>c.id===cid)||COLS[0];
-  const pills=open=>`<div style="position:relative;display:flex;align-items:center"><div class="chips" style="padding-right:56px;-webkit-mask:linear-gradient(90deg,#000 80%,transparent 92%);mask:linear-gradient(90deg,#000 80%,transparent 92%)">${COLS.map(c=>`<button class="chip ${c.id===col.id?'on':''}" data-a="colswitch" data-arg="${c.id}">${c.name}</button>`).join('')}</div><button class="chip chip-arrow" style="position:absolute;right:16px" data-a="colpanel" aria-label="All collections">${I('down')}</button></div>`;
+  const pills=open=>`<div style="position:relative;display:flex;align-items:center"><div class="chips" style="padding-right:56px;-webkit-mask:linear-gradient(90deg,#000 80%,transparent 92%);mask:linear-gradient(90deg,#000 80%,transparent 92%)">${COLS.map(c=>`<button class="chip ${c.id===col.id?'on':''}" data-a="colswitch" data-arg="${c.id}">${c.name}</button>`).join('')}</div><button class="chip chip-arrow" style="position:absolute;right:16px" data-a="colpanel" aria-label="All collections">${I('filter')}</button></div>`;
   const html=`<div class="scroll"><div style="height:176px"></div><div class="cgrid">${col.items.map(id=>ccard(ALL[id])).join('')}</div></div>
    <div style="position:absolute;top:0;left:0;right:0;height:176px;background:linear-gradient(var(--bg) 85%,rgba(10,10,12,0));z-index:20"></div>
    <div class="navbar"><button class="circle glass" data-a="back" aria-label="Back">${I('back')}</button><div class="nt">${col.name.replace(/^\S+\s/,'')}</div></div>
@@ -1478,6 +1488,18 @@ const H2={
  cropx:()=>{pop();setTimeout(()=>{if(F)choosePhoto(F.slot||0)},360)},
  cropsave:()=>{const el=stack[stack.length-1];const url=el&&el._crop?el._crop():null;pop();if(url&&F)setTimeout(()=>usePhoto(url),340)}
 };
+
+/* Categories / Collections picker as an iOS sheet (Figma 833:1100): title, X on the right, inset list, selected row lime + check */
+function catSheet(title,items,cur,pick){
+  const emo=l=>{const m=l.match(/^(\S+)\s(.*)$/);return m&&!/[A-Za-z0-9]/.test(m[1])?[m[1],m[2]]:['',l]};
+  sheet(`<div class="ct"><div class="cp2-h"><span></span><h3>${title}</h3><button class="circle glass cp2-x" data-a="sheetclose" aria-label="Close">${I('x')}</button></div>
+    <div class="ct-list">${items.map(([id,l])=>{const [e,t]=emo(l);return `<button class="ct-row ${id===cur?'on':''}" data-id="${id}"><span class="ct-e">${e}</span><span class="ct-l">${esc(t)}</span>${id===cur?`<span class="ct-ck">${I('check')}</span>`:''}</button>`}).join('')}</div></div>`,
+  {cls:'ctsheet',mount:sh=>sh.addEventListener('click',ev=>{const r=ev.target.closest('.ct-row');if(!r)return;const id=r.dataset.id;closeSheet(()=>{if(id!==cur)pick(id)})})})}
+H2.catpanel=a=>{const host=a.closest('.vscreen');const o=host&&host._cf;if(!o||!o.cats)return;
+  const nm='Categories';
+  catSheet(nm,o.cats,o.cur,id=>H[o.act]({dataset:{cat:id},closest:()=>host}))};
+H2.colpanel=()=>{const top=stack[stack.length-1];const cur=(COLS.find(c=>top&&top.innerHTML.includes(`chip on" data-a="colswitch" data-arg="${c.id}"`))||{}).id;
+  catSheet('Categories',COLS.map(c=>[c.id,c.name]),cur,id=>openCollection(id))};
 
 /* ================= sheets: report, delete, paywall ================= */
 function reportSheet(){let sel=null;sheet(`<div class="rp"><h3>Report this creation</h3>${['It doesn\'t look like me','Offensive or unsafe','Poor quality','Something else'].map(r=>`<button class="ropt" data-r="${esc(r)}">${esc(r)}<span class="rad"></span></button>`).join('')}<textarea id="rnote" placeholder="Add a note (optional)"></textarea><button class="cta" id="rsend" disabled>Send report</button></div>`,{mount:sh=>{
