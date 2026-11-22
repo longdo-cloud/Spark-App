@@ -27,14 +27,14 @@ function settingsList(){const s=F.set;
   const rows=F.v?[row('speaker','Sound',`<button class="tg ${s.sound?'on':''}" data-a="gset2" data-k="sound" data-v="${!s.sound}" aria-label="Sound"><i></i></button>`),row('clock','Duration',segc('dur',['5s','10s'])),row('film','Resolution',segc('res',['480p','720p']))]
     :[row('photo','Ratio',segc('ratio',['4:5','1:1','9:16'])),row('sparkles','Quality',segc('q',['Standard','HD']))];
   const note=F.v?(s.res==='720p'?'720p adds 30 coins':''):(s.q==='HD'?'HD adds 20 coins':'');
-  return `<div class="gs-h">Generation settings</div><div class="gs2card">${rows.join('<i class="gdiv"></i>')}</div>${note?`<div class="gs-note"><img src="img/coin.png" alt="">${note}</div>`:''}`}
+  return `<div class="gs-h">Generation settings</div><div class="gs2card">${rows.join('<i class="gdiv"></i>')}</div>${note?`<div class="gs-note"><img src="img/spark-coin.png" alt="">${note}</div>`:''}`}
 function renderSetup(){if(!F||!F.el)return;const L=$('#slist',F.el),B=$('#sbottom',F.el);if(!L)return;
   if(F.mode==='settings'){L.innerHTML=settingsList();B.innerHTML=`<button class="cta" data-a="gsave">Save</button>`;return}
   L.innerHTML=photoCard()+settingsCard();
   const ok=F.photos.every(x=>x&&x.st==='ok');const anyBad=F.photos.some(x=>x&&x.st==='bad');const checking=F.photos.some(x=>x&&x.st==='checking');const left=F.photos.filter(x=>!x).length;
   let cap;if(checking)cap='Checking your photo…';else if(anyBad)cap='No coins used · choose another photo';else if(F.t.people>1)cap=left===F.t.people?`Add ${F.t.people} photos to continue`:`Add ${left} more photo`;else cap='Add a photo to continue';
-  B.innerHTML=ok?`<button class="cta" data-a="create">Create with <img src="img/coin.png" alt="coins"> ${price()}</button>`
-    :`<button class="cta" data-a="create" disabled>Create <span class="sep">·</span> <img src="img/coin.png" alt="coins"> ${price()}</button><div class="cs-cap">${cap}</div>`}
+  B.innerHTML=ok?`<button class="cta" data-a="create">Create with <img src="img/spark-coin.png" alt="coins"> ${price()}</button>`
+    :`<button class="cta" data-a="create" disabled>Create <span class="sep">·</span> <img src="img/spark-coin.png" alt="coins"> ${price()}</button><div class="cs-cap">${cap}</div>`}
 /* 05 · Choose a photo (sheet) + empty state; Photo library opens the iPhone's own picker */
 function choosePhoto(slot){F.slot=slot;const other=F.photos.map((p,i)=>i!==slot&&p?p.img:null).filter(Boolean);
   const none=$('#sw-norecent')&&$('#sw-norecent').checked;const pool=none?[]:[...S.uploads,...SELFIES];

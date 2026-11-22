@@ -37,8 +37,8 @@ vm.init();
 /* ================= pieces ================= */
 /* Header right: Join Now until the user buys Pro, then the coin balance (REQ-76) */
 const headBtn=()=>S.pro?balBtn():proBtn();
-const proBtn=()=>`<button class="join" data-a="paywall">${I('crown')}Join Now</button>`;
-const balBtn=()=>`<button class="balance glass" data-a="paywall"><img src="img/coin.png" alt="">${S.coins.toLocaleString('en-US')}</button>`;
+const proBtn=()=>`<button class="join-img" data-a="paywall" aria-label="Join Now"><img src="img/join-now.png" width="125" height="28" alt="Join Now"></button>`;
+const balBtn=()=>`<button class="balance glass" data-a="paywall"><img src="img/spark-coin.png" alt="">${S.coins.toLocaleString('en-US')}</button>`;
 const card=(t,w)=>`<button class="mcard" data-a="open" data-id="${t.id}" ${w?`style="width:${w}px"`:''}>${t.src.v?media(t,{small:true}):`<img src="${thumb(t)}" alt="" loading="lazy">`}<span class="t">${esc(t.name)}</span></button>`;
 const secHead=(title,act,arg)=>`<button class="sec-h" data-a="${act}" data-arg="${arg||''}">${title}${act?I('chev'):''}</button>`;
 function row(col){return `<section class="sec">${secHead(col.name,'col',col.id)}<div class="hrow">${col.items.map(id=>card(ALL[id])).join('')}</div></section>`}
@@ -138,7 +138,7 @@ function detectLink(root,val){const out=$('#tcout',root);if(!val.trim()){out.inn
 function feedItem(t,{back=false}={}){const bm=S.bookmarks.has(t.id);return `<article class="fitem" data-id="${t.id}">${media(t,{kb:true})}
   <div class="fmeta"><div class="fcat"><span class="ic">${I(t.kind==='video'?'film':'photo')}</span>${back?`<a data-a="catlink" data-cat="${t.cat}">${t.cat}</a>`:t.cat}</div>
    <h2 class="ftitle">${esc(t.name)}</h2>
-   <div class="fsub"><b><img src="img/coin.png" alt="">${t.price} coins</b><span>·</span><span>${t.uses} uses</span>${t.kind==='video'?`<span>·</span><span>${t.dur}</span>`:''}${t.people>1?`<span>·</span><span>${t.people} people</span>`:''}</div>
+   <div class="fsub"><b><img src="img/spark-coin.png" alt="">${t.price} coins</b><span>·</span><span>${t.uses} uses</span>${t.kind==='video'?`<span>·</span><span>${t.dur}</span>`:''}${t.people>1?`<span>·</span><span>${t.people} people</span>`:''}</div>
    <button class="cta fuse" data-a="use" data-id="${t.id}">${I('sparkles')}Use This Style</button></div>
   <div class="fside"><button class="sbtn ${bm?'on':''}" data-a="bm" data-id="${t.id}"><span class="circle glass">${I(bm?'bookmarkF':'bookmark')}</span>${bm?'Saved':'Save'}</button><button class="sbtn" data-a="share"><span class="circle glass">${I('share')}</span>Share</button></div></article>`}
 function feedList(cat){return V.filter(t=>t.cats.includes(cat))}
@@ -151,7 +151,7 @@ function feedScreen(host,o){host._cf=o;host.classList.add('vscreen');host.classL
   const has=o.cats&&o.cats.length,ci=has?Math.max(0,o.cats.findIndex(c=>c[0]===o.cur)):0,nm=has?o.cats[ci][1].replace(/^\S+\s/,''):'';
   const chip=([id,l],i)=>`<button class="chip ${o.cur===id?'on':''}" ${i!=null?`style="--i:${i}"`:''} data-a="${o.act}" data-cat="${id}">${l}</button>`;
   host.innerHTML=`<div class="feed">${o.items}</div>
-   <div class="vmini off"><div class="vp-left"><button class="vp-price" data-a="vfull" aria-label="Show details"><img src="img/coin.png" alt="coins"><b></b></button><button class="vp-use" data-a="use" data-id="">${I('sparkles')}Use this</button></div><button class="vp-bm" data-a="bm" data-id="" aria-label="Save">${I('bookmark')}</button></div>
+   <div class="vmini off"><div class="vp-left"><button class="vp-price" data-a="vfull" aria-label="Show details"><img src="img/spark-coin.png" alt="coins"><b></b></button><button class="vp-use" data-a="use" data-id="">${I('sparkles')}Use this</button></div><button class="vp-bm" data-a="bm" data-id="" aria-label="Save">${I('bookmark')}</button></div>
    <div class="ftop"><div class="toolbar">${o.back?`<button class="circle glass-dark tb-back" data-a="back" aria-label="Back">${I('back')}</button>`:''}${o.back?`<div class="ttl"><h1 class="ltitle sm">${esc(o.title)}</h1>${has?`<button class="tfilter" data-a="catpanel" aria-label="All ${o.noun}">${I('filter')}</button>`:''}</div>`:`<h1 class="ltitle">${esc(o.title)}</h1>`}<div class="tb-right">${headBtn()}</div></div>
     ${has?`<div class="catrow"><div class="chips" style="padding-right:56px;-webkit-mask:linear-gradient(90deg,#000 80%,transparent 92%);mask:linear-gradient(90deg,#000 80%,transparent 92%)">${o.cats.map(chip).join('')}</div>
      <button class="chip chip-arrow" style="position:absolute;right:16px" data-a="catpanel" aria-label="All ${o.noun}">${I(o.back?'filter':'down')}</button>

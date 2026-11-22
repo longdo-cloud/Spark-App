@@ -97,7 +97,7 @@ $$('[data-jump]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.j
 S.jobs.forEach(j=>{j.v=j.v||(ALL[j.tpl]&&ALL[j.tpl].src.v)||null});
 /* demo: seeded queue items stay in 'Making' forever, progress loops so the Queue always shows the in-progress state */
 S.jobs.filter(j=>j.status==='making').forEach(j=>{j.stage='video';j.cost=0;j.selfie='selfie3';j.loop=true;j.timer=setInterval(()=>{j.p=j.p>=96?4:j.p+1;j.eta=j.p>80?'Almost done':j.p>40?'~1 min':'~2 min';onJobUpdate(j)},450)});
-setInterval(()=>{$$('.balance',app).forEach(b=>{const t=S.coins.toLocaleString('en-US');if(!b.textContent.includes(t))b.innerHTML=`<img src="img/coin.png" alt="">${t}`})},800);
+setInterval(()=>{$$('.balance',app).forEach(b=>{const t=S.coins.toLocaleString('en-US');if(!b.textContent.includes(t))b.innerHTML=`<img src="img/spark-coin.png" alt="">${t}`})},800);
 
 /* ================= fit device to window ================= */
 function fit(){const d=$('#device'),w=$('#dwrap');const mobile=innerWidth<=860;const W=mobile?402:426,Hh=mobile?874:898;
