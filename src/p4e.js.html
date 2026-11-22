@@ -114,3 +114,10 @@ H2.catpanel=a=>{const host=a.closest('.vscreen');const o=host&&host._cf;if(!o||!
   catSheet(nm,o.cats,o.cur,id=>H[o.act]({dataset:{cat:id},closest:()=>host}))};
 H2.colpanel=()=>{const top=stack[stack.length-1];const cur=(COLS.find(c=>top&&top.innerHTML.includes(`chip on" data-a="colswitch" data-arg="${c.id}"`))||{}).id;
   catSheet('Categories',COLS.map(c=>[c.id,c.name]),cur,id=>openCollection(id))};
+
+/* 04 · First time – Content guidelines (Figma 930:537): iOS 27 sheet, title + X, Works great examples, I understand, Read full guidelines */
+function guidelines(after){sheet(`<div class="gl2"><div class="cp2-h"><span></span><h3>Before you add a photo</h3><button class="circle glass cp2-x" data-a="sheetclose" aria-label="Close">${I('x')}</button></div>
+  <div class="gl2-hd"><img src="img/i_check.png" alt="">Works great</div>
+  <div class="gl2-ex">${SELFIES.slice(0,4).map(s=>`<img src="img/${s}.jpg" alt="">`).join('')}</div>
+  <div class="gl2-cap">Your own selfie · face the camera · one person</div>
+  <button class="cta" data-a="gl-ok">I understand</button><button class="gl2-more" data-a="fullrules">Read full guidelines</button></div>`,{mount:sh=>{sh._after=after}})}

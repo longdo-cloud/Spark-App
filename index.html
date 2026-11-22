@@ -800,6 +800,32 @@ img{display:block}
 .ct-row.on .ct-l{color:var(--lime);font-weight:600}
 .ct-ck{display:grid;color:var(--lime)}.ct-ck svg{width:20px;height:20px}
 .ct-row:active{background:rgba(255,255,255,.06)}
+
+/* iOS 27 floating sheets (Figma: inset 6, top corners 34, bottom 58, #1A1A1A, dimming 48%) */
+.sheet{left:6px;right:6px;bottom:6px;border-radius:34px 34px 58px 58px;background:#1A1A1A;box-shadow:0 0 48px rgba(0,0,0,.45);transform:translateY(calc(100% + 12px));max-height:calc(100% - 62px)}
+.sheet.in{transform:none}
+.scrim{background:rgba(0,0,0,.48)}
+.grabber{width:58px;height:4px;background:#333;margin-top:5px}
+.cp2,.ct,.gl2{padding-left:16px;padding-right:16px}
+.gl2{display:flex;flex-direction:column;gap:8px;padding-bottom:16px}
+.gl2-hd{display:flex;align-items:center;gap:4px;font-size:17px;font-weight:600;margin-top:8px}
+.gl2-hd img{width:24px;height:24px}
+.gl2-ex{display:flex;gap:8px;margin-top:4px}
+.gl2-ex img{flex:1;min-width:0;height:104px;border-radius:16px;object-fit:cover}
+.gl2-cap{font-size:13px;color:#A3A3A3}
+.gl2 .cta{margin-top:8px}
+.gl2-more{height:32px;font-size:13px;color:#A3A3A3;text-align:center}
+/* Collection grid & feed details per Figma 01/02 */
+.ccard .tag{display:none}
+.chip-arrow{background:none!important;box-shadow:none!important;-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.chip-arrow svg{width:20px!important;height:20px!important}
+.fcat{gap:8px}
+.fcat .ic{border-radius:12px;background:rgba(255,255,255,.09)}
+.fcat .ic svg{width:13px;height:13px}
+.fcat,.fcat a{color:#fff;font-weight:600;text-decoration:none}
+.chip-arrow{z-index:2}
+:has(>.chip-arrow)>.chips{padding-right:56px}
+.chip-arrow::before{content:'';position:absolute;z-index:-1;top:-4px;bottom:-4px;right:-16px;width:88px;background:linear-gradient(90deg,rgba(10,10,10,0),var(--bg,#0A0A0A) 45%);pointer-events:none}
 </style>
 <div class="stage">
   <aside class="panel" aria-label="Presenter controls">
@@ -1500,6 +1526,13 @@ H2.catpanel=a=>{const host=a.closest('.vscreen');const o=host&&host._cf;if(!o||!
   catSheet(nm,o.cats,o.cur,id=>H[o.act]({dataset:{cat:id},closest:()=>host}))};
 H2.colpanel=()=>{const top=stack[stack.length-1];const cur=(COLS.find(c=>top&&top.innerHTML.includes(`chip on" data-a="colswitch" data-arg="${c.id}"`))||{}).id;
   catSheet('Categories',COLS.map(c=>[c.id,c.name]),cur,id=>openCollection(id))};
+
+/* 04 · First time – Content guidelines (Figma 930:537): iOS 27 sheet, title + X, Works great examples, I understand, Read full guidelines */
+function guidelines(after){sheet(`<div class="gl2"><div class="cp2-h"><span></span><h3>Before you add a photo</h3><button class="circle glass cp2-x" data-a="sheetclose" aria-label="Close">${I('x')}</button></div>
+  <div class="gl2-hd"><img src="img/i_check.png" alt="">Works great</div>
+  <div class="gl2-ex">${SELFIES.slice(0,4).map(s=>`<img src="img/${s}.jpg" alt="">`).join('')}</div>
+  <div class="gl2-cap">Your own selfie · face the camera · one person</div>
+  <button class="cta" data-a="gl-ok">I understand</button><button class="gl2-more" data-a="fullrules">Read full guidelines</button></div>`,{mount:sh=>{sh._after=after}})}
 
 /* ================= sheets: report, delete, paywall ================= */
 function reportSheet(){let sel=null;sheet(`<div class="rp"><h3>Report this creation</h3>${['It doesn\'t look like me','Offensive or unsafe','Poor quality','Something else'].map(r=>`<button class="ropt" data-r="${esc(r)}">${esc(r)}<span class="rad"></span></button>`).join('')}<textarea id="rnote" placeholder="Add a note (optional)"></textarea><button class="cta" id="rsend" disabled>Send report</button></div>`,{mount:sh=>{
