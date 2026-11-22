@@ -610,4 +610,21 @@
 .rs-share{height:50px;border-radius:999px;background:#2C2C2E;font-size:17px;font-weight:600;color:#fff}
 .join{height:28px;padding:0 12px 0 8px;gap:4px;font-size:13px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:#111;background:linear-gradient(90deg,#D6C4FF,#EEF9B5)}
 .join svg{width:16px;height:16px}
+
+/* detail feed header per Figma 02 / 02b: Back + centered title; chips with filter; scrolled: chips go, filter sits next to the title */
+.hasback .ftop .tb-right{display:none}
+.hasback .ftop .toolbar{min-height:48px;padding-top:64px}
+.hasback .ftop .tb-back{width:48px;height:48px}
+.hasback .ttl{position:absolute;left:72px;right:72px;top:64px;height:48px;display:flex;align-items:center;justify-content:center;gap:6px;pointer-events:auto}
+.hasback .ttl .ltitle.sm{font-size:17px;line-height:22px;font-weight:600;letter-spacing:0;flex:0 1 auto;text-shadow:0 1px 8px rgba(0,0,0,.35)}
+.tfilter{width:32px;height:32px;display:grid;place-items:center;color:#fff;opacity:0;transform:scale(.8);pointer-events:none;transition:opacity .3s,transform .3s}
+.tfilter svg{width:20px;height:20px}
+.hasback.immersive .ftop .ltitle{opacity:1;transform:none}
+.hasback.immersive .ftop .ttl{pointer-events:auto}
+.hasback.immersive .tfilter{opacity:1;transform:none;pointer-events:auto;transition-delay:.25s}
+.hasback.immersive .ftop .catrow,.hasback .ftop.collapsed .catrow{transform:translateY(-16px);opacity:0;pointer-events:none;transition:opacity .3s,transform .4s}
+.hasback .catfab,.hasback .catname{display:none!important}
+.hasback .catrow .chip-arrow{background:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+.hasback .catrow .chip-arrow svg{width:20px;height:20px}
+.hasback.immersive .ftop .catpanel{top:120px!important}
 </style>

@@ -152,9 +152,9 @@ function feedScreen(host,o){host.classList.add('vscreen');host.classList.toggle(
   const chip=([id,l],i)=>`<button class="chip ${o.cur===id?'on':''}" ${i!=null?`style="--i:${i}"`:''} data-a="${o.act}" data-cat="${id}">${l}</button>`;
   host.innerHTML=`<div class="feed">${o.items}</div>
    <div class="vmini off"><div class="vp-left"><button class="vp-price" data-a="vfull" aria-label="Show details"><img src="img/coin.png" alt="coins"><b></b></button><button class="vp-use" data-a="use" data-id="">${I('sparkles')}Use this</button></div><button class="vp-bm" data-a="bm" data-id="" aria-label="Save">${I('bookmark')}</button></div>
-   <div class="ftop"><div class="toolbar">${o.back?`<button class="circle glass-dark tb-back" data-a="back" aria-label="Back">${I('back')}</button>`:''}<h1 class="ltitle${o.back?' sm':''}">${esc(o.title)}</h1><div class="tb-right">${headBtn()}</div></div>
+   <div class="ftop"><div class="toolbar">${o.back?`<button class="circle glass-dark tb-back" data-a="back" aria-label="Back">${I('back')}</button>`:''}${o.back?`<div class="ttl"><h1 class="ltitle sm">${esc(o.title)}</h1>${has?`<button class="tfilter" data-a="catpanel" aria-label="All ${o.noun}">${I('filter')}</button>`:''}</div>`:`<h1 class="ltitle">${esc(o.title)}</h1>`}<div class="tb-right">${headBtn()}</div></div>
     ${has?`<div class="catrow"><div class="chips" style="padding-right:56px;-webkit-mask:linear-gradient(90deg,#000 80%,transparent 92%);mask:linear-gradient(90deg,#000 80%,transparent 92%)">${o.cats.map(chip).join('')}</div>
-     <button class="chip chip-arrow" style="position:absolute;right:16px" data-a="catpanel" aria-label="All ${o.noun}">${I('down')}</button>
+     <button class="chip chip-arrow" style="position:absolute;right:16px" data-a="catpanel" aria-label="All ${o.noun}">${I(o.back?'filter':'down')}</button>
      <button class="catfab circle glass-dark" data-a="catexpand" aria-label="${esc(nm)}. Show ${o.noun}" tabindex="-1">${I('filter')}</button>
      <button class="catname" data-a="catexpand" tabindex="-1" aria-hidden="true">${esc(nm)}</button></div>
     <div class="catpanel glass-dark" style="top:164px"><h4>All ${o.noun}</h4><div class="wrap">${o.cats.map(c=>chip(c)).join('')}</div></div>`:''}</div>`;

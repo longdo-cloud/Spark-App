@@ -774,6 +774,23 @@ img{display:block}
 .rs-share{height:50px;border-radius:999px;background:#2C2C2E;font-size:17px;font-weight:600;color:#fff}
 .join{height:28px;padding:0 12px 0 8px;gap:4px;font-size:13px;font-weight:700;letter-spacing:.02em;text-transform:uppercase;color:#111;background:linear-gradient(90deg,#D6C4FF,#EEF9B5)}
 .join svg{width:16px;height:16px}
+
+/* detail feed header per Figma 02 / 02b: Back + centered title; chips with filter; scrolled: chips go, filter sits next to the title */
+.hasback .ftop .tb-right{display:none}
+.hasback .ftop .toolbar{min-height:48px;padding-top:64px}
+.hasback .ftop .tb-back{width:48px;height:48px}
+.hasback .ttl{position:absolute;left:72px;right:72px;top:64px;height:48px;display:flex;align-items:center;justify-content:center;gap:6px;pointer-events:auto}
+.hasback .ttl .ltitle.sm{font-size:17px;line-height:22px;font-weight:600;letter-spacing:0;flex:0 1 auto;text-shadow:0 1px 8px rgba(0,0,0,.35)}
+.tfilter{width:32px;height:32px;display:grid;place-items:center;color:#fff;opacity:0;transform:scale(.8);pointer-events:none;transition:opacity .3s,transform .3s}
+.tfilter svg{width:20px;height:20px}
+.hasback.immersive .ftop .ltitle{opacity:1;transform:none}
+.hasback.immersive .ftop .ttl{pointer-events:auto}
+.hasback.immersive .tfilter{opacity:1;transform:none;pointer-events:auto;transition-delay:.25s}
+.hasback.immersive .ftop .catrow,.hasback .ftop.collapsed .catrow{transform:translateY(-16px);opacity:0;pointer-events:none;transition:opacity .3s,transform .4s}
+.hasback .catfab,.hasback .catname{display:none!important}
+.hasback .catrow .chip-arrow{background:none;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+.hasback .catrow .chip-arrow svg{width:20px;height:20px}
+.hasback.immersive .ftop .catpanel{top:120px!important}
 </style>
 <div class="stage">
   <aside class="panel" aria-label="Presenter controls">
@@ -1115,9 +1132,9 @@ function feedScreen(host,o){host.classList.add('vscreen');host.classList.toggle(
   const chip=([id,l],i)=>`<button class="chip ${o.cur===id?'on':''}" ${i!=null?`style="--i:${i}"`:''} data-a="${o.act}" data-cat="${id}">${l}</button>`;
   host.innerHTML=`<div class="feed">${o.items}</div>
    <div class="vmini off"><div class="vp-left"><button class="vp-price" data-a="vfull" aria-label="Show details"><img src="img/coin.png" alt="coins"><b></b></button><button class="vp-use" data-a="use" data-id="">${I('sparkles')}Use this</button></div><button class="vp-bm" data-a="bm" data-id="" aria-label="Save">${I('bookmark')}</button></div>
-   <div class="ftop"><div class="toolbar">${o.back?`<button class="circle glass-dark tb-back" data-a="back" aria-label="Back">${I('back')}</button>`:''}<h1 class="ltitle${o.back?' sm':''}">${esc(o.title)}</h1><div class="tb-right">${headBtn()}</div></div>
+   <div class="ftop"><div class="toolbar">${o.back?`<button class="circle glass-dark tb-back" data-a="back" aria-label="Back">${I('back')}</button>`:''}${o.back?`<div class="ttl"><h1 class="ltitle sm">${esc(o.title)}</h1>${has?`<button class="tfilter" data-a="catpanel" aria-label="All ${o.noun}">${I('filter')}</button>`:''}</div>`:`<h1 class="ltitle">${esc(o.title)}</h1>`}<div class="tb-right">${headBtn()}</div></div>
     ${has?`<div class="catrow"><div class="chips" style="padding-right:56px;-webkit-mask:linear-gradient(90deg,#000 80%,transparent 92%);mask:linear-gradient(90deg,#000 80%,transparent 92%)">${o.cats.map(chip).join('')}</div>
-     <button class="chip chip-arrow" style="position:absolute;right:16px" data-a="catpanel" aria-label="All ${o.noun}">${I('down')}</button>
+     <button class="chip chip-arrow" style="position:absolute;right:16px" data-a="catpanel" aria-label="All ${o.noun}">${I(o.back?'filter':'down')}</button>
      <button class="catfab circle glass-dark" data-a="catexpand" aria-label="${esc(nm)}. Show ${o.noun}" tabindex="-1">${I('filter')}</button>
      <button class="catname" data-a="catexpand" tabindex="-1" aria-hidden="true">${esc(nm)}</button></div>
     <div class="catpanel glass-dark" style="top:164px"><h4>All ${o.noun}</h4><div class="wrap">${o.cats.map(c=>chip(c)).join('')}</div></div>`:''}</div>`;
