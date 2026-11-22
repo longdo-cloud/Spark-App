@@ -1,0 +1,104 @@
+
+/* ================= 23/11 rebuild: create flow from Figma (sections 857:6736 video · 971:4366 photo) ================= */
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const reqSub=()=>F.v?'A clear, front-facing selfie works best':(/Birthday|Holiday/.test(F.t.cat)?'Full body, head to toe works best':'A clear, front-facing selfie works best');
+/* 03 · Create: full-bleed template, floating cards (photo card + settings bar), CTA at the bottom */
+function startSetup(t,host){const v=t.kind==='video';if(F&&F.host)closePanel();
+  F={t,v,photos:Array(t.people).fill(null),slot:0,mode:'main',set:{sound:true,dur:'5s',res:'480p',ratio:'4:5',q:'Standard'}};
+  const el=push(`<div class="cs">${media(t,{kb:true})}<i class="cs-top"></i><i class="cs-fade"></i>
+    <button class="circle glass cs-x" data-a="close" aria-label="Close">${I('x')}</button><div class="cs-title">${esc(t.name)}</div>
+    <div class="cs-cards" id="slist"></div><div class="cs-bottom" id="sbottom"></div></div>`,{modal:true});
+  el.dataset.screen='setup';F.el=el;renderSetup()}
+function multiCard(){const nextIdx=F.photos.findIndex(x=>!x);
+  return `<div class="pc pc-multi">${F.photos.map((x,i)=>{const st=x?x.st:'';
+    const inner=x?`<img src="${imgSrc(x.img)}" alt="">${st==='checking'?'<i class="pc-dim"></i><i class="spin"></i>':''}`:`<span class="uplus ${i===nextIdx?'':'still'}">${I('plus')}</span>`;
+    const lab=st==='bad'?'No clear face':st==='ok'?`Person ${i+1} ✓`:st==='checking'?'Checking…':`Person ${i+1}`;
+    return `<button class="pm" data-a="addphoto" data-slot="${i}"><span class="pc-th ${x?'':'empty'} ${st==='bad'?'bad':''}">${inner}</span><span class="pm-l ${st}">${lab}</span></button>`}).join('')}</div>`}
+function photoCard(){if(F.t.people>1)return multiCard();const p=F.photos[0];
+  if(!p)return `<button class="pc" data-a="addphoto" data-slot="0" aria-label="Add your photo"><span class="pc-th empty"><span class="uplus">${I('plus')}</span></span><span class="pc-tx"><b>Add your photo</b><small>${reqSub()}</small></span></button>`;
+  const th=`<span class="pc-th"><img src="${imgSrc(p.img)}" alt="Your photo">${p.st==='checking'?'<i class="pc-dim"></i><i class="spin"></i>':''}</span>`;
+  if(p.st==='checking')return `<div class="pc">${th}<span class="pc-tx"><b>Checking photo…</b><small>Making sure your face is clear</small></span></div>`;
+  if(p.st==='bad')return `<div class="pc bad">${th}<span class="pc-tx"><b>Choose another photo</b><small class="red">No clear face · no coins used</small></span><button class="pc-chg" data-a="addphoto" data-slot="0">Change</button></div>`;
+  return `<div class="pc">${th}<span class="pc-tx"><b>Your photo</b><span class="pc-ok">${I('checkC')}Looks good</span></span><button class="pc-chg" data-a="addphoto" data-slot="0">Change</button></div>`}
+/* 03a · Generation settings: pushed in place of the cards (X / Save keep their spots) */
+function settingsList(){const s=F.set;
+  const segc=(k,opts)=>`<span class="sg">${opts.map(o=>`<button class="${String(s[k])===String(o)?'on':''}" data-a="gset2" data-k="${k}" data-v="${o}">${o}</button>`).join('')}</span>`;
+  const row=(ic,l,ctl)=>`<div class="gr"><i>${I(ic)}</i><span>${l}</span>${ctl}</div>`;
+  const rows=F.v?[row('speaker','Sound',`<button class="tg ${s.sound?'on':''}" data-a="gset2" data-k="sound" data-v="${!s.sound}" aria-label="Sound"><i></i></button>`),row('clock','Duration',segc('dur',['5s','10s'])),row('film','Resolution',segc('res',['480p','720p']))]
+    :[row('photo','Ratio',segc('ratio',['4:5','1:1','9:16'])),row('sparkles','Quality',segc('q',['Standard','HD']))];
+  const note=F.v?(s.res==='720p'?'720p adds 30 coins':''):(s.q==='HD'?'HD adds 20 coins':'');
+  return `<div class="gs-h">Generation settings</div><div class="gcard">${rows.join('<i class="gdiv"></i>')}</div>${note?`<div class="gs-note"><img src="img/coin.png" alt="">${note}</div>`:''}`}
+function renderSetup(){if(!F||!F.el)return;const L=$('#slist',F.el),B=$('#sbottom',F.el);if(!L)return;
+  if(F.mode==='settings'){L.innerHTML=settingsList();B.innerHTML=`<button class="cta" data-a="gsave">Save</button>`;return}
+  L.innerHTML=photoCard()+settingsCard();
+  const ok=F.photos.every(x=>x&&x.st==='ok');const anyBad=F.photos.some(x=>x&&x.st==='bad');const checking=F.photos.some(x=>x&&x.st==='checking');const left=F.photos.filter(x=>!x).length;
+  let cap;if(checking)cap='Checking your photo…';else if(anyBad)cap='No coins used · choose another photo';else if(F.t.people>1)cap=left===F.t.people?`Add ${F.t.people} photos to continue`:`Add ${left} more photo`;else cap='Add a photo to continue';
+  B.innerHTML=ok?`<button class="cta" data-a="create">Create with <img src="img/coin.png" alt="coins"> ${price()}</button>`
+    :`<button class="cta" data-a="create" disabled>Create <span class="sep">·</span> <img src="img/coin.png" alt="coins"> ${price()}</button><div class="cs-cap">${cap}</div>`}
+/* 05 · Choose a photo (sheet) + empty state; Photo library opens the iPhone's own picker */
+function choosePhoto(slot){F.slot=slot;const other=F.photos.map((p,i)=>i!==slot&&p?p.img:null).filter(Boolean);
+  const none=$('#sw-norecent')&&$('#sw-norecent').checked;const pool=none?[]:[...S.uploads,...SELFIES];
+  const title=F.t.people>1?`Photo for Person ${slot+1}`:'Choose a photo';
+  sheet(`<div class="cp2"><div class="cp2-h"><span></span><h3>${title}</h3><button class="circle glass cp2-x" data-a="sheetclose" aria-label="Close">${I('x')}</button></div>
+    <div class="cp2-src"><label class="glass">${I('camera')}Take a selfie<input type="file" accept="image/*" capture="user" data-pick></label><label class="glass">${I('photo')}Photo library<input type="file" accept="image/*" data-pick></label></div>
+    <b class="cp2-r">Recent</b>${pool.length?`<div class="recent">${pool.map(p=>`<button class="rph2" data-img="${p}" ${other.includes(p)?'disabled':''}><img src="${imgSrc(p)}" alt="">${other.includes(p)?'<span class="usedl">In use</span>':''}</button>`).join('')}</div>`
+      :`<div class="cp2-empty">${I('photo')}<b>No recent photos</b><span>Photos you use will show up here next time.</span></div>`}</div>`,
+  {cls:'cpsheet',mount:sh=>{
+    sh.addEventListener('click',e=>{const b=e.target.closest('.rph2');if(b&&!b.disabled){const img=b.dataset.img;closeSheet(()=>usePhoto(img))}});
+    $$('[data-pick]',sh).forEach(inp=>inp.addEventListener('change',()=>{const f=inp.files[0];if(!f)return;const u=URL.createObjectURL(f);closeSheet(()=>openCrop(u))}))}})}
+function usePhoto(img){const slot=F.slot||0;const bad=$('#sw-reject').checked;if(bad)$('#sw-reject').checked=false;
+  if((img.startsWith('data:')||img.startsWith('blob:'))&&!S.uploads.includes(img))S.uploads.unshift(img);
+  F.photos[slot]={img,st:'checking'};renderSetup();
+  setTimeout(()=>{if(!F||!F.photos[slot]||F.photos[slot].img!==img)return;F.photos[slot].st=bad?'bad':'ok';renderSetup();
+    if(!bad){const nx=F.photos.findIndex(x=>!x);if(nx>=0)setTimeout(()=>choosePhoto(nx),500)}},1500)}
+/* 05b · Crop photo: free crop, no ratio presets, Save */
+function openCrop(src){
+  const el=push(`<div class="crop"><div class="crop-tb"><button class="circle glass" data-a="cropx" aria-label="Close">${I('x')}</button><b>Crop photo</b><span></span></div>
+    <div class="crop-area"><img src="${src}" alt=""><div class="crop-box"><i class="g v1"></i><i class="g v2"></i><i class="g h1"></i><i class="g h2"></i>${['tl','tr','bl','br'].map(k=>`<i class="hd ${k}" data-h="${k}"></i>`).join('')}${['t','b','l','r'].map(k=>`<i class="eh ${k}" data-h="${k}"></i>`).join('')}</div></div>
+    <div class="crop-hint">Drag the corners to crop · Pinch to zoom</div><button class="cta crop-save" data-a="cropsave">Save</button></div>`,{modal:true});
+  el.dataset.screen='crop';
+  const area=$('.crop-area',el),im=$('img',area),box=$('.crop-box',el);const AW=402,AH=588;let R=null,B=null;
+  const draw=()=>Object.assign(box.style,{left:B.x+'px',top:B.y+'px',width:B.w+'px',height:B.h+'px'});
+  const layout=()=>{const r=im.naturalWidth/im.naturalHeight;let w=AW,h=w/r;if(h>AH){h=AH;w=h*r}R={x:(AW-w)/2,y:(AH-h)/2,w,h};
+    Object.assign(im.style,{left:R.x+'px',top:R.y+'px',width:w+'px',height:h+'px'});B={x:R.x+24,y:R.y+24,w:w-48,h:h-48};draw()};
+  if(im.complete&&im.naturalWidth)layout();else im.onload=layout;
+  box.addEventListener('pointerdown',e=>{if(!B)return;const h=e.target.dataset.h||'move';const sc=el.getBoundingClientRect().width/402;const s0=Object.assign({},B),x0=e.clientX,y0=e.clientY;box.setPointerCapture(e.pointerId);
+    const mv=ev=>{const dx=(ev.clientX-x0)/sc,dy=(ev.clientY-y0)/sc;let {x,y,w}=s0,hh=s0.h;const MIN=80;
+      if(h==='move'){x=clamp(x+dx,R.x,R.x+R.w-w);y=clamp(y+dy,R.y,R.y+R.h-hh)}else{
+        if(h.includes('l')){const nx=clamp(x+dx,R.x,x+w-MIN);w+=x-nx;x=nx}
+        if(h.includes('r')){w=clamp(w+dx,MIN,R.x+R.w-x)}
+        if(h.includes('t')){const ny=clamp(y+dy,R.y,y+hh-MIN);hh+=y-ny;y=ny}
+        if(h.includes('b')){hh=clamp(hh+dy,MIN,R.y+R.h-y)}}
+      B={x,y,w,h:hh};draw()};
+    const up=()=>{box.removeEventListener('pointermove',mv);box.removeEventListener('pointerup',up);box.removeEventListener('pointercancel',up)};
+    box.addEventListener('pointermove',mv);box.addEventListener('pointerup',up);box.addEventListener('pointercancel',up)});
+  el._crop=()=>{if(!R)return src;try{const c=document.createElement('canvas');const k=im.naturalWidth/R.w;c.width=Math.round(B.w*k);c.height=Math.round(B.h*k);
+    c.getContext('2d').drawImage(im,(B.x-R.x)*k,(B.y-R.y)*k,B.w*k,B.h*k,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.9)}catch(e){return src}};
+  return el}
+/* 08 · Making: edge glow + waiting card (no progress) */
+function makingHtml(j){const t=ALL[j.tpl];const isV=j.stage!=='photo';const src=t?thumb(t):jimg(j);
+  const sp=[[36,52,24],[217,69,37],[141,142,17],[257,200,20],[46,199,31],[191,229,14],[31,352,17],[235,335,34],[119,400,20],[215,448,17],[89,117,14],[166,318,24]];
+  return `<div class="mk2"><i class="edge"></i><i class="edge2"></i><button class="circle glass mk2-x" data-a="keep" aria-label="Close">${I('x')}</button>
+  <div class="mk2-card"><img class="mk2-img" src="${src}" alt=""><i class="mk2-au a1"></i><i class="mk2-au a2"></i><i class="mk2-au a3"></i><i class="mk2-au a4"></i><i class="mk2-ov"></i><i class="mk2-band"></i>
+   ${sp.map(([x,y,s],i)=>`<i class="spk" style="left:${x}px;top:${y}px;width:${s}px;height:${s}px;animation-delay:${(((i*7)%12)*.25).toFixed(2)}s"></i>`).join('')}
+   <span class="mk2-chip c1">${I('sparkles')}Dreaming up your scene…</span><span class="mk2-chip c2">${I('sparkles')}${isV?'Adding motion…':'Adding final touches…'}</span>
+   <span class="mk2-av"><img src="${imgSrc(j.selfie)}" alt=""></span></div>
+  <h2 class="mk2-t">${isV?'Your video is on its way...':'Your photo is on its way...'}</h2><p class="mk2-s">You can leave this screen and find it in Gallery › Queue.</p>
+  <div class="mk2-b"><button class="cta" data-a="keep">Keep browsing</button><button class="textlink" data-a="toqueue">Go to Queue</button></div></div>`}
+function onJobUpdate(j){const el=stack.find(s=>s.dataset.job===j.id);
+  if(el&&j.status==='failed'){replaceAt(el,failedHtml(j),{modal:true},n=>{n.dataset.screen='failed';n.dataset.job=j.id})}
+  else if(!el&&j.status==='failed')toast(`${esc(j.name)} didn't work · coins refunded`,`<span style="color:var(--red)">${I('warn','ico')}</span>`);
+  if(S.tab==='gallery'&&S.gtab==='queue'&&!stack.length){const now=performance.now();if(!onJobUpdate._t||now-onJobUpdate._t>500){onJobUpdate._t=now;renderGallery()}}}
+/* 09 · Result: video 9:16 with play, photo 4:5 · Share / Save */
+function resultHtml(c){const isV=c.kind==='video';const src=c.v?`<video src="v/${c.v}.mp4" poster="p/${c.v}.jpg" loop playsinline muted autoplay data-auto></video>`:`<img src="${imgSrc(c.img)}" alt="">`;
+  return `<div class="rs"><button class="circle glass rs-back" data-a="close" aria-label="Back">${I('back')}</button><div class="rs-title">${esc(c.name)}</div>
+  <div class="rs-media ${isV?'v':'p'}${c.v?' playing':''}" ${isV?'data-a="playtoggle"':''}>${src}${isV?`<span class="playbtn">${I('playF')}</span>`:''}</div>
+  <div class="rs-b"><button class="rs-share" data-a="shareres">Share</button><button class="cta" data-a="save" data-k="${c.key}">Save</button></div></div>`}
+const H2={
+ gsettings:()=>{if(!F)return;F.setBak=Object.assign({},F.set);F.mode='settings';renderSetup()},
+ gset2:a=>{const k=a.dataset.k;let v=a.dataset.v;if(k==='sound')v=v==='true';F.set[k]=v;renderSetup()},
+ gsave:()=>{F.mode='main';renderSetup()},
+ create:()=>{const c=price();if(c>S.coins){toast('Not enough coins');return paywall()}const j=startJob({stage:F.v?'video':'photo',t:F.t,img:F.photos[0].img,cost:c});openMaking(j)},
+ cropx:()=>{pop();setTimeout(()=>{if(F)choosePhoto(F.slot||0)},360)},
+ cropsave:()=>{const el=stack[stack.length-1];const url=el&&el._crop?el._crop():null;pop();if(url&&F)setTimeout(()=>usePhoto(url),340)}
+};

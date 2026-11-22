@@ -76,6 +76,7 @@ const H={
  contact:()=>toast('Opens the support form'),
  tcpaste:()=>{const inp=$('#tcin');inp.value='https://www.tiktok.com/@rainy.days/video/7312845510962';inp.focus({preventScroll:true});detectLink($('.tabview[data-id=discover]'),inp.value)}
 };
+Object.assign(H,H2);{const c0=H.close;H.close=a=>{if(F&&F.mode==='settings'&&stack[stack.length-1]===F.el){F.set=F.setBak||F.set;F.mode='main';renderSetup();return}c0(a)}}
 app.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(!a||!app.contains(a))return;const f=H[a.dataset.a];if(f){e.preventDefault();e.stopPropagation();f(a,e)}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(sheets.length)closeSheet();else if(stack.length)H.close()}});
 // close category panels when tapping elsewhere
@@ -85,10 +86,11 @@ app.addEventListener('pointerdown',e=>{if(!e.target.closest('.catpanel,.chip-arr
 function resetAll(){while(sheets.length)closeSheet();popAll();F=null}
 const J={discover:()=>setTab('discover'),video:()=>{setTab('discover');openVideoDetail(feedList('foryou')[0].id,'foryou')},photo:()=>setTab('photo'),tools:()=>setTab('tools'),gallery:()=>setTab('gallery'),
  'flow-video':()=>{setTab('discover');startSetup(ALL.neon)},'flow-video2':()=>{setTab('discover');startSetup(ALL.pool)},
- 'flow-image':()=>{setTab('photo');startSetup(ALL.santa)},'flow-image2':()=>{setTab('photo');startSetup(ALL.duo)},
+ 'flow-image':()=>{setTab('photo');startSetup(ALL.lavender||ALL.santa)},'flow-image2':()=>{setTab('photo');startSetup(ALL.duo)},
  trend:()=>{setTab('discover');const sc=$('#dscroll');const tc=$('#tc');sc.scrollTo({top:tc.offsetTop-130,behavior:'smooth'});setTimeout(()=>H.tcpaste(),600)},
  collection:()=>{setTab('discover');openCollection('tv')},
  reset:()=>{S.coins=1250;S.seenGuide=false;S.seenSwipe=false;S.seenTap=false;S.seenChips=false;S.seenColChips=false;S.seenSeeAll=false;S.created=[];S.uploads=[];renderVideo();renderGallery();toast('Demo reset')}};
+J.crop=()=>{setTab('discover');startSetup(ALL.neon);setTimeout(()=>openCrop('img/selfie2.jpg'),420)};
 $$('[data-jump]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.jump;if(k!=='reset')resetAll();setTimeout(()=>J[k](),k==='reset'?0:360)}));
 
 /* ================= seeded queue + coin pill refresh ================= */

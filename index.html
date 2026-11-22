@@ -634,6 +634,144 @@ img{display:block}
 .plan b{font-size:17px}
 .plan span{font-size:13px;color:var(--fg2)}
 .pro-img{display:block;width:79px;height:29px;padding:0;border:0;background:none;border-radius:999px;cursor:pointer;flex:none}.pro-img img{display:block;width:79px;height:29px}.pro-img:active{transform:scale(.96)}
+
+/* ===== 23/11 create flow rebuild (Figma 857:6736 / 971:4366) ===== */
+.cs{position:absolute;inset:0;background:#000;overflow:hidden}
+.cs>video,.cs>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.cs>img.kb{animation:kb 10s ease-in-out infinite alternate}
+.cs-top{position:absolute;inset:0 0 auto;height:140px;background:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,0));pointer-events:none}
+.cs-fade{position:absolute;left:0;right:0;top:469px;bottom:0;background:linear-gradient(rgba(0,0,0,0),rgba(0,0,0,.82) 52%,#000 80%);pointer-events:none}
+.cs-x{position:absolute;left:16px;top:64px;z-index:3}
+.cs-title{position:absolute;left:72px;right:72px;top:78px;text-align:center;font-size:17px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:3;text-shadow:0 1px 8px rgba(0,0,0,.4)}
+.cs-cards{position:absolute;left:16px;right:16px;bottom:128px;display:flex;flex-direction:column;gap:12px;z-index:3}
+.cs-bottom{position:absolute;left:16px;right:16px;top:762px;display:flex;flex-direction:column;align-items:center;gap:12px;z-index:3}
+.cs-cap{font-size:13px;color:rgba(255,255,255,.5)}
+.pc{display:flex;align-items:center;gap:16px;padding:16px;border-radius:24px;background:rgba(255,255,255,.08);-webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);text-align:left;width:100%;color:#fff;font:inherit}
+.pc-th{position:relative;flex:none;width:96px;height:120px;border-radius:16px;overflow:hidden;display:grid;place-items:center;background:#1c1c1e}
+.pc-th>img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.pc-th.empty{background:rgba(255,255,255,.04);border:1.5px dashed rgba(255,255,255,.24);overflow:visible}
+.pc-th .uplus{width:48px;height:48px}
+.pc-th .uplus svg{width:24px;height:24px}
+.pc-th.bad,.pc.bad .pc-th{box-shadow:0 0 0 2px var(--red)}
+.pc-dim{position:absolute;inset:0;background:rgba(0,0,0,.6)}
+.pc-th .spin{position:relative;width:32px;height:32px;border-radius:50%;border:3px solid rgba(255,255,255,.28);border-top-color:#fff;animation:spin .8s linear infinite}
+.pc-tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.pc-tx b{font-size:17px;font-weight:600;line-height:22px}
+.pc-tx small{font-size:13px;color:rgba(255,255,255,.55);line-height:18px}
+.pc-tx small.red{color:var(--red)}
+.pc-ok{align-self:flex-start;display:inline-flex;align-items:center;gap:4px;height:26px;padding:0 10px;border-radius:999px;background:rgba(48,209,88,.2);color:#30D158;font-size:13px;font-weight:600;margin-top:4px}
+.pc-ok svg{width:14px;height:14px}
+.pc-chg{flex:none;height:36px;padding:0 14px;border-radius:999px;background:#2C2C2E;font-size:15px;font-weight:600;color:#fff}
+.pc-multi{justify-content:center;gap:24px}
+.pm{display:flex;flex-direction:column;align-items:center;gap:8px;color:#fff;font:inherit}
+.pm-l{font-size:13px;color:rgba(255,255,255,.55)}
+.pm-l.bad{color:var(--red)}.pm-l.ok{color:#30D158}
+.cs .gbar{background:rgba(255,255,255,.09);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px)}
+.gs-h{font-size:15px;font-weight:600}
+.gcard{border-radius:24px;background:rgba(255,255,255,.08);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);display:flex;flex-direction:column}
+.gr{height:56px;display:flex;align-items:center;gap:12px;padding:0 12px 0 16px}
+.gr>i{display:grid;place-items:center;width:28px;color:#a3a3a3}
+.gr>i svg{width:20px;height:20px}
+.gr>span:not(.sg){flex:1;font-size:17px}
+.gdiv{display:block;height:1px;margin-left:56px;background:rgba(255,255,255,.09)}
+.sg{display:flex;padding:2px;border-radius:999px;background:rgba(255,255,255,.09);flex:none}
+.sg button{min-width:64px;height:28px;padding:0 12px;border-radius:999px;font-size:13px;font-weight:600;color:rgba(255,255,255,.6)}
+.sg button.on{background:rgba(255,255,255,.22);color:#fff}
+.tg{width:64px;height:28px;border-radius:999px;background:rgba(120,120,128,.32);position:relative;transition:background .2s;flex:none}
+.tg i{position:absolute;left:2px;top:2px;width:38px;height:24px;border-radius:999px;background:#fff;transition:transform .2s;box-shadow:0 2px 6px rgba(0,0,0,.2)}
+.tg.on{background:#30D158}.tg.on i{transform:translateX(22px)}
+.gs-note{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--fg2)}
+.gs-note img{width:14px;height:14px}
+/* choose a photo sheet */
+.cp2{padding:0 16px 32px;display:flex;flex-direction:column;gap:12px}
+.cp2-h{display:grid;grid-template-columns:44px 1fr 44px;align-items:center;height:56px}
+.cp2-h h3{margin:0;text-align:center;font-size:17px;font-weight:600}
+.cp2-x{width:44px;height:44px}
+.cp2-x svg{width:18px;height:18px}
+.cp2-src{display:flex;gap:12px}
+.cp2-src label{flex:1;height:58px;border-radius:20px;display:flex;align-items:center;gap:10px;padding:0 16px;font-weight:600;font-size:15px;position:relative;overflow:hidden;cursor:pointer}
+.cp2-src svg{width:22px;height:22px}
+.cp2-src input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.cp2-r{font-size:17px;margin-top:4px}
+.rph2{flex:none;width:110px;height:136px;border-radius:16px;overflow:hidden;position:relative}
+.rph2 img{width:100%;height:100%;object-fit:cover}
+.rph2[disabled]{opacity:.45}
+.rph2 .usedl{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-size:12px;font-weight:600;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.2);white-space:nowrap}
+.cp2-empty{height:136px;border-radius:16px;border:1px dashed rgba(255,255,255,.16);background:rgba(255,255,255,.04);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;padding:0 16px}
+.cp2-empty svg{width:24px;height:24px;color:rgba(255,255,255,.48);margin-bottom:4px}
+.cp2-empty b{font-size:17px}
+.cp2-empty span{font-size:13px;color:var(--fg2)}
+/* crop */
+.crop{position:absolute;inset:0;background:#000}
+.crop-tb{position:absolute;left:0;right:0;top:62px;height:54px;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;padding:0 16px}
+.crop-tb .circle{width:44px;height:44px}
+.crop-tb .circle svg{width:18px;height:18px}
+.crop-tb b{text-align:center;font-size:17px;font-weight:600}
+.crop-area{position:absolute;left:0;width:402px;top:124px;height:588px;overflow:hidden}
+.crop-area img{position:absolute;user-select:none;-webkit-user-drag:none;pointer-events:none}
+.crop-box{position:absolute;box-shadow:0 0 0 9999px rgba(0,0,0,.6);outline:1px solid #fff;touch-action:none;cursor:move}
+.crop-box .g{position:absolute;background:rgba(255,255,255,.36);pointer-events:none}
+.g.v1{left:33.33%;top:0;bottom:0;width:1px}.g.v2{left:66.66%;top:0;bottom:0;width:1px}
+.g.h1{top:33.33%;left:0;right:0;height:1px}.g.h2{top:66.66%;left:0;right:0;height:1px}
+.hd{position:absolute;width:32px;height:32px;touch-action:none}
+.hd::before,.hd::after{content:"";position:absolute;background:#fff;border-radius:2px;pointer-events:none}
+.hd.tl{left:-4px;top:-4px}.hd.tr{right:-4px;top:-4px}.hd.bl{left:-4px;bottom:-4px}.hd.br{right:-4px;bottom:-4px}
+.hd.tl::before,.hd.tr::before{top:2px;width:24px;height:4px}.hd.bl::before,.hd.br::before{bottom:2px;width:24px;height:4px}
+.hd.tl::after,.hd.bl::after{left:2px;width:4px;height:24px}.hd.tr::after,.hd.br::after{right:2px;width:4px;height:24px}
+.hd.tl::before,.hd.bl::before{left:2px}.hd.tr::before,.hd.br::before{right:2px}
+.hd.tl::after,.hd.tr::after{top:2px}.hd.bl::after,.hd.br::after{bottom:2px}
+.eh{position:absolute;background:#fff;border-radius:2px}
+.eh.t{top:-2px;left:50%;width:24px;height:4px;margin-left:-12px}.eh.b{bottom:-2px;left:50%;width:24px;height:4px;margin-left:-12px}
+.eh.l{left:-2px;top:50%;width:4px;height:24px;margin-top:-12px}.eh.r{right:-2px;top:50%;width:4px;height:24px;margin-top:-12px}
+.crop-hint{position:absolute;left:0;right:0;top:728px;text-align:center;font-size:13px;color:var(--fg2)}
+.crop-save{position:absolute;left:16px;right:16px;top:762px;width:auto}
+/* making: edge glow (twin comets) + waiting card */
+@property --ga{syntax:'<angle>';inherits:false;initial-value:0deg}
+@keyframes edgeSpin{to{--ga:360deg}}
+.mk2{position:absolute;inset:0;background:#000;overflow:hidden}
+.mk2 .edge{position:absolute;inset:0;pointer-events:none;z-index:5;filter:blur(18px);opacity:.8}
+.mk2 .edge::before,.mk2 .edge2{content:"";position:absolute;inset:0;border-radius:55px;background:conic-gradient(from var(--ga),rgba(201,184,255,0) 0deg,#fff 6deg,#C9B8FF 18deg,rgba(201,184,255,0) 60deg,rgba(201,184,255,0) 180deg,#fff 186deg,#C9B8FF 198deg,rgba(201,184,255,0) 240deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;animation:edgeSpin 6s linear infinite}
+.mk2 .edge::before{padding:28px}
+.mk2 .edge2{padding:3px;pointer-events:none;z-index:5;opacity:.9}
+.mk2-x{position:absolute;left:16px;top:64px;z-index:6}
+.mk2-card{position:absolute;left:45px;top:112px;width:313px;height:556px;border-radius:38px;overflow:hidden;background:#0a0a0a;box-shadow:0 0 0 1px #aaa;isolation:isolate}
+.mk2-img{position:absolute;left:-32px;top:-32px;width:376px;height:619px;object-fit:cover;filter:blur(28px);animation:breathe 6s ease-in-out infinite}
+@keyframes breathe{0%,100%{transform:scale(1);filter:blur(28px)}50%{transform:scale(1.06);filter:blur(16px)}}
+.mk2-au{position:absolute;border-radius:50%;filter:blur(60px);animation:drift 6s ease-in-out infinite}
+.mk2-au.a1{left:-60px;top:40px;width:260px;height:260px;background:#fff;opacity:.22;--dx:180px;--dy:-60px}
+.mk2-au.a2{left:150px;top:260px;width:280px;height:280px;background:#8F949E;opacity:.35;--dx:-190px;--dy:40px}
+.mk2-au.a3{left:40px;top:380px;width:200px;height:200px;background:#fff;opacity:.14;--dx:140px;--dy:40px}
+.mk2-au.a4{left:120px;top:120px;width:140px;height:140px;background:#fff;opacity:.3;--dx:-60px;--dy:80px}
+@keyframes drift{50%{transform:translate(var(--dx),var(--dy))}}
+.mk2-ov{position:absolute;inset:0;background:rgba(0,0,0,.28)}
+.mk2-band{position:absolute;top:-170px;left:-200px;width:110px;height:900px;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.5),rgba(255,255,255,0));filter:blur(16px);transform:rotate(20deg);animation:band 3s ease-in-out infinite}
+@keyframes band{0%{translate:0 0}60%,100%{translate:700px 0}}
+.spk{position:absolute;background:#fff;clip-path:polygon(50% 0,59% 41%,100% 50%,59% 59%,50% 100%,41% 59%,0 50%,41% 41%);opacity:0;animation:twinkle 3s ease-in-out infinite}
+@keyframes twinkle{0%{opacity:0;transform:scale(.3) rotate(0)}20%{opacity:1;transform:scale(1) rotate(-22deg)}40%,100%{opacity:0;transform:scale(.3) rotate(-45deg)}}
+.mk2-chip{position:absolute;left:50%;top:260px;transform:translateX(-50%);display:flex;align-items:center;gap:8px;height:37px;padding:0 16px 0 12px;border-radius:100px;background:rgba(0,0,0,.4);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);box-shadow:inset 0 0 0 1px rgba(255,255,255,.16);font-size:15px;font-weight:600;white-space:nowrap}
+.mk2-chip svg{width:16px;height:16px;animation:pulse2 1.5s ease-in-out infinite}
+.mk2-chip.c1{animation:chipA 6s infinite}.mk2-chip.c2{animation:chipB 6s infinite}
+@keyframes chipA{0%,43%{opacity:1}50%,93%{opacity:0}100%{opacity:1}}
+@keyframes chipB{0%,43%{opacity:0}50%,93%{opacity:1}100%{opacity:0}}
+@keyframes pulse2{50%{transform:scale(1.2)}}
+.mk2-av{position:absolute;left:19px;top:468px;width:70px;height:70px;border-radius:50%;overflow:hidden;box-shadow:0 0 0 2px rgba(255,255,255,.9)}
+.mk2-av img{width:100%;height:100%;object-fit:cover}
+.mk2-t{position:absolute;left:32px;right:32px;top:687px;margin:0;text-align:center;font-size:22px;font-weight:700;line-height:28px}
+.mk2-s{position:absolute;left:32px;right:32px;top:720px;margin:0;text-align:center;font-size:13px;color:var(--fg2)}
+.mk2-b{position:absolute;left:16px;right:16px;top:762px;display:flex;flex-direction:column;align-items:center;gap:12px}
+/* result */
+.rs{position:absolute;inset:0;background:#000}
+.rs-back{position:absolute;left:16px;top:64px;z-index:2}
+.rs-title{position:absolute;left:72px;right:72px;top:75px;text-align:center;font-size:20px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rs-media{position:absolute;left:31px;width:340px;border-radius:24px;overflow:hidden;background:#111}
+.rs-media.v{top:133px;height:604px}.rs-media.p{top:219px;height:425px}
+.rs-media>img,.rs-media>video{width:100%;height:100%;object-fit:cover}
+.rs-media .playbtn{position:absolute;left:50%;top:50%;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;background:rgba(0,0,0,.28);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);display:grid;place-items:center;transition:opacity .2s}
+.rs-media .playbtn svg{width:26px;height:26px;color:#fff}
+.rs-media.playing .playbtn{opacity:0}
+.rs-b{position:absolute;left:16px;right:16px;top:762px;display:flex;gap:12px}
+.rs-b>*{flex:1}
+.rs-share{height:50px;border-radius:999px;background:#2C2C2E;font-size:17px;font-weight:600;color:#fff}
 </style>
 <div class="stage">
   <aside class="panel" aria-label="Presenter controls">
@@ -653,9 +791,11 @@ img{display:block}
       <button class="pbtn" data-jump="flow-video2">Create video <small>2 photos</small></button>
       <button class="pbtn" data-jump="flow-image">Create image <small>1 photo</small></button>
       <button class="pbtn" data-jump="flow-image2">Create image <small>2 photos</small></button>
+      <button class="pbtn" data-jump="crop">Crop photo <small>Photo library → crop</small></button>
       <button class="pbtn" data-jump="collection">Collection grid <small>See all</small></button>
     </div>
     <div class="pgroup"><h2>Demo switches</h2>
+      <label class="ptoggle">No recent photos <input type="checkbox" id="sw-norecent"></label>
       <label class="ptoggle">Next photo is rejected <input type="checkbox" id="sw-reject"></label>
       <label class="ptoggle">Next generation fails <input type="checkbox" id="sw-fail"></label>
       <label class="ptoggle">User has Pro <input type="checkbox" id="sw-pro"></label>
@@ -1216,6 +1356,110 @@ function failedHtml(j){return `<button class="circle glass" style="position:abso
   <div class="mk-body"><h2>This one didn't work</h2><div class="tn" style="max-width:300px;line-height:20px">Something went wrong on our side. No coins were charged.</div><div style="margin-top:16px"><span class="okpill">${I('checkC')}${j.cost} coins back in your balance</span></div></div>
   <div class="bottom"><button class="cta" data-a="retry" data-id="${j.id}">Try again</button><button class="textlink" data-a="contact">Contact us</button></div>`}
 
+/* ================= 23/11 rebuild: create flow from Figma (sections 857:6736 video · 971:4366 photo) ================= */
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const reqSub=()=>F.v?'A clear, front-facing selfie works best':(/Birthday|Holiday/.test(F.t.cat)?'Full body, head to toe works best':'A clear, front-facing selfie works best');
+/* 03 · Create: full-bleed template, floating cards (photo card + settings bar), CTA at the bottom */
+function startSetup(t,host){const v=t.kind==='video';if(F&&F.host)closePanel();
+  F={t,v,photos:Array(t.people).fill(null),slot:0,mode:'main',set:{sound:true,dur:'5s',res:'480p',ratio:'4:5',q:'Standard'}};
+  const el=push(`<div class="cs">${media(t,{kb:true})}<i class="cs-top"></i><i class="cs-fade"></i>
+    <button class="circle glass cs-x" data-a="close" aria-label="Close">${I('x')}</button><div class="cs-title">${esc(t.name)}</div>
+    <div class="cs-cards" id="slist"></div><div class="cs-bottom" id="sbottom"></div></div>`,{modal:true});
+  el.dataset.screen='setup';F.el=el;renderSetup()}
+function multiCard(){const nextIdx=F.photos.findIndex(x=>!x);
+  return `<div class="pc pc-multi">${F.photos.map((x,i)=>{const st=x?x.st:'';
+    const inner=x?`<img src="${imgSrc(x.img)}" alt="">${st==='checking'?'<i class="pc-dim"></i><i class="spin"></i>':''}`:`<span class="uplus ${i===nextIdx?'':'still'}">${I('plus')}</span>`;
+    const lab=st==='bad'?'No clear face':st==='ok'?`Person ${i+1} ✓`:st==='checking'?'Checking…':`Person ${i+1}`;
+    return `<button class="pm" data-a="addphoto" data-slot="${i}"><span class="pc-th ${x?'':'empty'} ${st==='bad'?'bad':''}">${inner}</span><span class="pm-l ${st}">${lab}</span></button>`}).join('')}</div>`}
+function photoCard(){if(F.t.people>1)return multiCard();const p=F.photos[0];
+  if(!p)return `<button class="pc" data-a="addphoto" data-slot="0" aria-label="Add your photo"><span class="pc-th empty"><span class="uplus">${I('plus')}</span></span><span class="pc-tx"><b>Add your photo</b><small>${reqSub()}</small></span></button>`;
+  const th=`<span class="pc-th"><img src="${imgSrc(p.img)}" alt="Your photo">${p.st==='checking'?'<i class="pc-dim"></i><i class="spin"></i>':''}</span>`;
+  if(p.st==='checking')return `<div class="pc">${th}<span class="pc-tx"><b>Checking photo…</b><small>Making sure your face is clear</small></span></div>`;
+  if(p.st==='bad')return `<div class="pc bad">${th}<span class="pc-tx"><b>Choose another photo</b><small class="red">No clear face · no coins used</small></span><button class="pc-chg" data-a="addphoto" data-slot="0">Change</button></div>`;
+  return `<div class="pc">${th}<span class="pc-tx"><b>Your photo</b><span class="pc-ok">${I('checkC')}Looks good</span></span><button class="pc-chg" data-a="addphoto" data-slot="0">Change</button></div>`}
+/* 03a · Generation settings: pushed in place of the cards (X / Save keep their spots) */
+function settingsList(){const s=F.set;
+  const segc=(k,opts)=>`<span class="sg">${opts.map(o=>`<button class="${String(s[k])===String(o)?'on':''}" data-a="gset2" data-k="${k}" data-v="${o}">${o}</button>`).join('')}</span>`;
+  const row=(ic,l,ctl)=>`<div class="gr"><i>${I(ic)}</i><span>${l}</span>${ctl}</div>`;
+  const rows=F.v?[row('speaker','Sound',`<button class="tg ${s.sound?'on':''}" data-a="gset2" data-k="sound" data-v="${!s.sound}" aria-label="Sound"><i></i></button>`),row('clock','Duration',segc('dur',['5s','10s'])),row('film','Resolution',segc('res',['480p','720p']))]
+    :[row('photo','Ratio',segc('ratio',['4:5','1:1','9:16'])),row('sparkles','Quality',segc('q',['Standard','HD']))];
+  const note=F.v?(s.res==='720p'?'720p adds 30 coins':''):(s.q==='HD'?'HD adds 20 coins':'');
+  return `<div class="gs-h">Generation settings</div><div class="gcard">${rows.join('<i class="gdiv"></i>')}</div>${note?`<div class="gs-note"><img src="img/coin.png" alt="">${note}</div>`:''}`}
+function renderSetup(){if(!F||!F.el)return;const L=$('#slist',F.el),B=$('#sbottom',F.el);if(!L)return;
+  if(F.mode==='settings'){L.innerHTML=settingsList();B.innerHTML=`<button class="cta" data-a="gsave">Save</button>`;return}
+  L.innerHTML=photoCard()+settingsCard();
+  const ok=F.photos.every(x=>x&&x.st==='ok');const anyBad=F.photos.some(x=>x&&x.st==='bad');const checking=F.photos.some(x=>x&&x.st==='checking');const left=F.photos.filter(x=>!x).length;
+  let cap;if(checking)cap='Checking your photo…';else if(anyBad)cap='No coins used · choose another photo';else if(F.t.people>1)cap=left===F.t.people?`Add ${F.t.people} photos to continue`:`Add ${left} more photo`;else cap='Add a photo to continue';
+  B.innerHTML=ok?`<button class="cta" data-a="create">Create with <img src="img/coin.png" alt="coins"> ${price()}</button>`
+    :`<button class="cta" data-a="create" disabled>Create <span class="sep">·</span> <img src="img/coin.png" alt="coins"> ${price()}</button><div class="cs-cap">${cap}</div>`}
+/* 05 · Choose a photo (sheet) + empty state; Photo library opens the iPhone's own picker */
+function choosePhoto(slot){F.slot=slot;const other=F.photos.map((p,i)=>i!==slot&&p?p.img:null).filter(Boolean);
+  const none=$('#sw-norecent')&&$('#sw-norecent').checked;const pool=none?[]:[...S.uploads,...SELFIES];
+  const title=F.t.people>1?`Photo for Person ${slot+1}`:'Choose a photo';
+  sheet(`<div class="cp2"><div class="cp2-h"><span></span><h3>${title}</h3><button class="circle glass cp2-x" data-a="sheetclose" aria-label="Close">${I('x')}</button></div>
+    <div class="cp2-src"><label class="glass">${I('camera')}Take a selfie<input type="file" accept="image/*" capture="user" data-pick></label><label class="glass">${I('photo')}Photo library<input type="file" accept="image/*" data-pick></label></div>
+    <b class="cp2-r">Recent</b>${pool.length?`<div class="recent">${pool.map(p=>`<button class="rph2" data-img="${p}" ${other.includes(p)?'disabled':''}><img src="${imgSrc(p)}" alt="">${other.includes(p)?'<span class="usedl">In use</span>':''}</button>`).join('')}</div>`
+      :`<div class="cp2-empty">${I('photo')}<b>No recent photos</b><span>Photos you use will show up here next time.</span></div>`}</div>`,
+  {cls:'cpsheet',mount:sh=>{
+    sh.addEventListener('click',e=>{const b=e.target.closest('.rph2');if(b&&!b.disabled){const img=b.dataset.img;closeSheet(()=>usePhoto(img))}});
+    $$('[data-pick]',sh).forEach(inp=>inp.addEventListener('change',()=>{const f=inp.files[0];if(!f)return;const u=URL.createObjectURL(f);closeSheet(()=>openCrop(u))}))}})}
+function usePhoto(img){const slot=F.slot||0;const bad=$('#sw-reject').checked;if(bad)$('#sw-reject').checked=false;
+  if((img.startsWith('data:')||img.startsWith('blob:'))&&!S.uploads.includes(img))S.uploads.unshift(img);
+  F.photos[slot]={img,st:'checking'};renderSetup();
+  setTimeout(()=>{if(!F||!F.photos[slot]||F.photos[slot].img!==img)return;F.photos[slot].st=bad?'bad':'ok';renderSetup();
+    if(!bad){const nx=F.photos.findIndex(x=>!x);if(nx>=0)setTimeout(()=>choosePhoto(nx),500)}},1500)}
+/* 05b · Crop photo: free crop, no ratio presets, Save */
+function openCrop(src){
+  const el=push(`<div class="crop"><div class="crop-tb"><button class="circle glass" data-a="cropx" aria-label="Close">${I('x')}</button><b>Crop photo</b><span></span></div>
+    <div class="crop-area"><img src="${src}" alt=""><div class="crop-box"><i class="g v1"></i><i class="g v2"></i><i class="g h1"></i><i class="g h2"></i>${['tl','tr','bl','br'].map(k=>`<i class="hd ${k}" data-h="${k}"></i>`).join('')}${['t','b','l','r'].map(k=>`<i class="eh ${k}" data-h="${k}"></i>`).join('')}</div></div>
+    <div class="crop-hint">Drag the corners to crop · Pinch to zoom</div><button class="cta crop-save" data-a="cropsave">Save</button></div>`,{modal:true});
+  el.dataset.screen='crop';
+  const area=$('.crop-area',el),im=$('img',area),box=$('.crop-box',el);const AW=402,AH=588;let R=null,B=null;
+  const draw=()=>Object.assign(box.style,{left:B.x+'px',top:B.y+'px',width:B.w+'px',height:B.h+'px'});
+  const layout=()=>{const r=im.naturalWidth/im.naturalHeight;let w=AW,h=w/r;if(h>AH){h=AH;w=h*r}R={x:(AW-w)/2,y:(AH-h)/2,w,h};
+    Object.assign(im.style,{left:R.x+'px',top:R.y+'px',width:w+'px',height:h+'px'});B={x:R.x+24,y:R.y+24,w:w-48,h:h-48};draw()};
+  if(im.complete&&im.naturalWidth)layout();else im.onload=layout;
+  box.addEventListener('pointerdown',e=>{if(!B)return;const h=e.target.dataset.h||'move';const sc=el.getBoundingClientRect().width/402;const s0=Object.assign({},B),x0=e.clientX,y0=e.clientY;box.setPointerCapture(e.pointerId);
+    const mv=ev=>{const dx=(ev.clientX-x0)/sc,dy=(ev.clientY-y0)/sc;let {x,y,w}=s0,hh=s0.h;const MIN=80;
+      if(h==='move'){x=clamp(x+dx,R.x,R.x+R.w-w);y=clamp(y+dy,R.y,R.y+R.h-hh)}else{
+        if(h.includes('l')){const nx=clamp(x+dx,R.x,x+w-MIN);w+=x-nx;x=nx}
+        if(h.includes('r')){w=clamp(w+dx,MIN,R.x+R.w-x)}
+        if(h.includes('t')){const ny=clamp(y+dy,R.y,y+hh-MIN);hh+=y-ny;y=ny}
+        if(h.includes('b')){hh=clamp(hh+dy,MIN,R.y+R.h-y)}}
+      B={x,y,w,h:hh};draw()};
+    const up=()=>{box.removeEventListener('pointermove',mv);box.removeEventListener('pointerup',up);box.removeEventListener('pointercancel',up)};
+    box.addEventListener('pointermove',mv);box.addEventListener('pointerup',up);box.addEventListener('pointercancel',up)});
+  el._crop=()=>{if(!R)return src;try{const c=document.createElement('canvas');const k=im.naturalWidth/R.w;c.width=Math.round(B.w*k);c.height=Math.round(B.h*k);
+    c.getContext('2d').drawImage(im,(B.x-R.x)*k,(B.y-R.y)*k,B.w*k,B.h*k,0,0,c.width,c.height);return c.toDataURL('image/jpeg',.9)}catch(e){return src}};
+  return el}
+/* 08 · Making: edge glow + waiting card (no progress) */
+function makingHtml(j){const t=ALL[j.tpl];const isV=j.stage!=='photo';const src=t?thumb(t):jimg(j);
+  const sp=[[36,52,24],[217,69,37],[141,142,17],[257,200,20],[46,199,31],[191,229,14],[31,352,17],[235,335,34],[119,400,20],[215,448,17],[89,117,14],[166,318,24]];
+  return `<div class="mk2"><i class="edge"></i><i class="edge2"></i><button class="circle glass mk2-x" data-a="keep" aria-label="Close">${I('x')}</button>
+  <div class="mk2-card"><img class="mk2-img" src="${src}" alt=""><i class="mk2-au a1"></i><i class="mk2-au a2"></i><i class="mk2-au a3"></i><i class="mk2-au a4"></i><i class="mk2-ov"></i><i class="mk2-band"></i>
+   ${sp.map(([x,y,s],i)=>`<i class="spk" style="left:${x}px;top:${y}px;width:${s}px;height:${s}px;animation-delay:${(((i*7)%12)*.25).toFixed(2)}s"></i>`).join('')}
+   <span class="mk2-chip c1">${I('sparkles')}Dreaming up your scene…</span><span class="mk2-chip c2">${I('sparkles')}${isV?'Adding motion…':'Adding final touches…'}</span>
+   <span class="mk2-av"><img src="${imgSrc(j.selfie)}" alt=""></span></div>
+  <h2 class="mk2-t">${isV?'Your video is on its way...':'Your photo is on its way...'}</h2><p class="mk2-s">You can leave this screen and find it in Gallery › Queue.</p>
+  <div class="mk2-b"><button class="cta" data-a="keep">Keep browsing</button><button class="textlink" data-a="toqueue">Go to Queue</button></div></div>`}
+function onJobUpdate(j){const el=stack.find(s=>s.dataset.job===j.id);
+  if(el&&j.status==='failed'){replaceAt(el,failedHtml(j),{modal:true},n=>{n.dataset.screen='failed';n.dataset.job=j.id})}
+  else if(!el&&j.status==='failed')toast(`${esc(j.name)} didn't work · coins refunded`,`<span style="color:var(--red)">${I('warn','ico')}</span>`);
+  if(S.tab==='gallery'&&S.gtab==='queue'&&!stack.length){const now=performance.now();if(!onJobUpdate._t||now-onJobUpdate._t>500){onJobUpdate._t=now;renderGallery()}}}
+/* 09 · Result: video 9:16 with play, photo 4:5 · Share / Save */
+function resultHtml(c){const isV=c.kind==='video';const src=c.v?`<video src="v/${c.v}.mp4" poster="p/${c.v}.jpg" loop playsinline muted autoplay data-auto></video>`:`<img src="${imgSrc(c.img)}" alt="">`;
+  return `<div class="rs"><button class="circle glass rs-back" data-a="close" aria-label="Back">${I('back')}</button><div class="rs-title">${esc(c.name)}</div>
+  <div class="rs-media ${isV?'v':'p'}${c.v?' playing':''}" ${isV?'data-a="playtoggle"':''}>${src}${isV?`<span class="playbtn">${I('playF')}</span>`:''}</div>
+  <div class="rs-b"><button class="rs-share" data-a="shareres">Share</button><button class="cta" data-a="save" data-k="${c.key}">Save</button></div></div>`}
+const H2={
+ gsettings:()=>{if(!F)return;F.setBak=Object.assign({},F.set);F.mode='settings';renderSetup()},
+ gset2:a=>{const k=a.dataset.k;let v=a.dataset.v;if(k==='sound')v=v==='true';F.set[k]=v;renderSetup()},
+ gsave:()=>{F.mode='main';renderSetup()},
+ create:()=>{const c=price();if(c>S.coins){toast('Not enough coins');return paywall()}const j=startJob({stage:F.v?'video':'photo',t:F.t,img:F.photos[0].img,cost:c});openMaking(j)},
+ cropx:()=>{pop();setTimeout(()=>{if(F)choosePhoto(F.slot||0)},360)},
+ cropsave:()=>{const el=stack[stack.length-1];const url=el&&el._crop?el._crop():null;pop();if(url&&F)setTimeout(()=>usePhoto(url),340)}
+};
+
 /* ================= sheets: report, delete, paywall ================= */
 function reportSheet(){let sel=null;sheet(`<div class="rp"><h3>Report this creation</h3>${['It doesn\'t look like me','Offensive or unsafe','Poor quality','Something else'].map(r=>`<button class="ropt" data-r="${esc(r)}">${esc(r)}<span class="rad"></span></button>`).join('')}<textarea id="rnote" placeholder="Add a note (optional)"></textarea><button class="cta" id="rsend" disabled>Send report</button></div>`,{mount:sh=>{
   sh.addEventListener('click',e=>{const o=e.target.closest('.ropt');if(o){sel=o.dataset.r;$$('.ropt',sh).forEach(x=>x.classList.toggle('on',x===o));$('#rsend',sh).disabled=false}if(e.target.closest('#rsend')&&sel){closeSheet();toast('Thanks. We will review it',`<span style="color:var(--green)">${I('checkC','ico')}</span>`)}})}})}
@@ -1293,6 +1537,7 @@ const H={
  contact:()=>toast('Opens the support form'),
  tcpaste:()=>{const inp=$('#tcin');inp.value='https://www.tiktok.com/@rainy.days/video/7312845510962';inp.focus({preventScroll:true});detectLink($('.tabview[data-id=discover]'),inp.value)}
 };
+Object.assign(H,H2);{const c0=H.close;H.close=a=>{if(F&&F.mode==='settings'&&stack[stack.length-1]===F.el){F.set=F.setBak||F.set;F.mode='main';renderSetup();return}c0(a)}}
 app.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(!a||!app.contains(a))return;const f=H[a.dataset.a];if(f){e.preventDefault();e.stopPropagation();f(a,e)}});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(sheets.length)closeSheet();else if(stack.length)H.close()}});
 // close category panels when tapping elsewhere
@@ -1302,10 +1547,11 @@ app.addEventListener('pointerdown',e=>{if(!e.target.closest('.catpanel,.chip-arr
 function resetAll(){while(sheets.length)closeSheet();popAll();F=null}
 const J={discover:()=>setTab('discover'),video:()=>{setTab('discover');openVideoDetail(feedList('foryou')[0].id,'foryou')},photo:()=>setTab('photo'),tools:()=>setTab('tools'),gallery:()=>setTab('gallery'),
  'flow-video':()=>{setTab('discover');startSetup(ALL.neon)},'flow-video2':()=>{setTab('discover');startSetup(ALL.pool)},
- 'flow-image':()=>{setTab('photo');startSetup(ALL.santa)},'flow-image2':()=>{setTab('photo');startSetup(ALL.duo)},
+ 'flow-image':()=>{setTab('photo');startSetup(ALL.lavender||ALL.santa)},'flow-image2':()=>{setTab('photo');startSetup(ALL.duo)},
  trend:()=>{setTab('discover');const sc=$('#dscroll');const tc=$('#tc');sc.scrollTo({top:tc.offsetTop-130,behavior:'smooth'});setTimeout(()=>H.tcpaste(),600)},
  collection:()=>{setTab('discover');openCollection('tv')},
  reset:()=>{S.coins=1250;S.seenGuide=false;S.seenSwipe=false;S.seenTap=false;S.seenChips=false;S.seenColChips=false;S.seenSeeAll=false;S.created=[];S.uploads=[];renderVideo();renderGallery();toast('Demo reset')}};
+J.crop=()=>{setTab('discover');startSetup(ALL.neon);setTimeout(()=>openCrop('img/selfie2.jpg'),420)};
 $$('[data-jump]').forEach(b=>b.addEventListener('click',()=>{const k=b.dataset.jump;if(k!=='reset')resetAll();setTimeout(()=>J[k](),k==='reset'?0:360)}));
 
 /* ================= seeded queue + coin pill refresh ================= */
