@@ -78,9 +78,9 @@ function openCrop(src){
 /* 08 · Making: edge glow + waiting card (no progress) */
 function makingHtml(j){const t=ALL[j.tpl];const isV=j.stage!=='photo';const src=t?thumb(t):jimg(j);
   const sp=[[36,52,24],[217,69,37],[141,142,17],[257,200,20],[46,199,31],[191,229,14],[31,352,17],[235,335,34],[119,400,20],[215,448,17],[89,117,14],[166,318,24]];
-  return `<div class="mk2"><i class="edge"></i><i class="edge2"></i><button class="circle glass mk2-x" data-a="keep" aria-label="Close">${I('x')}</button>
+  return `<div class="mk2"><i class="edge"></i><button class="circle glass mk2-x" data-a="keep" aria-label="Close">${I('x')}</button>
   <div class="mk2-card"><img class="mk2-img" src="${src}" alt=""><i class="mk2-au a1"></i><i class="mk2-au a2"></i><i class="mk2-au a3"></i><i class="mk2-au a4"></i><i class="mk2-ov"></i><i class="mk2-band"></i>
-   ${sp.map(([x,y,s],i)=>`<i class="spk" style="left:${x}px;top:${y}px;width:${s}px;height:${s}px;animation-delay:${(((i*7)%12)*.25).toFixed(2)}s"></i>`).join('')}
+   ${sp.map(([x,y,s],i)=>`<i class="spk" style="left:${x}px;top:${y}px;width:${s}px;height:${s}px;animation-delay:${[0,1.05,.3,1.35,.6,1.65,.9,.15,1.2,.45,1.5,.75][i]}s"></i>`).join('')}
    <span class="mk2-chip c1">${I('sparkles')}Dreaming up your scene…</span><span class="mk2-chip c2">${I('sparkles')}${isV?'Adding motion…':'Adding final touches…'}</span>
    <span class="mk2-av"><img src="${imgSrc(j.selfie)}" alt=""></span></div>
   <h2 class="mk2-t">${isV?'Your video is on its way...':'Your photo is on its way...'}</h2><p class="mk2-s">You can leave this screen and find it in Gallery › Queue.</p>

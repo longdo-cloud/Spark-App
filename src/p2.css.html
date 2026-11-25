@@ -659,4 +659,13 @@
 .fcat .ic{border-radius:12px;background:rgba(255,255,255,.09)}
 .fcat .ic svg{width:13px;height:13px}
 .fcat,.fcat a{color:#fff;font-weight:600;text-decoration:none}
+
+/* Making · Edge glow motion (Figma 1028:39117): ring mask inset 61px, layer blur 61, opacity .4; twin comets rotate 6s */
+.mk2 .edge{position:absolute;inset:auto;left:-28px;top:-52px;width:458px;height:976px;pointer-events:none;z-index:5;filter:blur(61px);opacity:.4}
+.mk2 .edge::before{content:"";position:absolute;inset:0;border-radius:0;padding:61.36px;box-sizing:border-box;background:conic-gradient(from calc(var(--ga) + 90deg) at 50% 50%,rgba(201,184,255,0) 0deg,#fff 7.2deg,#C9B8FF 21.6deg,rgba(201,184,255,0) 64.8deg,rgba(201,184,255,0) 68.4deg,#fff 187.2deg,#C9B8FF 201.6deg,rgba(201,184,255,0) 244.8deg,rgba(201,184,255,0) 360deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;animation:edgeSpin 6s linear infinite}
+.mk2 .edge2{display:none}
+.mk2-au{filter:blur(72px)}
+@keyframes band{0%{translate:0 0;animation-timing-function:ease-in-out}60%,100%{translate:680px 0}}
+.spk{animation:twinkle2 3s linear infinite}
+@keyframes twinkle2{0%{opacity:0;transform:scale(.3) rotate(0);animation-timing-function:ease-out}20%{opacity:1;transform:scale(1) rotate(22.5deg);animation-timing-function:ease-in}40%{opacity:0;transform:scale(.3) rotate(45deg)}100%{opacity:0;transform:scale(.3) rotate(45deg)}}
 </style>

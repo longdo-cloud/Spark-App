@@ -823,6 +823,15 @@ img{display:block}
 .fcat .ic{border-radius:12px;background:rgba(255,255,255,.09)}
 .fcat .ic svg{width:13px;height:13px}
 .fcat,.fcat a{color:#fff;font-weight:600;text-decoration:none}
+
+/* Making · Edge glow motion (Figma 1028:39117): ring mask inset 61px, layer blur 61, opacity .4; twin comets rotate 6s */
+.mk2 .edge{position:absolute;inset:auto;left:-28px;top:-52px;width:458px;height:976px;pointer-events:none;z-index:5;filter:blur(61px);opacity:.4}
+.mk2 .edge::before{content:"";position:absolute;inset:0;border-radius:0;padding:61.36px;box-sizing:border-box;background:conic-gradient(from calc(var(--ga) + 90deg) at 50% 50%,rgba(201,184,255,0) 0deg,#fff 7.2deg,#C9B8FF 21.6deg,rgba(201,184,255,0) 64.8deg,rgba(201,184,255,0) 68.4deg,#fff 187.2deg,#C9B8FF 201.6deg,rgba(201,184,255,0) 244.8deg,rgba(201,184,255,0) 360deg);-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude;animation:edgeSpin 6s linear infinite}
+.mk2 .edge2{display:none}
+.mk2-au{filter:blur(72px)}
+@keyframes band{0%{translate:0 0;animation-timing-function:ease-in-out}60%,100%{translate:680px 0}}
+.spk{animation:twinkle2 3s linear infinite}
+@keyframes twinkle2{0%{opacity:0;transform:scale(.3) rotate(0);animation-timing-function:ease-out}20%{opacity:1;transform:scale(1) rotate(22.5deg);animation-timing-function:ease-in}40%{opacity:0;transform:scale(.3) rotate(45deg)}100%{opacity:0;transform:scale(.3) rotate(45deg)}}
 </style>
 <div class="stage">
   <aside class="panel" aria-label="Presenter controls">
@@ -1487,9 +1496,9 @@ function openCrop(src){
 /* 08 · Making: edge glow + waiting card (no progress) */
 function makingHtml(j){const t=ALL[j.tpl];const isV=j.stage!=='photo';const src=t?thumb(t):jimg(j);
   const sp=[[36,52,24],[217,69,37],[141,142,17],[257,200,20],[46,199,31],[191,229,14],[31,352,17],[235,335,34],[119,400,20],[215,448,17],[89,117,14],[166,318,24]];
-  return `<div class="mk2"><i class="edge"></i><i class="edge2"></i><button class="circle glass mk2-x" data-a="keep" aria-label="Close">${I('x')}</button>
+  return `<div class="mk2"><i class="edge"></i><button class="circle glass mk2-x" data-a="keep" aria-label="Close">${I('x')}</button>
   <div class="mk2-card"><img class="mk2-img" src="${src}" alt=""><i class="mk2-au a1"></i><i class="mk2-au a2"></i><i class="mk2-au a3"></i><i class="mk2-au a4"></i><i class="mk2-ov"></i><i class="mk2-band"></i>
-   ${sp.map(([x,y,s],i)=>`<i class="spk" style="left:${x}px;top:${y}px;width:${s}px;height:${s}px;animation-delay:${(((i*7)%12)*.25).toFixed(2)}s"></i>`).join('')}
+   ${sp.map(([x,y,s],i)=>`<i class="spk" style="left:${x}px;top:${y}px;width:${s}px;height:${s}px;animation-delay:${[0,1.05,.3,1.35,.6,1.65,.9,.15,1.2,.45,1.5,.75][i]}s"></i>`).join('')}
    <span class="mk2-chip c1">${I('sparkles')}Dreaming up your scene…</span><span class="mk2-chip c2">${I('sparkles')}${isV?'Adding motion…':'Adding final touches…'}</span>
    <span class="mk2-av"><img src="${imgSrc(j.selfie)}" alt=""></span></div>
   <h2 class="mk2-t">${isV?'Your video is on its way...':'Your photo is on its way...'}</h2><p class="mk2-s">You can leave this screen and find it in Gallery › Queue.</p>
