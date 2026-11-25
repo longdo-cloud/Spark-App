@@ -832,6 +832,14 @@ img{display:block}
 @keyframes band{0%{translate:0 0;animation-timing-function:ease-in-out}60%,100%{translate:680px 0}}
 .spk{animation:twinkle2 3s linear infinite}
 @keyframes twinkle2{0%{opacity:0;transform:scale(.3) rotate(0);animation-timing-function:ease-out}20%{opacity:1;transform:scale(1) rotate(22.5deg);animation-timing-function:ease-in}40%{opacity:0;transform:scale(.3) rotate(45deg)}100%{opacity:0;transform:scale(.3) rotate(45deg)}}
+
+/* Figma layer-blur value = 2x CSS blur() radius → halve every Figma blur on the Making screen */
+.mk2-img{filter:blur(14px);animation:breathe2 6s ease-in-out infinite}
+@keyframes breathe2{0%,100%{transform:scale(1);filter:blur(14px)}50%{transform:scale(1.06);filter:blur(8px)}}
+.mk2-au{filter:blur(36px)}
+.mk2-band{filter:blur(8px)}
+.mk2 .edge{filter:blur(30.7px)}
+.mk2-chip{-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}
 </style>
 <div class="stage">
   <aside class="panel" aria-label="Presenter controls">
