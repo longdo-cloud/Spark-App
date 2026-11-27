@@ -9,13 +9,13 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 
 /* ---------- data ---------- */
 const T = { // templates (video + photo)
-  neon: { id: 'neon', name: 'Neon Run', kind: 'video', img: '3188779628', price: 120, cat: 'Cinematic', uses: '12.4K' },
-  cosmic: { id: 'cosmic', name: 'Cosmic Night', kind: 'video', img: 'a0c009bf83', price: 120, cat: 'Fantasy', uses: '8.1K', v: '05' },
-  billionaire: { id: 'billionaire', name: 'Billionaire Reveal', kind: 'video', img: '30b2d83d18', price: 120, cat: 'Cinematic' },
-  street: { id: 'street', name: 'Street Icon', kind: 'video', img: 'cc8862499f', price: 120, cat: 'Action' },
-  skyhero: { id: 'skyhero', name: 'Sky Hero', kind: 'video', img: '3b449190bc', price: 120, cat: 'Action' },
-  dream: { id: 'dream', name: 'Dreamscape', kind: 'video', img: '3188779628', price: 120, cat: 'Action' },
-  pinkhair: { id: 'pinkhair', name: 'Pastel Waves', kind: 'video', img: '89c24bbb5c', price: 120, cat: 'Trending' },
+  neon: { id: 'neon', name: 'Neon Run', kind: 'video', img: '3188779628', price: 100, cat: 'Cinematic', uses: '12.4K' },
+  cosmic: { id: 'cosmic', name: 'Cosmic Night', kind: 'video', img: 'a0c009bf83', price: 100, cat: 'Fantasy', uses: '8.1K', v: '05' },
+  billionaire: { id: 'billionaire', name: 'Billionaire Reveal', kind: 'video', img: '30b2d83d18', price: 100, cat: 'Cinematic' },
+  street: { id: 'street', name: 'Street Icon', kind: 'video', img: 'cc8862499f', price: 100, cat: 'Action' },
+  skyhero: { id: 'skyhero', name: 'Sky Hero', kind: 'video', img: '3b449190bc', price: 100, cat: 'Action' },
+  dream: { id: 'dream', name: 'Dreamscape', kind: 'video', img: '3188779628', price: 100, cat: 'Action' },
+  pinkhair: { id: 'pinkhair', name: 'Pastel Waves', kind: 'video', img: '89c24bbb5c', price: 100, cat: 'Trending' },
   lavender: { id: 'lavender', name: 'Lavender Birthday', kind: 'photo', img: '0e4cddc53b', price: 100, cat: 'Birthday' },
   cake: { id: 'cake', name: 'Cake Princess', kind: 'photo', img: 'd4bd65a314', price: 100, cat: 'Birthday' },
   thirty: { id: 'thirty', name: 'Thirty & Thriving', kind: 'photo', img: '4378f76bb3', price: 100, cat: 'Birthday' },
@@ -37,7 +37,7 @@ const S = {
     { id: 'bday', name: 'Birthday ideas', items: ['cake', 'thirty'] },
     { id: 'halloween', name: 'Halloween', items: [] },
   ],
-  guideAgreed: false, profile: { name: 'Su Su', user: 'susu.creates', birthday: 'Aug 14, 2000', gender: 'Female' },
+  guideAgreed: false, profile: { name: 'Su Su', user: 'su.creates', birthday: 'Aug 14, 2000', gender: 'Female' },
 };
 
 /* ---------- router ---------- */
@@ -106,11 +106,11 @@ function alertBox({ icon = '', title, msg = '', acts, h = false }) {
   p.appendChild(d);
 }
 let toastT;
-function toast(text, { act = '', fn = null, icon = 'check', ms = 3200 } = {}) {
+function toast(text, { act = '', fn = null, icon = 'check', ms = 3200, pos = 'top' } = {}) {
   const p = $phone(); p.querySelectorAll('.toast').forEach(n => n.remove()); clearTimeout(toastT);
-  const t = document.createElement('div'); t.className = 'toast glass dark';
+  const t = document.createElement('div'); t.className = 'toast glass dark' + (pos === 'bottom' ? ' bottom' : '');
   const iconHtml = icon === 'check' ? `<img src="img/lg_check.png" alt="">` : icon === 'bell' ? `<span class="icbox bellring" style="width:20px;height:20px">${ic('bell')}</span>` : icon;
-  t.innerHTML = `${iconHtml}<span>${text}</span>${act ? `<button class="act">${act} ${act.length < 10 ? ic('chev') : ''}</button>` : ''}`;
+  t.innerHTML = `${iconHtml}<span>${text}</span>${act ? `<button class="act">${act} ${ic('chev')}</button>` : ''}`;
   if (fn) t.querySelector('.act').onclick = () => { t.remove(); fn(); };
   p.appendChild(t); toastT = setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 350); }, ms);
 }

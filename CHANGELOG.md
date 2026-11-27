@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-27 — Khớp lại với Figma từng màn
+
+- Generate video/image: feed (bỏ dòng category, nút Save/More), trạng thái thu gọn (Use this viền lime + nút lọc cạnh tiêu đề), lần đầu bấm Use This Style mở Guidelines ngay trên feed rồi vào Create; thẻ ảnh 152, nút + lime 48, Checking / Looks good (Change trắng) / No clear face (Change lime, viền đỏ); Making (thẻ 312×554, ngôi sao, toast Notify nằm trong thẻ); Result video/ảnh và Failed đúng kích thước; giá Try again 160 (video) / 100 (ảnh); giá template 100.
+- More sheet: icon Messenger và chữ Other như Figma. Categories thêm Y2K Vibes.
+- Profile: thẻ Credits Free/Pro đúng bố cục và chữ; Coin history đúng hàng 84, segmented control trắng.
+- Bookmarks: ảnh bìa và số lượng như Figma, sheet Save to collection, sheet New collection (ô viền lime, nút xoá, dòng "… will be added"), collection trống, toast "Saved · Collections" ở dưới.
+- Tab Video: khoảng cách giữa các hàng 40.
+
 ## 2026-11-27 — Icon theo Figma, bỏ Search ở tab bar
 
 - Icon SF Symbols lấy trực tiếp từ Figma (tab bar, toolbar, settings bar, sheet, profile…). Icon nào Figma không có vẫn dùng Font Awesome.

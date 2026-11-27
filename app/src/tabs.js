@@ -34,11 +34,11 @@ SCREENS.tab_video = () => ({
     </div>
     <div class="hscroll" style="gap:8px;padding:0 16px">${['🔥 Trending AI Video', '⚡️ Action Video', '🎀 AI Hair Studio', 'Birthday'].map(c => `<button class="chip" data-act="grid" data-v="${c}">${c}</button>`).join('')}</div>
    </div>
-   ${ROWS_VIDEO.map(r => rowSection(r[0], r[1])).join('')}
+   <div style="display:flex;flex-direction:column;gap:40px">${ROWS_VIDEO.map(r => rowSection(r[0], r[1])).join('')}
    ${top10()}
    ${rowSection('✨ Fantasy Video', ['cosmic', 'skyhero', 'neon'])}
    ${banner()}
-   ${rowSection('✨ Fantasy Video', ['cosmic', 'skyhero', 'neon'])}
+   ${rowSection('✨ Fantasy Video', ['cosmic', 'skyhero', 'neon'])}</div>
   </div></div>
   <div class="abs" style="left:0;top:0;width:100%;height:120px;background:linear-gradient(rgba(0,0,0,.55),transparent);pointer-events:none;z-index:25"></div>
   ${largeTitle('Video')}${tabBar('video')}`
@@ -76,12 +76,12 @@ SCREENS.tab_photo = () => ({
   }
 });
 SCREENS.tab_tools = () => {
-  const tools = [['sparkles', 'Enhance'], ['brush', 'Stylist'], ['scissors', 'Hairstyle', 'New'], ['eyedrop', 'Makeup', 'Hot'], ['face', 'Face Slim'], ['body', 'Body Slim'], ['sun', 'Skin Tone'], ['halfcircle', 'Remove BG']];
+  const tools = [['sparkles', 'Enhance'], ['brush', 'Stylist'], ['scissors', 'Hairstyle', 'New'], ['eyedrop', 'Makeup', 'Hot'], ['face', 'Face Slim'], ['person', 'Body Slim'], ['sun', 'Skin Tone'], ['halfcircle', 'Remove BG']];
   const pc = (img, title, base = '8fa2b1b0eb') => `<button class="mcard press" style="width:132px;height:208px" data-act="soon"><img src="${IMG(img || base)}" alt="" loading="lazy"><div class="scrim" style="background:linear-gradient(transparent,rgba(0,0,0,.6))">${title}</div></button>`;
   const sec = (t, cards) => `<section style="display:flex;flex-direction:column;gap:12px"><div class="sech" style="padding:0 16px">${t} ${ic('chev')}</div><div class="hscroll" style="gap:12px;padding:0 16px">${cards}</div></section>`;
   return {
     html: `<div class="scroll"><div style="padding:118px 0 140px;display:flex;flex-direction:column;gap:24px">
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);row-gap:20px;padding:8px 16px 0">${tools.map(([i, l, b]) => `<button class="press" data-act="soon" style="position:relative;display:flex;flex-direction:column;align-items:center;gap:8px"><span class="circ l glass">${ic(i)}</span><span class="fns">${l}</span>${b ? `<span class="c2s" style="position:absolute;right:4px;top:-4px;background:var(--lime);color:#000;border-radius:8px;padding:0 8px">${b}</span>` : ''}</button>`).join('')}</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);row-gap:20px;padding:8px 16px">${tools.map(([i, l, b]) => `<button class="press" data-act="soon" style="position:relative;display:flex;flex-direction:column;align-items:center;gap:8px"><span class="circ l glass">${ic(i)}</span><span class="fns">${l}</span>${b ? `<span class="c2s" style="position:absolute;right:4px;top:-4px;background:var(--lime);color:#000;border-radius:8px;padding:0 8px">${b}</span>` : ''}</button>`).join('')}</div>
     ${banner()}
     ${sec('🎀 More Hairstyles', pc(0, 'Color Change') + pc(0, 'Hair Length') + pc(0, 'Smooth Hair'))}
     ${sec('✨ More Beauty tools', pc('8495a865f8', 'Double Eyelids') + pc('db21aa5772', 'V-Line Face') + pc('aae04f701a', 'Brighten Skin'))}
@@ -112,7 +112,7 @@ function queueBody() {
   return `<section style="display:flex;flex-direction:column;gap:16px"><div class="t3" style="padding:0 16px">Making now</div><div class="hscroll" style="gap:12px;padding:0 16px">
   ${making.map(([img, n, p, t]) => qc(img, `<span class="abs" style="left:50px;top:96px;width:48px;height:48px">${ring(p)}<span class="fns abs" style="inset:0;display:flex;align-items:center;justify-content:center">${p}%</span></span>`, `<div class="shs" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${n}</div><div class="fn n5">Making · ${t}</div>`)).join('')}</div></section>
   <section style="display:flex;flex-direction:column;gap:16px"><div class="t3" style="padding:0 16px">Didn’t work</div><div class="hscroll" style="gap:12px;padding:0 16px">
-  ${qc('7852d2c76e', `<button class="btn xs glass abs" style="left:31px;top:106px" data-act="openTpl" data-v="neon">Try again</button>`, `<div class="shs">Mountain Ride</div><div class="fn red">Didn’t work · refunded</div>`)}</div></section>`;
+  ${qc('7852d2c76e', `<button class="btn xs glass abs" style="left:31px;top:106px" data-act="openTpl" data-v="neon">Try again</button>`, `<div class="shs">Mountain Ride</div><div class="fn red" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Didn’t work · refunded</div>`)}</div></section>`;
 }
 SCREENS.tab_gallery = () => {
   const g = S.galleryTab;

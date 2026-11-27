@@ -6,48 +6,47 @@ const chevR = `<span class="r">${ic('chev')}</span>`;
 const valR = v => `<span class="r">${v} ${ic('chev')}</span>`;
 
 function creditsCard() {
-  const bg = `background:radial-gradient(90% 80% at 85% 10%,rgba(120,90,200,.55),transparent 60%),linear-gradient(160deg,#2a2440,#191626 70%)`;
+  const bg = `background:radial-gradient(70% 60% at 90% 0%,rgba(190,180,230,.45),transparent 70%),radial-gradient(80% 70% at 10% 100%,rgba(120,80,200,.45),transparent 70%),linear-gradient(160deg,#2b2638,#1c1828 60%,#2a1f45)`;
+  const stars = [[300, 30], [250, 70], [60, 110], [330, 120], [190, 20]].map(([x, y]) => `<i style="position:absolute;left:${x}px;top:${y}px;width:2px;height:2px;border-radius:1px;background:rgba(255,255,255,.7)"></i>`).join('');
   if (S.pro) {
     const pct = 76;
-    return `<div style="position:relative;border-radius:28px;padding:20px;${bg};overflow:hidden">
-      <img src="${BIGCOIN}" alt="" style="position:absolute;right:-28px;top:-40px;width:150px;opacity:.55;transform:rotate(12deg)">
-      <div class="t3" style="position:relative">Credits</div><div class="fn" style="color:rgba(255,255,255,.6);margin-top:4px;max-width:250px;position:relative">You’re on an active <b style="color:#fff">Spark Pro</b> plan. Credits renew monthly.</div>
-      <div class="fns" style="display:flex;justify-content:space-between;margin-top:16px"><span style="color:rgba(255,255,255,.7)">Current session</span><b>${pct}% used</b></div>
-      <div style="display:flex;align-items:center;gap:8px;margin-top:8px"><img src="img/coin.png" style="width:32px;height:32px" alt=""><span style="font-size:34px;font-weight:800;letter-spacing:-.5px">${fmt(PRO.used)}</span><span class="sh n5" style="margin-left:auto">${fmt(PRO.total)}</span></div>
-      <div style="height:6px;border-radius:3px;background:rgba(255,255,255,.12);margin-top:10px;overflow:hidden"><i style="display:block;height:100%;width:${pct}%;border-radius:3px;background:linear-gradient(90deg,#efcbea,#cecbf4,#cdefda,#f6f3cb)"></i></div>
-      <div class="fns" style="display:flex;justify-content:space-between;margin-top:12px;color:rgba(255,255,255,.7)"><span>Weekly limits</span><span>Resets</span></div>
-      <div class="shs" style="display:flex;justify-content:space-between;margin-top:2px"><span>${PRO.weekly}% used</span><span>${PRO.reset}</span></div>
-      <button class="btn glass pastel" style="height:50px;margin-top:20px" data-act="coins">${ic('plus')} Get more coins</button>
-      <div class="fns ctr" style="color:rgba(255,255,255,.6);margin-top:10px">8,000 credits for $49.99</div><button class="fns" style="display:block;margin:4px auto 0;text-decoration:underline;font-weight:700" data-act="coins">See all options</button></div>`;
+    return `<div style="position:relative;margin:20px 3px 0;border-radius:28px;padding:25px 21px 25px;${bg};box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)">
+      <div style="position:absolute;inset:0;border-radius:28px;overflow:hidden;pointer-events:none">${stars}<img src="img/prostar.png" alt="" style="position:absolute;right:0;top:0;width:108px;height:78px;-webkit-mask:radial-gradient(90% 90% at 70% 20%,#000 55%,transparent);mask:radial-gradient(90% 90% at 70% 20%,#000 55%,transparent)"></div>
+      <div style="position:relative;font-size:20px;line-height:25px;font-weight:600">Credits</div><div style="position:relative;font-size:13px;line-height:18px;color:rgba(255,255,255,.6);margin-top:4px;white-space:nowrap">You’re on an active <b style="color:#fff;font-weight:600">Spark Pro</b> plan.<br>Credits renew monthly.</div>
+      <div style="display:flex;justify-content:space-between;margin-top:12px;font-size:13px;line-height:18px"><span>Current session</span><b style="font-weight:600">${pct}% used</b></div>
+      <div style="display:flex;align-items:center;gap:8px;margin-top:12px;height:41px"><img src="img/coin.png" style="width:36px;height:36px" alt=""><span style="font-size:34px;font-weight:700;letter-spacing:-.4px">${fmt(PRO.used)}</span><span style="margin-left:auto;font-size:17px;color:rgba(255,255,255,.6)">${fmt(PRO.total)}</span></div>
+      <div style="height:8px;border-radius:4px;background:rgba(255,255,255,.12);margin-top:12px;overflow:hidden"><i style="display:block;height:100%;width:${pct}%;border-radius:4px;background:linear-gradient(90deg,#efcbea,#cecbf4,#cdefda,#f6f3cb)"></i></div>
+      <div style="display:flex;justify-content:space-between;margin-top:12px;font-size:13px;line-height:18px;color:rgba(255,255,255,.6)"><span>Weekly limits</span><span>Resets</span></div>
+      <div style="display:flex;justify-content:space-between;font-size:15px;line-height:20px;font-weight:600"><span>${PRO.weekly}% used</span><span>${PRO.reset}</span></div>
+      <button class="btn glass pastel" style="height:46px;margin-top:24px;font-weight:600" data-act="coins">${ic('plus')} Get more coins</button>
+      <div style="text-align:center;font-size:13px;line-height:18px;color:rgba(255,255,255,.6);margin-top:12px">8,000 credits for $49.99</div><button style="display:block;margin:4px auto 0;text-decoration:underline;font-size:13px;font-weight:600" data-act="coins">See all options</button></div>`;
   }
   const c = S.coins; const low = c > 0 && c < 120;
-  const sub = c === 0 ? 'You’re out of coins. Go Pro with 4,000 coins refill every month.' : low ? 'Running low. Go Pro for 4,000 credits/month.' : 'You’re on the Free plan.<br>Go Pro for 4,000 credits/month';
-  const hint = c === 0 ? 'Go Pro for 4,000 coins a month — about 8 videos or 50 photos.' : low ? 'Not enough for a video — top up or go Pro.' : `Enough for about ${Math.max(1, Math.floor(c / 120))} video or ${Math.floor(c / 100) + 2} photos`;
-  return `<div style="position:relative;border-radius:28px;padding:20px;${bg};overflow:hidden">
-    <img src="${BIGCOIN}" alt="" style="position:absolute;right:0;top:-6px;width:124px">
-    <div class="t3">Credits</div><div class="fn" style="color:rgba(255,255,255,.6);margin-top:4px;max-width:210px">${sub}</div>
-    <div style="margin-top:16px;display:flex;align-items:baseline;gap:6px"><span style="font-size:34px;font-weight:800">${fmt(c)}</span><span class="sh" style="color:rgba(255,255,255,.7)">coins</span></div>
-    <div class="sh" style="font-style:italic;color:rgba(255,255,255,.75);margin-top:4px">${hint}</div>
-    <button class="btn glass pastel" style="height:50px;margin-top:20px" data-act="paywall">${ic('sparkles')} Go Pro</button>
-    ${c > 0 ? `<button class="fns" style="display:block;margin:12px auto 0;text-decoration:underline;font-weight:700" data-act="coins">Buy coins</button>` : ''}</div>`;
+  const sub = c === 0 ? 'You\'re out of coins. Go Pro with 4,000 coins refill every month.' : low ? 'Running low. Go Pro with 4,000 coins refill every month.' : 'You\'re on the Free plan.<br>Go Pro for 4,000 credits/month';
+  const hint = c === 0 ? 'Go Pro for 4,000 coins a month — about 8 videos or 50 photos.' : low ? 'Only enough for 2 photos. Videos need more coins.' : 'Enough for about 1 video or 6 photos';
+  return `<div style="position:relative;margin:24px 1px 0;border-radius:28px;padding:21px 21px 21px;${bg};box-shadow:inset 0 0 0 1px rgba(255,255,255,.12)">
+    <div style="position:absolute;inset:0;border-radius:28px;overflow:hidden;pointer-events:none">${stars}</div>
+    <img src="${BIGCOIN}" alt="" style="position:absolute;left:217px;top:-24px;width:137px;height:137px">
+    <div style="position:relative;font-size:20px;line-height:25px;font-weight:600">Credits</div><div style="position:relative;font-size:13px;line-height:18px;color:rgba(255,255,255,.6);margin-top:4px;width:194px">${sub}</div>
+    <div style="margin-top:12px;display:flex;align-items:baseline;gap:4px;height:41px"><span style="font-size:34px;line-height:41px;font-weight:700">${fmt(c)}</span><span style="font-size:15px;color:rgba(255,255,255,.7)">coins</span></div>
+    <div style="font-size:15px;line-height:20px;font-style:italic;color:rgba(255,255,255,.85);margin-top:8px">${hint}</div>
+    <button class="btn glass pastel" style="height:46px;margin-top:36px;font-weight:600" data-act="paywall">${ic('sparkles')} Go Pro</button></div>`;
 }
 SCREENS.profile = () => {
   const head = S.signedIn
-    ? `<button data-act="editProfile" style="display:flex;flex-direction:column;align-items:center;gap:8px;width:100%"><img src="${IMG(AVATAR)}" style="width:98px;height:98px;border-radius:50%;object-fit:cover;background:#f5c518" alt="">
-       <div style="display:flex;align-items:center;gap:8px"><span class="t2">${S.profile.name}</span><span class="pill" style="background:${S.pro ? 'linear-gradient(90deg,#efcbea,#cdefda)' : 'var(--a200)'};color:${S.pro ? '#000' : '#fff'}">${S.pro ? 'Pro' : 'Free'}</span></div>
-       <span class="sh n5" style="display:flex;align-items:center;gap:4px">@${S.profile.user} <span style="font-size:12px">${ic('pencil')}</span></span></button>`
-    : `<button data-act="signIn" style="display:flex;flex-direction:column;align-items:center;gap:6px;width:100%"><span style="width:88px;height:88px;border-radius:50%;background:#3a3a3c;display:flex;align-items:center;justify-content:center;font-size:48px;color:#8e8e93;overflow:hidden">${ic('user')}</span>
-       <span class="t3" style="margin-top:8px">Tap to sign in</span><span class="fn n5">to save your creations and templates</span></button>`;
+    ? `<button data-act="editProfile" style="display:flex;flex-direction:column;align-items:center;width:100%;height:172px"><img src="${IMG(S.avatar || AVATAR)}" style="width:88px;height:88px;border-radius:50%;object-fit:cover;background:#f5c518" alt="">
+       <div style="display:flex;align-items:center;gap:8px;margin-top:12px;height:28px"><span style="font-size:22px;font-weight:700">${S.profile.name}</span><span class="pill" style="height:26px;padding:0 10px;font-size:15px;font-weight:600;${S.pro ? 'background:linear-gradient(90deg,#efcbea,#cdefda);color:#000' : 'background:rgba(255,255,255,.12);color:#fff;box-shadow:inset 0 0 0 .5px rgba(255,255,255,.3)'}">${S.pro ? 'Pro' : 'Free'}</span></div>
+       <span style="display:flex;align-items:center;gap:4px;margin-top:8px;font-size:15px;color:rgba(255,255,255,.6)">@${S.profile.user} <span style="font-size:13px">${ic('pencil')}</span></span></button>`
+    : `<button data-act="signIn" style="display:flex;flex-direction:column;align-items:center;width:100%;height:172px"><span style="width:88px;height:88px;border-radius:50%;background:#3a3a3c;display:flex;align-items:flex-end;justify-content:center;overflow:hidden"><svg width="88" height="88" viewBox="0 0 88 88"><circle cx="44" cy="35" r="16" fill="#8e8e93"/><path d="M12 88c2-20 16-30 32-30s30 10 32 30z" fill="#8e8e93"/></svg></span>
+       <span style="font-size:20px;font-weight:700;margin-top:20px">Tap to sign in</span><span style="font-size:15px;color:rgba(255,255,255,.6);margin-top:4px">to save your creations and templates</span></button>`;
+  const sec = (t, rows) => `<div style="display:flex;flex-direction:column;gap:12px"><div style="font-size:17px;line-height:22px;font-weight:600">${t}</div><div class="grp noic" style="border-radius:20px">${rows}</div></div>`;
   return {
-    html: `<div class="scroll"><div style="padding:122px 16px 48px;display:flex;flex-direction:column;gap:24px">${head}${creditsCard()}
-      <div><div class="sech" style="padding:0 0 8px"><span class="hl">Preferences</span></div><div class="grp noic">
-        <button class="row" data-act="lang">App language${valR('English')}</button><button class="row" data-act="notif">Notification${chevR}</button>
-        <button class="row" data-act="coinHistory">Coin history${chevR}</button><button class="row" data-act="shareApp">Share the app${chevR}</button><button class="row" data-act="deleteData">Delete my data${chevR}</button></div></div>
-      <div><div class="sech" style="padding:0 0 8px"><span class="hl">Feedback & about</span></div><div class="grp noic">
-        <button class="row" data-act="soon">Help Center${chevR}</button><button class="row" data-act="soon">Trust Center${chevR}</button><button class="row" data-act="soon">Terms and Policies${chevR}</button>
-        <button class="row" data-act="clearCache">Clear cache<span class="r cache">2 MB</span></button><div class="row">Version<span class="r">1.0.0</span></div></div></div>
-    </div></div><div class="abs" style="left:0;top:0;width:100%;height:120px;background:linear-gradient(#000 60%,transparent);pointer-events:none;z-index:29"></div>
-    <div class="tb">${backBtn()}<span class="sp"></span>${S.signedIn ? `<button class="circ s glass" data-act="editProfile" aria-label="Settings">${ic('gear')}</button>` : ''}</div>`
+    html: `<div class="scroll"><div style="padding:122px 16px 100px">${head}${creditsCard()}
+      <div style="display:flex;flex-direction:column;gap:24px;margin-top:${S.pro ? 20 : 24}px">
+      ${sec('Preferences', `<button class="row" data-act="lang">App language${valR('English')}</button><button class="row" data-act="notif">Notification${chevR}</button><button class="row" data-act="coinHistory">Coin history${chevR}</button><button class="row" data-act="shareApp">Share the app${chevR}</button><button class="row" data-act="deleteData">Delete my data${chevR}</button>`)}
+      ${sec('Feedback & about', `<button class="row" data-act="soon">Help Center${chevR}</button><button class="row" data-act="soon">Trust Center${chevR}</button><button class="row" data-act="soon">Terms and Policies${chevR}</button><button class="row" data-act="clearCache">Clear cache<span class="r cache">2 MB</span></button><div class="row">Version<span class="r">1.0.0</span></div>`)}
+    </div></div></div><div class="abs" style="left:0;top:0;width:100%;height:120px;background:linear-gradient(#000 60%,transparent);pointer-events:none;z-index:29"></div>
+    <div class="tb">${backBtn()}<span class="sp"></span>${S.signedIn && S.pro ? `<button class="circ s glass" data-act="editProfile" aria-label="Settings">${ic('gearo')}</button>` : ''}</div>`
   };
 };
 ACT.lang = () => sheet({ title: 'App language', html: `<div class="grp noic">${['English', 'Tiếng Việt', '日本語', 'Español', 'Português'].map((l, i) => `<button class="row" data-act="closeSheet">${l}${i ? '' : `<span class="r" style="color:var(--lime)">${ic('check')}</span>`}</button>`).join('')}</div>` });
@@ -72,9 +71,9 @@ const HIST = [['TODAY', [['Neon Corridor', 'Video', '11:42 AM', -120, '318877962
 SCREENS.coinHistory = ({ filter = 'All' } = {}) => {
   const empty = !S.signedIn || (!S.pro && S.coins === 480 && !S.spent);
   const row = ([n, k, t, d, im]) => { const isImg = /^[0-9a-f]{10}$/.test(im);
-    return `<div class="row" style="min-height:72px;gap:12px"><span style="width:44px;height:44px;border-radius:10px;overflow:hidden;flex:none;display:flex;align-items:center;justify-content:center;background:${isImg ? 'none' : 'rgba(240,254,101,.12)'};color:var(--lime);font-size:18px">${isImg ? `<img src="${IMG(im)}" style="width:100%;height:100%;object-fit:cover" alt="">` : ic(im === 'cart' ? 'coins' : im)}</span>
-    <span style="flex:1;min-width:0"><span class="shs" style="display:block">${n}</span><span class="fns n5">${k} | ${t}</span></span><span class="shs" style="display:flex;align-items:center;gap:6px;color:${d > 0 ? 'var(--green)' : '#fff'}">${d > 0 ? '+' + d : '−' + Math.abs(d)}<img src="img/coin.png" style="width:20px;height:20px" alt=""></span></div>`; };
-  const list = HIST.map(([h, items]) => { const f = items.filter(i => filter === 'All' || (filter === 'Spent' ? i[3] < 0 : i[3] > 0)); return f.length ? `<div class="fns n5" style="padding:16px 0 8px;font-weight:600">${h}</div><div class="grp">${f.map(row).join('')}</div>` : ''; }).join('');
+    return `<div style="height:84px;display:flex;align-items:center;gap:12px;padding:0 16px 0 12px;position:relative">${isImg ? `<span style="width:44px;height:60px;border-radius:8px;overflow:hidden;flex:none"><img src="${IMG(im)}" style="width:100%;height:100%;object-fit:cover" alt=""></span>` : `<span style="width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,.09);flex:none;display:flex;align-items:center;justify-content:center;color:var(--lime);font-size:19px">${ic(im)}</span>`}
+    <span style="flex:1;min-width:0"><span style="display:block;font-size:17px;line-height:22px;font-weight:600">${n}</span><span style="font-size:13px;line-height:18px;color:rgba(255,255,255,.6)">${k} | ${t}</span></span><span style="display:flex;align-items:center;gap:4px;font-size:17px;font-weight:600;color:${d > 0 ? 'var(--green)' : '#fff'}">${d > 0 ? '+' + d : '−' + Math.abs(d)}<img src="img/coin.png" style="width:24px;height:24px" alt=""></span></div>`; };
+  const list = HIST.map(([h, items]) => { const f = items.filter(i => filter === 'All' || (filter === 'Spent' ? i[3] < 0 : i[3] > 0)); return f.length ? `<div style="margin-top:20px;font-size:13px;line-height:18px;font-weight:600;color:rgba(255,255,255,.6)">${h}</div><div style="margin-top:12px;border-radius:20px;background:rgba(255,255,255,.09);overflow:hidden">${f.map(row).join('<div style="height:1px;margin:0 16px 0 12px;background:rgba(255,255,255,.08)"></div>')}</div>` : ''; }).join('');
   const body = empty ? `<div style="display:flex;flex-direction:column;align-items:center;text-align:center;gap:8px;padding:96px 24px 0"><img src="img/ee471ee025.jpg" style="width:120px;height:120px;mix-blend-mode:screen" alt=""><div class="t3" style="margin-top:8px">No activity yet</div><div class="sh n5">Coins you use or add will show up here. Start creating and they’ll appear in this list.</div><button class="btn glass prom m" style="width:auto;padding:0 24px;margin-top:16px" data-act="startCreating">Start creating</button></div>`
     : `${S.pro ? `<div style="border-radius:28px;padding:20px;background:radial-gradient(90% 80% at 85% 10%,rgba(120,90,200,.55),transparent 60%),linear-gradient(160deg,#2a2440,#191626 70%)">
         <div class="fns" style="display:flex;justify-content:space-between"><span style="color:rgba(255,255,255,.7)">Current session</span><b>76% used</b></div>
@@ -82,7 +81,7 @@ SCREENS.coinHistory = ({ filter = 'All' } = {}) => {
         <div style="height:6px;border-radius:3px;background:rgba(255,255,255,.12);margin-top:10px"><i style="display:block;height:100%;width:76%;border-radius:3px;background:linear-gradient(90deg,#efcbea,#cecbf4,#cdefda,#f6f3cb)"></i></div>
         <div class="fns" style="display:flex;justify-content:space-between;margin-top:12px;color:rgba(255,255,255,.7)"><span>Weekly limits</span><span>Resets</span></div><div class="shs" style="display:flex;justify-content:space-between"><span>9% used</span><span>Dec 16, 2026</span></div>
         <button class="btn glass pastel" style="height:50px;margin-top:16px" data-act="coins">${ic('plus')} Get more coins</button></div>` : ''}
-      <div class="seg" style="margin-top:16px">${['All', 'Spent', 'Added'].map(f => `<button style="flex:1" class="${f === filter ? 'on' : ''}" data-act="histF" data-v="${f}">${f}</button>`).join('')}</div>${list}`;
+      <div class="seg" style="margin-top:20px;height:40px;padding:2px;gap:4px">${['All', 'Spent', 'Added'].map(f => `<button style="flex:1;height:36px;${f === filter ? 'background:#fff;color:#000;font-size:15px' : 'font-size:13.3px;color:#fff;font-weight:500'}" class="${f === filter ? 'on' : ''}" data-act="histF" data-v="${f}">${f}</button>`).join('')}</div>${list}`;
   return { html: `<div class="scroll"><div style="padding:124px 16px 48px">${body}</div></div><div class="abs" style="left:0;top:0;width:100%;height:120px;background:linear-gradient(#000 60%,transparent);pointer-events:none;z-index:29"></div><div class="tb">${backBtn()}<div class="ttl">Coin history</div></div>` };
 };
 ACT.coinHistory = () => go('coinHistory', {});

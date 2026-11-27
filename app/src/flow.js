@@ -1,21 +1,23 @@
 /* Generate video / Generate image flows — Figma 1365:77183 (video) & 1365:81391 (image) */
 const FEED_VIDEO = ['neon', 'cosmic', 'billionaire', 'street', 'skyhero'];
 const FEED_PHOTO = ['lavender', 'cake', 'thirty', 'candle', 'midnight'];
-const CATS = [['🔥', 'Trending AI Video'], ['📸', 'Trending AI Photo'], ['✨', 'Trending AI Tools'], ['⚡', 'Action Video'], ['🎀', 'AI Hair Studio'], ['🎄', 'Holiday Glow'], ['💖', 'Valentine'], ['🎃', 'Halloween Night']];
+const CATS = [['🔥', 'Trending AI Video'], ['📸', 'Trending AI Photo'], ['✨', 'Trending AI Tools'], ['⚡', 'Action Video'], ['🎀', 'AI Hair Studio'], ['🎄', 'Holiday Glow'], ['💖', 'Valentine'], ['🎃', 'Halloween Night'], ['💿', 'Y2K Vibes']];
 const isVid = t => t.kind === 'video';
 const media = (t, style = '', cls = '') => t.v ? `<video class="${cls}" src="v/${t.v}.mp4" poster="${IMG(t.img)}" muted loop playsinline autoplay data-auto style="${style}"></video>` : `<img class="${cls}" src="${IMG(t.img)}" alt="" style="${style}">`;
 
 /* ---------- 01 · Collection grid ---------- */
+const FILTER_SVG = '<svg width="21" height="13" viewBox="0 0 21 13" fill="#fff"><path d="M5.05 12.49h10.4c.64 0 1.14-.55 1.14-1.18 0-.64-.5-1.17-1.14-1.17H5.05c-.64 0-1.15.54-1.15 1.17 0 .62.51 1.18 1.15 1.18ZM3.1 7.42h14.28c.64 0 1.14-.55 1.14-1.17 0-.65-.5-1.18-1.14-1.18H3.1c-.64 0-1.14.54-1.14 1.18 0 .61.51 1.17 1.14 1.17ZM1.15 2.35H19.3c.65 0 1.15-.55 1.15-1.17C20.46.53 19.97 0 19.32 0H1.15C.5 0 0 .54 0 1.18c0 .61.51 1.17 1.15 1.17Z"/></svg>';
+const BM_BTN = 'position:absolute;right:8px;top:8px;width:32px;height:32px;border-radius:50%;background:rgba(0,0,0,.28);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;font-size:15px';
 function chipsRow(active, filterAct = 'cats') {
   return `<div class="abs" style="left:0;top:124px;width:100%;height:36px;z-index:31"><div class="hscroll" style="gap:8px;padding:0 60px 0 16px">${CATS.slice(0, 5).map(([e, l]) => `<button class="chip ${l === active ? 'on' : 'a1'}" style="height:36px" data-act="pickCat" data-v="${l}">${e} ${l}</button>`).join('')}</div>
   <div class="abs" style="right:0;top:0;width:105px;height:36px;background:linear-gradient(90deg,transparent,#000 50%);pointer-events:none"></div>
-  <button class="abs circ xs glass" style="right:16px;top:0" data-act="${filterAct}" aria-label="Filter">${ic('filter')}</button></div>`;
+  <button class="abs" style="right:16px;top:0;width:36px;height:36px;display:flex;align-items:center;justify-content:center" data-act="${filterAct}" aria-label="Filter">${FILTER_SVG}</button></div>`;
 }
 function gridCard(t) {
   const bm = S.bookmarks.has(t.id);
   return `<div class="mcard press" style="width:179px;height:318px;border-radius:20px" data-act="openTpl" data-v="${t.id}">${t.v ? `<video src="v/${t.v}.mp4" poster="${IMG(t.img)}" muted loop playsinline autoplay data-auto></video>` : `<img src="${IMG(t.img)}" alt="" loading="lazy">`}
    <div class="scrim" style="padding:40px 12px 12px;display:flex;flex-direction:column;gap:2px"><span class="shs">${t.name}</span><span class="fns" style="display:flex;align-items:center;gap:4px"><img src="img/coin.png" style="width:16px;height:16px" alt="">${t.price}</span></div>
-   <button class="abs circ xs glass" style="right:8px;top:8px" data-act="toggleBm" data-v="${t.id}" aria-label="Save">${ic(bm ? 'bookmarkf' : 'bookmark')}</button></div>`;
+   <button style="${BM_BTN}" data-act="toggleBm" data-v="${t.id}" aria-label="Save">${ic(bm ? 'bookmarkf' : 'bookmark')}</button></div>`;
 }
 SCREENS.grid = ({ title = '🔥 Trending AI Video' }) => {
   const clean = title.replace(/^[^A-Za-z]+/, '').trim() || 'Trending AI Video';
@@ -29,44 +31,45 @@ SCREENS.grid = ({ title = '🔥 Trending AI Video' }) => {
 ACT.pickCat = el => { const cur = stack[stack.length - 1]; if (cur.name === 'grid') { cur.args.title = el.dataset.v; rerender(); } else go('grid', { title: el.dataset.v }); };
 ACT.cats = () => sheet({ title: 'Categories', html: `<div class="grp">${CATS.map(([e, l], i) => `<button class="row" data-act="catRow" data-v="${l}"><span style="width:24px;text-align:center;font-size:18px">${e}</span>${l}${i === 0 ? `<span class="r" style="color:var(--lime)">${ic('check')}</span>` : ''}</button>`).join('')}</div>` });
 ACT.catRow = el => { closeSheet(); setTimeout(() => ACT.pickCat(el), 200); };
-ACT.toggleBm = (el, e) => { e.stopPropagation(); const id = el.dataset.v; if (S.bookmarks.has(id)) { S.bookmarks.delete(id); rerender(); toast('Removed from Saved', { icon: '' }); } else { S.bookmarks.add(id); addToDefault(id); rerender(); toast('Saved', { act: 'Collections', fn: () => saveToCollection(id) }); } };
+ACT.toggleBm = (el, e) => { e.stopPropagation(); const id = el.dataset.v; if (S.bookmarks.has(id)) { S.bookmarks.delete(id); rerender(); toast('Removed from Saved', { icon: '' }); } else { S.bookmarks.add(id); addToDefault(id); rerender(); toast('Saved', { icon: BMI, pos: 'bottom', act: 'Collections', fn: () => saveToCollection(id) }); } };
 function addToDefault(id) { const d = S.collections.find(c => c.def); if (!d.items.includes(id)) d.items.unshift(id); }
 
 /* ---------- 02 · Template detail (full-screen feed) ---------- */
 SCREENS.feed = ({ id = 'neon' }) => {
   const list = isVid(T[id]) ? FEED_VIDEO : FEED_PHOTO; const order = [id, ...list.filter(x => x !== id)];
+  const ttlTxt = isVid(T[id]) ? 'Trending AI Video' : 'Trending AI Photo';
   const page = t => {
     const bm = S.bookmarks.has(t.id);
     return `<section class="fpage" data-id="${t.id}" style="position:relative;height:874px;scroll-snap-align:start;scroll-snap-stop:always;overflow:hidden">
     ${media(t, 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover')}
-    <div class="abs" style="left:0;top:0;width:100%;height:246px;background:linear-gradient(rgba(0,0,0,.7),transparent)"></div>
+    <div class="abs" style="left:0;top:0;width:100%;height:200px;background:linear-gradient(rgba(0,0,0,.5),transparent)"></div>
     <div class="abs" style="left:0;bottom:0;width:100%;height:325px;background:linear-gradient(transparent,rgba(0,0,0,.8))"></div>
-    <div class="abs" style="left:16px;top:670px;width:300px">
-      <div style="display:flex;align-items:center;gap:8px"><span class="icbox" style="width:24px;height:24px;border-radius:12px;background:var(--a100);font-size:12px">${ic(isVid(t) ? 'film' : 'camera')}</span><span class="shs">${t.cat}</span></div>
-      <div style="font-size:36px;line-height:43px;font-weight:800;letter-spacing:-.5px;margin-top:8px">${t.name}</div>
-      <div class="fns" style="display:flex;align-items:center;gap:4px;margin-top:8px"><img src="img/coin.png" style="width:20px;height:20px" alt="">${t.price} coins</div></div>
-    <div class="abs" style="left:340px;top:692px;display:flex;flex-direction:column;gap:16px">
-      <button class="press" data-act="feedSave" data-v="${t.id}" style="display:flex;flex-direction:column;align-items:center;gap:4px"><span class="circ glass">${ic(bm ? 'bookmarkf' : 'bookmark')}</span><span class="c1" style="font-weight:700">${bm ? 'Saved' : 'Save'}</span></button>
-      <button class="press" data-act="more" data-v="${t.id}" style="display:flex;flex-direction:column;align-items:center;gap:4px"><span class="circ glass">${ic('ellipsis')}</span><span class="c1" style="font-weight:700">More</span></button></div>
-    <button class="btn glass prom abs" style="left:16px;top:788px;width:192px;height:50px" data-act="useStyle" data-v="${t.id}">${ic('sparkles')} Use This Style</button>
+    <div class="abs fmeta" style="left:16px;top:700px;width:300px">
+      <div style="font-size:36px;line-height:43px;font-weight:800;font-style:italic;letter-spacing:-.5px">${t.name}</div>
+      <div class="fns" style="display:flex;align-items:center;gap:4px;margin-top:4px;color:rgba(255,255,255,.85)"><img src="img/coin.png" style="width:20px;height:20px" alt="">${t.price} coins</div></div>
+    <div class="abs fside" style="left:340px;top:692px;display:flex;flex-direction:column;gap:12px">
+      <button class="press" data-act="feedSave" data-v="${t.id}" style="display:flex;flex-direction:column;align-items:center;gap:4px"><span class="circ glass dark">${ic(bm ? 'bookmarkf' : 'bookmark')}</span><span class="c1" style="font-weight:700">Save</span></button>
+      <button class="press" data-act="more" data-v="${t.id}" style="display:flex;flex-direction:column;align-items:center;gap:4px"><span class="circ glass dark">${ic('ellipsis')}</span><span class="c1" style="font-weight:700">More</span></button></div>
+    <button class="btn glass prom abs fuse" style="left:16px;top:788px;width:192px;height:50px;font-weight:500;gap:8px" data-act="useStyle" data-v="${t.id}"><span style="font-size:22px;display:flex">${ic('sparkles')}</span>Use This Style</button>
     </section>`;
   };
   return {
     html: `<div class="scroll feedsc" style="scroll-snap-type:y mandatory">${order.map(i => page(T[i])).join('')}</div>
     <div class="abs pager" style="right:6px;top:416px;display:flex;flex-direction:column;gap:4px;z-index:31">${order.map((_, i) => `<i style="width:4px;height:${i ? 4 : 16}px;border-radius:2px;background:${i ? 'var(--a400)' : '#fff'};display:block;transition:all .3s"></i>`).join('')}</div>
-    <div class="feedtop">${chipsRow(isVid(T[id]) ? 'Trending AI Video' : 'Trending AI Photo')}</div>
-    <div class="tb">${backBtn()}<div class="ttl feedttl" style="opacity:0;transition:opacity .25s;display:flex;align-items:center;justify-content:center;gap:8px">${isVid(T[id]) ? 'Trending AI Video' : 'Trending AI Photo'}</div><span class="sp"></span>${joinNow()}</div>
-    <div class="compact abs" style="left:16px;right:16px;top:795px;height:44px;display:flex;justify-content:space-between;z-index:32;opacity:0;pointer-events:none;transition:opacity .25s">
-      <span style="position:relative;display:inline-flex"><span class="runline"></span><button class="btn glass prom" style="height:44px;width:137px;font-size:15px" data-act="useStyleCur">${ic('sparkles')} Use this</button></span>
-      <button class="circ s glass" data-act="feedSaveCur">${ic('bookmark')}</button></div>`,
+    <div class="feedtop">${chipsRow(ttlTxt)}</div>
+    <div class="tb">${backBtn()}<button class="feedttl" data-act="cats" style="opacity:0;pointer-events:none;transition:opacity .25s;display:flex;align-items:center;gap:8px;font-size:17px;font-weight:600;letter-spacing:-.43px">${ttlTxt}<span style="display:flex;width:24px;justify-content:center">${FILTER_SVG}</span></button><span class="sp"></span>${joinNow()}</div>
+    <div class="compact abs" style="left:16px;right:16px;top:792px;height:50px;display:flex;justify-content:space-between;align-items:center;z-index:32;opacity:0;pointer-events:none;transition:opacity .25s">
+      <button class="btn glass dark usethis" style="height:50px;width:144px;font-size:17px;font-weight:500;gap:8px" data-act="useStyleCur"><span style="font-size:18px;display:flex">${ic('sparkles')}</span>Use this</button>
+      <button class="circ s glass dark feedbm" data-act="feedSaveCur">${ic('bookmark')}</button></div>`,
     mount(el) {
       const sc = el.querySelector('.feedsc'), top = el.querySelector('.feedtop'), ttl = el.querySelector('.feedttl'), cp = el.querySelector('.compact'); const dots = el.querySelectorAll('.pager i');
       let collapsed = false;
       sc.addEventListener('scroll', () => {
         const i = Math.round(sc.scrollTop / sc.clientHeight); el.dataset.cur = order[i];
         dots.forEach((d, k) => { d.style.height = k === i ? '16px' : '4px'; d.style.background = k === i ? '#fff' : 'var(--a400)'; });
-        const c = sc.scrollTop > 60; if (c !== collapsed) { collapsed = c; top.style.opacity = c ? 0 : 1; top.style.pointerEvents = c ? 'none' : ''; ttl.style.opacity = c ? 1 : 0; cp.style.opacity = c ? 1 : 0; cp.style.pointerEvents = c ? 'auto' : 'none';
-          el.querySelectorAll('.fpage > .btn, .fpage > .abs[style*="left:340px"]').forEach(n => { n.style.transition = 'opacity .25s'; n.style.opacity = c ? 0 : 1; n.style.pointerEvents = c ? 'none' : ''; }); }
+        const c = sc.scrollTop > 60; if (c !== collapsed) { collapsed = c; top.style.opacity = c ? 0 : 1; top.style.pointerEvents = c ? 'none' : ''; ttl.style.opacity = c ? 1 : 0; ttl.style.pointerEvents = c ? 'auto' : 'none'; cp.style.opacity = c ? 1 : 0; cp.style.pointerEvents = c ? 'auto' : 'none';
+          el.querySelectorAll('.fpage .fuse, .fpage .fside, .fpage .fmeta').forEach(n => { n.style.transition = 'opacity .25s'; n.style.opacity = c ? 0 : 1; n.style.pointerEvents = c ? 'none' : ''; }); }
+        cp.querySelector('.feedbm').innerHTML = ic(S.bookmarks.has(order[i]) ? 'bookmarkf' : 'bookmark');
         el.querySelectorAll('.fpage video').forEach((v, k) => k === i ? v.play().catch(() => { }) : v.pause());
       }, { passive: true });
       top.style.transition = 'opacity .25s'; el.dataset.cur = order[0];
@@ -74,23 +77,24 @@ SCREENS.feed = ({ id = 'neon' }) => {
   };
 };
 ACT.openTpl = el => go('feed', { id: el.dataset.v });
-ACT.feedSave = el => { const id = el.dataset.v; if (S.bookmarks.has(id)) { S.bookmarks.delete(id); toast('Removed from Saved', { icon: '' }); } else { S.bookmarks.add(id); addToDefault(id); toast('Saved', { act: 'Collections', fn: () => saveToCollection(id) }); }
-  const lbl = el.querySelector('.c1'), c = el.querySelector('.circ'); const on = S.bookmarks.has(id); lbl.textContent = on ? 'Saved' : 'Save'; c.innerHTML = ic(on ? 'bookmarkf' : 'bookmark'); };
+ACT.feedSave = el => { const id = el.dataset.v; if (S.bookmarks.has(id)) { S.bookmarks.delete(id); toast('Removed from Saved', { icon: '' }); } else { S.bookmarks.add(id); addToDefault(id); toast('Saved', { icon: BMI, pos: 'bottom', act: 'Collections', fn: () => saveToCollection(id) }); }
+  const c = el.querySelector('.circ'); c.innerHTML = ic(S.bookmarks.has(id) ? 'bookmarkf' : 'bookmark'); };
 ACT.feedSaveCur = el => { const cur = stack[stack.length - 1].el.dataset.cur; const b = stack[stack.length - 1].el.querySelector(`.fpage[data-id="${cur}"] [data-act="feedSave"]`); if (b) ACT.feedSave(b); el.innerHTML = ic(S.bookmarks.has(cur) ? 'bookmarkf' : 'bookmark'); };
 ACT.useStyle = el => startCreate(el.dataset.v);
 ACT.useStyleCur = () => startCreate(stack[stack.length - 1].el.dataset.cur);
-function startCreate(id) { go('create', { id, people: T[id].people || 1 }); }
+/* Figma: first time → 04 Guidelines sheet over the feed, Continue → 03 Create */
+function startCreate(id) { if (!S.guideAgreed) { guidelinesSheet(() => go('create', { id, people: T[id].people || 1 })); return; } go('create', { id, people: T[id].people || 1 }); }
 
 /* More sheet (option B: social + icon buttons) */
 ACT.more = () => {
   const soc = [['tiktok', 'TikTok'], ['instagram', 'Instagram'], ['facebook', 'Facebook'], ['messenger', 'Messenger'], ['whatsapp', 'WhatsApp']];
   const item = (inner, l, act) => `<button class="press" data-act="${act}" style="width:70px;display:flex;flex-direction:column;align-items:center;gap:4px">${inner}<span class="c1" style="font-weight:700">${l}</span></button>`;
   const solid = i => `<span class="circ" style="background:#2c2c2e">${ic(i)}</span>`;
-  const socImg = k => k === 'messenger' ? `<span class="circ" style="background:linear-gradient(#00b2ff,#006aff)">${ic('chat')}</span>` : `<img src="img/soc_${k}.png" style="width:48px;height:48px" alt="">`;
+  const socImg = k => k === 'messenger' ? `<span class="circ" style="background:linear-gradient(#00b2ff,#006aff)"><svg width="24" height="24" viewBox="0 0 24 24" fill="#fff"><path d="M12 .96C5.9.96.96 5.57.96 11.28c0 3.02 1.39 5.86 3.84 7.82v4.23l4.13-2.16c1 .29 2.01.38 3.07.38 6.1 0 11.04-4.6 11.04-10.32C23.04 5.57 18.1.96 12 .96Zm1.1 13.73-2.78-2.98-5.18 2.93 5.76-6.1 2.83 2.84 5.04-2.84-5.67 6.15Z"/></svg></span>` : `<img src="img/soc_${k}.png" style="width:48px;height:48px" alt="">`;
   sheet({
     title: 'More', html: `<div style="display:flex;gap:2px;padding-bottom:16px">${soc.map(([k, l]) => item(socImg(k), l, 'shareTo')).join('')}</div>
     <div style="height:1px;background:rgba(255,255,255,.08);margin-bottom:16px"></div>
-    <div style="display:flex;gap:2px">${item(solid('link'), 'Copy link', 'copyLink')}${item(solid('flag'), 'Report', 'report')}${item(solid('chat'), 'Contact us', 'contact')}${item(solid('ellipsis'), 'More', 'shareTo')}</div>`
+    <div style="display:flex;gap:2px">${item(solid('link'), 'Copy link', 'copyLink')}${item(solid('flag'), 'Report', 'report')}${item(solid('chat'), 'Contact us', 'contact')}${item(solid('ellipsis'), 'Other', 'shareTo')}</div>`
   });
 };
 ACT.shareTo = () => { closeSheet(); toast('Opening share…', { icon: '' }); };
@@ -109,7 +113,7 @@ function settingsBar(st) {
   return `<button class="press" data-act="openSettings" style="height:52px;border-radius:16px;background:var(--a100);display:flex;align-items:center;padding:0 16px 0 14px;width:100%">${items.map(([i, l], k) => `${k ? '<span style="width:1px;height:20px;background:var(--a200);margin:0 14px"></span>' : ''}<span class="sh" style="display:flex;align-items:center;gap:6px;font-weight:600"><span class="n5" style="font-size:14px">${ic(i)}</span>${l}</span>`).join('')}<span class="n5" style="margin-left:auto;font-size:13px">${ic('chev')}</span></button>`;
 }
 function thumb(img, w = 96, h = 120) { return `<span style="width:${w}px;height:${h}px;border-radius:16px;overflow:hidden;flex:none;display:block"><img src="${IMG(img)}" alt="" style="width:100%;height:100%;object-fit:cover"></span>`; }
-function emptyThumb(w = 96, h = 120, act = 'addPhoto', i = 0) { return `<button class="press" data-act="${act}" data-i="${i}" style="width:${w}px;height:${h}px;border-radius:16px;background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.3);position:relative;flex:none;display:flex;align-items:center;justify-content:center"><span class="ripple"></span><span class="ripple d2"></span><span class="addlime">${ic('plus')}</span></button>`; }
+function emptyThumb(w = 96, h = 120, act = 'addPhoto', i = 0) { return `<button class="press" data-act="${act}" data-i="${i}" style="width:${w}px;height:${h}px;border-radius:16px;background:rgba(255,255,255,.04);border:1.5px dashed rgba(255,255,255,.3);position:relative;flex:none;display:flex;align-items:center;justify-content:center"><span class="ripple"></span><span class="addlime">${ic('plus')}</span></button>`; }
 function photoCard(st) {
   if (st.people === 2) {
     const done = st.check.filter(c => c === 'ok').length;
@@ -123,44 +127,47 @@ function photoCard(st) {
   }
   const ph = st.photos[0], c = st.check[0];
   let left, text, right = '';
-  if (!ph) { left = emptyThumb(); text = `<div class="hl">Add your photo</div><div class="fn" style="color:rgba(255,255,255,.55);margin-top:4px">A clear, front-facing selfie works best</div>`; }
-  else if (c === 'checking') { left = `<span style="position:relative">${thumb(ph)}<span class="abs" style="inset:0;border-radius:16px;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center"><span class="spin"></span></span></span>`; text = `<div class="hl">Checking photo…</div><div class="fn" style="color:rgba(255,255,255,.55);margin-top:4px">Making sure your face is clear</div>`; }
-  else if (c === 'bad') { left = thumb(ph); text = `<div class="hl">Your photo</div><span class="pill bad" style="margin-top:6px">${ic('warn')} No clear face</span><div class="fn" style="color:rgba(255,255,255,.55);margin-top:6px">Try one person facing the camera</div>`; right = `<button class="btn glass prom s" style="height:36px" data-act="addPhoto" data-i="0">Change</button>`; }
-  else { left = thumb(ph); text = `<div class="hl">Your photo</div><span class="pill ok" style="margin-top:6px">${ic('checkc')} Looks good</span>`; right = `<button class="btn glass s" style="height:36px" data-act="addPhoto" data-i="0">Change</button>`; }
-  return `<div style="border-radius:24px;background:rgba(255,255,255,.08);padding:16px;display:flex;align-items:center;gap:16px;-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px)">${left}<div style="flex:1;min-width:0">${text}</div>${right}</div>`;
+  const sub = 'font-size:13px;line-height:18px;color:rgba(255,255,255,.6);margin-top:4px';
+  if (!ph) { left = emptyThumb(); text = `<div class="hl">Add your photo</div><div style="${sub};white-space:nowrap">A clear, front-facing selfie works best</div>`; }
+  else if (c === 'checking') { left = `<span style="position:relative">${thumb(ph)}<span class="abs" style="inset:0;border-radius:16px;background:rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center"><span class="spin"></span></span></span>`; text = `<div class="hl">Checking photo...</div><div style="${sub}">Making sure your face is clear</div>`; }
+  else if (c === 'bad') { left = `<span style="border-radius:16px;box-shadow:0 0 0 2px var(--red);display:block">${thumb(ph)}</span>`; text = `<div class="hl">Your photo</div><span class="pill bad" style="margin-top:8px">${ic('xcirc')} No clear face</span><div style="${sub};margin-top:8px">Try one person<br>facing the camera</div>`; right = `<button class="btn glass prom" style="height:36px;width:auto;padding:0 14px;font-size:15px" data-act="addPhoto" data-i="0">Change</button>`; }
+  else { left = thumb(ph); text = `<div class="hl">Your photo</div><span class="pill ok" style="margin-top:8px">${ic('checkc')} Looks good</span>`; right = `<button class="btn" style="height:36px;width:auto;padding:0 14px;font-size:15px;background:#fff;color:#000" data-act="addPhoto" data-i="0">Change</button>`; }
+  return `<div style="height:152px;border-radius:24px;background:rgba(255,255,255,.08);padding:0 16px;display:flex;align-items:center;gap:16px;-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px)">${left}<div style="flex:1;min-width:0">${text}</div>${right}</div>`;
 }
 SCREENS.create = ({ id = 'neon', people = 1, fresh = true }) => {
   const key = id + people; if (fresh || !SETUP[key]) SETUP[key] = SETUP[key] && !fresh ? SETUP[key] : newCreate(id, people);
   const st = SETUP[key]; const t = T[id]; const price = priceOf(st);
-  const ready = st.check.every(c => c === 'ok'); const checking = st.check.some(c => c === 'checking');
-  const note = checking ? 'Checking your photo…' : ready ? '' : st.check.some(c => c === 'bad') ? 'Change your photo to continue' : (people === 2 ? 'Add 2 photos to continue' : 'Add a photo to continue');
+  const ready = st.check.every(c => c === 'ok'); const checking = st.check.some(c => c === 'checking'); const any = st.photos.some(Boolean);
+  const label = ready || checking || st.check.some(c => c === 'bad') ? 'Create with' : 'Create ·';
   return {
     html: `${media(t, 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover')}
     <div class="abs" style="left:0;top:0;width:100%;height:140px;background:linear-gradient(rgba(0,0,0,.55),transparent)"></div>
     <div class="abs" style="left:0;top:${people === 2 ? 380 : 469}px;width:100%;bottom:0;background:linear-gradient(rgba(10,10,12,0),#0a0a0c 37%)"></div>
     <div class="tb">${closeBtn('closeCreate')}<div class="ttl">${t.name}</div></div>
-    <div class="abs" style="left:16px;right:16px;bottom:${note ? 128 : 112}px;display:flex;flex-direction:column;gap:12px">${photoCard(st)}${settingsBar(st)}</div>
-    <div class="abs" style="left:16px;right:16px;bottom:${note ? 50 : 62}px">
-      <button class="btn glass ${ready ? 'prom' : 'dis'}" style="height:50px" data-act="doCreate">${ready ? 'Create with' : 'Create ·'} ${COIN} ${price}</button>
-      ${note ? `<div class="fn ctr" style="color:rgba(255,255,255,.5);margin-top:12px">${note}</div>` : ''}</div>`,
+    <div class="abs" style="left:16px;right:16px;top:${people === 2 ? 437 : 530}px;display:flex;flex-direction:column;gap:12px">${photoCard(st)}${settingsBar(st)}</div>
+    <div class="abs" style="left:16px;right:16px;top:762px">
+      <button class="btn glass ${ready ? 'prom' : 'dis'}" style="height:50px;font-weight:500" data-act="doCreate">${label} ${COIN} ${price}</button>
+      ${checking ? `<div class="ctr" style="font-size:13px;color:rgba(255,255,255,.5);margin-top:12px">Checking your photo...</div>` : ''}</div>`,
     mount(el) { el.dataset.key = key; }
   };
 };
 const curSetup = () => SETUP[stack[stack.length - 1].el.dataset.key] || SETUP[Object.keys(SETUP).pop()];
 const refreshCreate = () => { const c = stack[stack.length - 1]; if (c.name === 'create') { c.args.fresh = false; rerender(); } };
 ACT.closeCreate = () => back();
-ACT.addPhoto = el => { const st = curSetup(); st.slot = +(el.dataset.i || 0); if (!S.guideAgreed) guidelinesSheet(); else chooseSheet(); };
+ACT.addPhoto = el => { const st = curSetup(); st.slot = +(el.dataset.i || 0); if (!S.guideAgreed) guidelinesSheet(chooseSheet); else chooseSheet(); };
 
 /* 04 · Guidelines + Permission */
-function guidelinesSheet() {
+let guideNext = null;
+function guidelinesSheet(next) {
+  guideNext = next || null;
   const ex = [SELFIE, '726146ff99', '2a841c84a2', '9f43c6d6b2'];
   const s = sheet({
     title: 'Before you add a photo', html: `<div style="display:flex;flex-direction:column;gap:24px;padding-bottom:4px">
-    <div><div class="hl" style="display:flex;align-items:center;gap:6px"><span class="green">${ic('face')}</span> Works great</div>
+    <div><div class="hl" style="display:flex;align-items:center;gap:8px"><span style="width:20px;height:20px;border-radius:5px;background:#0a84ff;display:flex;align-items:center;justify-content:center;font-size:12px">${ic('face')}</span>Works great</div>
       <div style="display:flex;gap:8px;margin:12px 0 8px">${ex.map(h => `<img src="${IMG(h)}" style="width:84px;height:104px;border-radius:16px;object-fit:cover" alt="">`).join('')}</div>
       <div class="fn n5">Your own selfie · face the camera · one person</div></div>
-    <div><div class="hl" style="display:flex;align-items:center;gap:6px"><img src="img/lg_risk.png" style="width:24px;height:24px" alt=""> Permission required</div>
-      <ul style="margin:16px 0 0 20px;display:flex;flex-direction:column;gap:8px;color:var(--n3)" class="sh">
+    <div><div class="hl" style="display:flex;align-items:center;gap:8px"><span style="font-size:17px">⚠️</span>Permission required</div>
+      <ul style="margin:16px 0 0 22px;padding:0;display:flex;flex-direction:column;gap:8px;color:rgba(255,255,255,.85);font-size:15px;line-height:20px">
       <li>Your photo is sent to third-party AI providers to make your result.</li><li>They use it only for that — nothing else.</li><li>Your original photo is deleted within 24 hours.</li><li>I'm in this photo, or everyone in it allowed me to use it.</li></ul>
       <button class="press" data-act="agreeTick" style="display:flex;align-items:center;gap:12px;margin-top:16px;text-align:left"><span class="cbx">${ic('check')}</span><span class="shs">I've read and agree with the above</span></button></div>
     <div><button class="btn glass dis agreebtn" style="height:50px" data-act="agreeGo">Continue</button><div class="fn n5 ctr" style="padding:8px">Read full guidelines</div></div></div>`
@@ -168,21 +175,28 @@ function guidelinesSheet() {
   return s;
 }
 ACT.agreeTick = el => { const c = el.querySelector('.cbx'); c.classList.toggle('on'); const b = el.closest('.sheet').querySelector('.agreebtn'); const on = c.classList.contains('on'); b.classList.toggle('dis', !on); b.classList.toggle('prom', on); };
-ACT.agreeGo = () => { S.guideAgreed = true; closeSheet(); setTimeout(chooseSheet, 320); };
+ACT.agreeGo = el => { if (el.classList.contains('dis')) return; S.guideAgreed = true; closeSheet(); const n = guideNext; guideNext = null; if (n) setTimeout(n, 320); };
 
 /* 05 · Choose a photo */
 let hasCreations = true;
 function chooseSheet() {
   const recent = [SELFIE, '726146ff99', '2a841c84a2', '9f43c6d6b2'];
-  const body = hasCreations ? `<div class="hscroll" style="gap:8px;margin:0 -16px;padding:0 16px">${recent.map(h => `<button class="press" data-act="pickRecent" data-v="${h}" style="width:110px;height:136px;border-radius:16px;overflow:hidden;flex:none"><img src="${IMG(h)}" style="width:100%;height:100%;object-fit:cover" alt=""></button>`).join('')}</div>`
+  const body = hasCreations ? `<div class="hscroll" style="gap:8px;margin:0 -16px;padding:0 16px">${recent.map(h => `<button class="press rph" data-act="pickRecent" data-v="${h}" style="position:relative;width:110px;height:136px;border-radius:16px;overflow:hidden;flex:none"><img src="${IMG(h)}" style="width:100%;height:100%;object-fit:cover" alt=""></button>`).join('')}</div>`
     : `<div style="height:136px;border-radius:16px;background:var(--a100);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0 24px;text-align:center"><span class="icbox" style="width:32px;height:32px;font-size:22px">${ic('sparkles')}</span><div class="hl">No creations yet</div><div class="fn n5">Photos you make in Spark will show up here.</div></div>`;
   sheet({
     title: 'Choose a photo', html: `<div style="display:flex;flex-direction:column;gap:24px;padding-bottom:17px">
-    <div style="display:flex;gap:12px">${[['camera', 'Take a selfie', 'selfie'], ['library', 'Photo library', 'library']].map(([i, l, a]) => `<button class="press" data-act="${a}" style="flex:1;height:56px;border-radius:20px;background:var(--a100);display:flex;align-items:center;gap:12px;padding:0 16px"><span class="icbox" style="width:24px;height:24px;font-size:20px">${ic(i)}</span><span class="shs">${l}</span></button>`).join('')}</div>
+    <div style="display:flex;gap:12px">${[['camera', 'Take a selfie', 'selfie'], ['library', 'Photo library', 'library']].map(([i, l, a]) => `<button class="press" data-act="${a}" style="flex:1;height:56px;border-radius:20px;background:rgba(255,255,255,.09);box-shadow:inset 0 0 0 .5px rgba(255,255,255,.15);display:flex;align-items:center;gap:12px;padding:0 16px"><span class="icbox" style="width:24px;height:24px;font-size:20px">${ic(i)}</span><span class="shs">${l}</span></button>`).join('')}</div>
     <div style="display:flex;flex-direction:column;gap:12px"><div class="hl" style="display:flex;align-items:center;gap:8px"><span class="icbox" style="width:24px;height:24px">${ic('sparkles')}</span>My creations</div>${body}</div></div>`
   });
 }
-ACT.pickRecent = el => { closeSheet(); setTimeout(() => go('crop', { img: el.dataset.v }), 250); };
+ACT.pickRecent = el => {
+  el.style.boxShadow = 'inset 0 0 0 2px var(--green)'; el.insertAdjacentHTML('beforeend', `<span style="position:absolute;right:8px;top:8px;width:20px;height:20px;border-radius:50%;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:10px;box-shadow:inset 0 0 0 2px #fff;z-index:1;color:#fff">${ic('check')}</span><span style="position:absolute;inset:0;border-radius:16px;box-shadow:inset 0 0 0 2px var(--green)"></span>`);
+  const img = el.dataset.v; setTimeout(() => { closeSheet(); setPhoto(img); }, 350);
+};
+function setPhoto(img) {
+  const st = curSetup(); const i = st.slot || 0; st.photos[i] = img; st.check[i] = 'checking'; refreshCreate();
+  setTimeout(() => { st.check[i] = (img === '30b2d83d18' || img === 'a0c009bf83' || img === '3188779628') ? 'bad' : 'ok'; refreshCreate(); }, 1600);
+}
 ACT.selfie = () => { closeSheet(); setTimeout(() => go('crop', { img: SELFIE }), 250); };
 ACT.library = () => {
   const imgs = [SELFIE, 'ffec858615', '30b2d83d18', '726146ff99', '3188779628', 'a0c009bf83', '2a841c84a2', 'cc8862499f', '3b449190bc', '9f43c6d6b2', '15cd66e195', '23e1943ea1', '5e89bb2630', 'd4bd65a314', '0e4cddc53b', '4378f76bb3', '5a2e1764e8', '8fa2b1b0eb'];
@@ -226,8 +240,8 @@ SCREENS.settings = ({ key }) => {
     <div class="abs" style="left:0;top:0;width:100%;height:140px;background:linear-gradient(rgba(0,0,0,.55),transparent)"></div>
     <div class="abs" style="left:0;top:420px;width:100%;bottom:0;background:linear-gradient(rgba(10,10,12,0),#0a0a0c 40%)"></div>
     <div class="tb">${closeBtn('closeSettings')}<div class="ttl">${t.name}</div></div>
-    <div class="abs" style="left:16px;right:16px;bottom:138px"><div class="fns n5" style="margin-bottom:12px">Generation settings</div><div class="grp">${rows.join('')}</div></div>
-    <div class="abs" style="left:16px;right:16px;bottom:34px"><button class="btn glass prom" style="height:54px" data-act="saveSettings">Save</button>
+    <div class="abs" style="left:16px;right:16px;top:535px"><div style="font-size:15px;font-weight:600;margin-bottom:12px">Generation settings</div><div class="grp">${rows.join('')}</div></div>
+    <div class="abs" style="left:16px;right:16px;top:760px"><button class="btn glass prom" style="height:50px;font-weight:600" data-act="saveSettings">Save</button>
     <div class="fn ctr" style="color:rgba(255,255,255,.5);margin-top:12px;display:flex;align-items:center;justify-content:center;gap:4px"><img src="img/coin.png" style="width:16px;height:16px" alt="">${price} · ${isVid(t) ? 'Price changes with the length only.' : 'Same price for every setting.'}</div></div>`,
     mount(el) { el.dataset.key = key; }
   };
@@ -241,10 +255,10 @@ ACT.closeSettings = () => {
 };
 function discardDialog(onDiscard) {
   const p = $phone(); const d = document.createElement('div'); d.className = 'alertdim';
-  d.innerHTML = `<div class="glass dark" style="width:338px;border-radius:32px;padding:32px 24px 24px;display:flex;flex-direction:column;align-items:center;gap:24px;animation:pop .3s var(--ease) both">
-   <img src="img/lg_risk.png" style="width:64px;height:64px" alt="">
-   <div class="ctr"><div class="t3">Discard changes?</div><div class="sh n5" style="margin-top:8px">Your new settings won't be saved if you leave now.</div></div>
-   <div style="width:100%;display:flex;flex-direction:column;gap:12px"><button class="btn glass prom" data-x="keep">Keep editing</button><button class="btn" style="background:var(--a100);color:var(--red)" data-x="discard">Discard</button></div></div>`;
+  d.innerHTML = `<div class="glass dark" style="width:338px;border-radius:32px;padding:44px 22px 22px;display:flex;flex-direction:column;align-items:center;gap:20px;animation:pop .3s var(--ease) both">
+   <img src="img/lg_risk.png" style="width:72px;height:72px" alt="">
+   <div class="ctr"><div class="t3">Discard changes?</div><div class="sh n5" style="margin-top:12px">Your new settings won't be saved if you leave now.</div></div>
+   <div style="width:100%;display:flex;flex-direction:column;gap:12px;margin-top:4px"><button class="btn glass prom" data-x="keep">Keep editing</button><button class="btn" style="background:var(--a100);color:var(--red)" data-x="discard">Discard</button></div></div>`;
   d.querySelector('[data-x=keep]').onclick = () => d.remove(); d.querySelector('[data-x=discard]').onclick = () => { d.remove(); onDiscard(); };
   p.appendChild(d);
 }
@@ -262,41 +276,45 @@ function notEnoughCoins(need) {
 /* 08 · Making */
 SCREENS.making = ({ id = 'neon', photo = SELFIE }) => {
   const t = T[id]; const vid = isVid(t);
+  const sp = [[48, 74, 1], [82, 118, 0], [133, 140, 0], [64, 214, 1], [252, 212, 0], [198, 230, 0], [38, 358, 0], [178, 324, 1], [251, 351, 1], [129, 408, 0], [223, 454, 0], [96, 30, 1]];
   return {
-    html: `<div class="abs" style="inset:0;background:radial-gradient(120% 70% at 50% 30%,#1b1530,#000 70%)"></div>
+    html: `<div class="abs" style="inset:0;background:#000"><img src="${IMG(t.img)}" alt="" style="position:absolute;inset:-60px;width:calc(100% + 120px);height:calc(100% + 120px);object-fit:cover;filter:blur(60px) brightness(.35)"></div>
     <div class="tb">${closeBtn('leaveMaking')}</div>
-    <div class="abs mk-card" style="left:13px;top:120px;width:376px;height:560px;border-radius:40px;overflow:hidden">
+    <div class="abs mk-card" style="left:45px;top:113px;width:312px;height:554px;border-radius:40px;overflow:hidden">
       <span class="mk-edge"></span>
-      <div class="abs" style="inset:3px;border-radius:37px;overflow:hidden;background:#0d0b14">
-        <img class="mk-img" src="${IMG(t.img)}" alt="" style="position:absolute;inset:-20px;width:calc(100% + 40px);height:calc(100% + 40px);object-fit:cover">
-        <div class="abs" style="inset:0;background:radial-gradient(70% 50% at 50% 50%,rgba(150,120,255,.18),transparent),linear-gradient(transparent 55%,rgba(0,0,0,.6))"></div>
-        ${Array.from({ length: 12 }, (_, i) => `<i class="mk-spark" style="left:${[18, 72, 40, 85, 28, 60, 12, 78, 50, 35, 90, 66][i]}%;top:${[20, 14, 38, 46, 64, 30, 50, 72, 56, 82, 26, 88][i]}%;animation-delay:${[0, 1.05, .3, 1.35, .6, 1.65, .9, .15, 1.2, .45, 1.5, .75][i]}s"></i>`).join('')}
-        <span class="abs glass dark mk-chip" style="left:50%;top:268px;transform:translateX(-50%);height:32px;border-radius:100px;padding:0 14px;display:flex;align-items:center;gap:6px;white-space:nowrap" class="fns">${ic('sparkles')}<span class="fns mk-chipt">Dreaming up your scene…</span></span>
-        <span class="abs" style="left:24px;bottom:24px;width:56px;height:56px;border-radius:50%;overflow:hidden;box-shadow:0 0 0 3px rgba(255,255,255,.85)"><img src="${IMG(photo)}" style="width:100%;height:100%;object-fit:cover" alt=""></span>
+      <div class="abs" style="inset:2px;border-radius:38px;overflow:hidden;background:#0d0b14">
+        <img class="mk-img" src="${IMG(t.img)}" alt="" style="position:absolute;inset:-40px;width:calc(100% + 80px);height:calc(100% + 80px);object-fit:cover;filter:blur(18px) saturate(1.1)">
+        <div class="abs" style="inset:0;background:rgba(0,0,0,.15)"></div>
+        ${sp.map(([x, y, big], i) => `<span class="mk-star" style="left:${x}px;top:${y}px;font-size:${big ? 30 : 16}px;animation-delay:${(i * .27) % 1.8}s">✦</span>`).join('')}
+        <div class="abs glass dark" style="left:12px;right:12px;top:18px;height:44px;border-radius:100px;display:flex;align-items:center;gap:8px;padding:0 6px 0 16px">
+          <span class="bellring" style="display:flex;font-size:15px">${ic('bell')}</span><span style="flex:1;font-size:13px;font-weight:600">Notify me when ready</span>
+          <button class="notifybtn" style="height:32px;padding:0 12px;border-radius:100px;background:rgba(255,255,255,.2);font-size:13px;font-weight:600" data-act="notifyOn">Turn on</button></div>
+        <span class="abs glass dark" style="left:50%;top:260px;transform:translateX(-50%);height:36px;border-radius:100px;padding:0 16px 0 12px;display:flex;align-items:center;gap:8px;white-space:nowrap"><span style="font-size:16px;display:flex">${ic('sparkles')}</span><span class="mk-chipt" style="font-size:15px;font-weight:600">Dreaming up your scene...</span></span>
+        <span class="abs" style="left:18px;bottom:18px;width:70px;height:70px;border-radius:50%;overflow:hidden;background:#fff;box-shadow:0 0 0 3px #fff"><img src="${IMG(photo)}" style="width:100%;height:100%;object-fit:cover" alt=""></span>
       </div></div>
-    <div class="abs ctr" style="left:24px;right:24px;top:704px"><div class="hl">Your ${vid ? 'video' : 'photo'} is on its way...</div><div class="fn n5" style="margin-top:4px">You can leave this screen and find it in Gallery › Queue.</div></div>
-    <div class="abs" style="left:16px;right:16px;top:770px"><button class="btn glass prom" style="height:50px" data-act="keepBrowsing">Keep browsing</button><button class="fn n5" style="display:block;margin:10px auto 0" data-act="goQueue">Go to Queue</button></div>`,
+    <div class="abs ctr" style="left:16px;right:16px;top:686px"><div style="font-size:22px;line-height:28px;font-weight:700">Your ${vid ? 'video' : 'photo'} is on its way...</div><div style="font-size:13px;color:rgba(255,255,255,.6);margin-top:6px">You can leave this screen and find it in Gallery › Queue.</div></div>
+    <div class="abs" style="left:16px;right:16px;top:762px"><button class="btn glass prom" style="height:50px;font-weight:500" data-act="keepBrowsing">Keep browsing</button><button style="display:block;margin:14px auto 0;font-size:15px;font-weight:600;color:rgba(255,255,255,.6)" data-act="goQueue">Go to Queue</button></div>`,
     mount(el) {
-      const msgs = ['Dreaming up your scene…', 'Adding final touches…'];
+      const msgs = ['Dreaming up your scene...', 'Adding final touches...'];
       let k = 0; const tt = el.querySelector('.mk-chipt');
       el._iv = setInterval(() => { k = (k + 1) % 2; tt.textContent = msgs[k]; }, 2600);
-      setTimeout(() => { if (stack[stack.length - 1].el === el) toast('Notify me when ready', { icon: 'bell', act: 'Turn on', fn: () => toast('We’ll let you know'), ms: 4000 }); }, 900);
       el._to = setTimeout(() => { clearInterval(el._iv); if (stack[stack.length - 1].el === el) replace('result', { id }, 'fade'); else toast(`Your ${vid ? 'video' : 'photo'} is ready`, { act: 'View', fn: () => go('result', { id }) }); }, 7000);
     }
   };
 };
+ACT.notifyOn = el => { el.textContent = 'On'; el.style.background = 'rgba(48,209,88,.25)'; el.style.color = 'var(--green)'; };
 ACT.leaveMaking = () => { back(); };
 ACT.keepBrowsing = () => { const vid = stack[stack.length - 1].args && T[stack[stack.length - 1].args.id] && isVid(T[stack[stack.length - 1].args.id]); reset(vid ? 'tab_video' : 'tab_photo'); };
 ACT.goQueue = () => { S.galleryTab = 'queue'; reset('tab_gallery'); };
 
 /* 09 · Result */
+const RETRY_PRICE = { video: 160, photo: 100 }; // Figma 09-A / 09-E
 SCREENS.result = ({ id = 'neon', img, failed = false, kind }) => {
-  const t = T[id] || T.neon; const vid = kind ? kind === 'video' : isVid(t); const price = vid ? 120 : 100; const src = img || t.img;
-  const w = vid ? 266 : 320, h = vid ? 472 : 400;
-  const top = 132, actsTop = failed ? 720 : 720, bottomOfMedia = failed ? actsTop - 24 : 628 - 24;
-  const y = Math.round((top + (bottomOfMedia - top - h) / 2) / 4) * 4;
+  const t = T[id] || T.neon; const vid = kind ? kind === 'video' : isVid(t); const price = RETRY_PRICE[vid ? 'video' : 'photo']; const src = img || t.img;
+  const w = vid ? (failed ? 304 : 266) : 320, h = vid ? (failed ? 540 : 472) : 400;
+  const actsTop = 720; const y = vid ? (failed ? 144 : 132) : (failed ? 216 : 168);
   const soc = [['tiktok', 'TikTok'], ['instagram', 'Instagram'], ['facebook', 'Facebook'], ['whatsapp', 'WhatsApp'], ['more', 'Other']];
-  const coinBtn = (cls, label) => `<button class="btn glass ${cls}" style="height:54px" data-act="tryAgain" data-v="${id}">${ic('retry')} ${label} · ${COIN} ${price}</button>`;
+  const coinBtn = (cls, label) => `<button class="btn glass ${cls}" data-act="tryAgain" data-v="${id}" style="height:54px;font-weight:500">${label} · ${COIN} ${price}</button>`;
   const mediaBox = failed
     ? `<div class="abs" style="left:${(402 - w) / 2}px;top:${y}px;width:${w}px;height:${h}px;border-radius:24px;overflow:hidden"><img src="${IMG(src)}" style="position:absolute;inset:-30px;width:calc(100% + 60px);height:calc(100% + 60px);object-fit:cover;filter:blur(32px)" alt=""><div class="abs" style="inset:0;background:rgba(0,0,0,.55)"></div>
        <div class="abs" style="left:24px;right:24px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center"><img src="img/lg_error.png" style="width:64px;height:64px" alt="">
@@ -305,7 +323,7 @@ SCREENS.result = ({ id = 'neon', img, failed = false, kind }) => {
     : `<button class="abs" style="left:${(402 - w) / 2}px;top:${y}px;width:${w}px;height:${h}px;border-radius:24px;overflow:hidden" data-act="${vid ? 'playToggle' : ''}">${t.v && vid ? `<video src="v/${t.v}.mp4" poster="${IMG(src)}" playsinline loop style="width:100%;height:100%;object-fit:cover"></video>` : `<img src="${IMG(src)}" style="width:100%;height:100%;object-fit:cover" alt="">`}
        ${vid ? `<span class="abs playbtn glass dark circ" style="width:64px;height:64px;left:50%;top:50%;transform:translate(-50%,-50%);font-size:22px">${ic('play')}</span>` : ''}</button>`;
   return {
-    html: `<div class="tb">${backBtn('resultBack')}<div class="ttl">${t.name}</div></div>${mediaBox}
+    html: `<div class="tb">${backBtn('resultBack')}<div class="ttl" style="font-size:20px;font-weight:600">${t.name}</div></div>${mediaBox}
     ${failed ? '' : `<div class="abs" style="left:16px;right:16px;top:628px;display:flex;justify-content:center;gap:4px">${soc.map(([k, l]) => `<button class="press" data-act="shareTo" style="width:70px;display:flex;flex-direction:column;align-items:center;gap:4px"><img src="img/soc_${k}.png" style="width:48px;height:48px" alt=""><span class="c1" style="font-weight:700">${l}</span></button>`).join('')}</div>`}
     <div class="abs" style="left:16px;right:16px;top:${actsTop}px;display:flex;flex-direction:column;gap:12px">
     ${failed ? coinBtn('prom', 'Try again') + `<button class="btn glass" style="height:54px" data-act="anotherPhoto" data-v="${id}">Use another photo</button>`
