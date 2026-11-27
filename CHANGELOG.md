@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-11-27 — Icon theo Figma, bỏ Search ở tab bar
+
+- Icon SF Symbols lấy trực tiếp từ Figma (tab bar, toolbar, settings bar, sheet, profile…). Icon nào Figma không có vẫn dùng Font Awesome.
+- Tab bar chỉ còn 4 tab (Video · Photo · Tools · Gallery), bỏ nút Search, pill rộng 345 căn giữa như Figma.
+
 ## 2026-11-27 — v2: code lại web app từ section Main flow (5 section đã chốt)
 
 - **App · 4 tabs**: Video / Photo (before–after kéo được) / Tools / Gallery (Queue, Video, Image, Uploads, Bookmarks), tab bar Liquid Glass + Search.

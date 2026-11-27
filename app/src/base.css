@@ -120,9 +120,9 @@ img,video{display:block}
 /* tab bar */
 .tabbar{position:absolute;left:0;right:0;bottom:0;height:102px;padding:16px 16px 32px;display:flex;gap:12px;align-items:center;z-index:40}
 .tabbar::after{content:"";position:absolute;inset:-20px 0 0;background:linear-gradient(transparent,rgba(0,0,0,.85) 60%);z-index:-2;pointer-events:none}
-.tabpill{flex:1;height:62px;border-radius:1000px;display:flex;padding:4px}
+.tabbar{justify-content:center}.tabpill{flex:none;width:345px;height:62px;border-radius:1000px;display:flex;padding:4px}
 .tabpill button{flex:1;border-radius:1000px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:10px;font-weight:500;line-height:12px}
-.tabpill button .ic{font-size:19px}
+.tabpill .tabic{height:28px;display:flex;align-items:center;justify-content:center;font-size:17px}
 .tabpill button.on{background:rgba(44,44,46,.9);color:var(--lime);font-weight:700}
 .tabsearch{width:62px;height:62px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex:none}
 /* edge fade */
@@ -203,3 +203,5 @@ img,video{display:block}
 @keyframes kb{from{transform:scale(1.02)}to{transform:scale(1.12) translate(-1.5%,-1.5%)}}
 .press{transition:transform .15s}.press:active{transform:scale(.97)}
 .hide{display:none!important}
+
+.fi{display:inline-block;background:currentColor;-webkit-mask-size:100% 100%;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;vertical-align:middle;flex:none}

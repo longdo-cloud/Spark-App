@@ -1,6 +1,7 @@
 /* Spark web prototype v2 — core: icons, assets, state, router, overlays */
 const ICONS = __ICONS__;
-const ic = (n, cls = '') => { const d = ICONS[n]; if (!d) return ''; return `<svg class="ic ${cls}" viewBox="${d[0]}" aria-hidden="true"><path d="${d[1]}"/></svg>`; };
+const FIG = __FIG__; // icons exported from Figma (SF Symbols), px at 144px font size
+const ic = (n, cls = '') => { const f = FIG[n]; if (f) return `<i class="ic fi fi-${n} ${cls}" aria-hidden="true" style="width:${(f[0] / 144).toFixed(3)}em;height:${(f[1] / 144).toFixed(3)}em"></i>`; const d = ICONS[n]; if (!d) return ''; return `<svg class="ic ${cls}" viewBox="${d[0]}" aria-hidden="true"><path d="${d[1]}"/></svg>`; };
 const IMG = h => `img/${h}.jpg`;
 const PNG = n => `img/${n}.png`;
 const COIN = `<img class="coin" src="img/coin.png" alt="">`;
@@ -126,7 +127,7 @@ const closeBtn = (act = 'back') => `<button class="circ s glass" data-act="${act
 function joinNow() { return S.pro ? `<button class="badge glass dark" data-act="coins">${COIN.replace('class="coin"', '')}<span>${S.coins.toLocaleString()}</span></button>` : `<button class="badge glass pastel" data-act="paywall"><img src="img/crown.png" alt="">JOIN NOW</button>`; }
 function tabBar(active) {
   const t = [['video', 'tvideo', 'Video'], ['photo', 'tphoto', 'Photo'], ['tools', 'ttools', 'Tools'], ['gallery', 'tgallery', 'Gallery']];
-  return `<div class="tabbar"><div class="tabpill glass">${t.map(([k, i, l]) => `<button class="${k === active ? 'on' : ''}" data-act="tab" data-v="${k}">${ic(i)}<span>${l}</span></button>`).join('')}</div><button class="tabsearch glass" data-act="search" aria-label="Search">${ic('search')}</button></div>`;
+  return `<div class="tabbar"><div class="tabpill glass">${t.map(([k, i, l]) => `<button class="${k === active ? 'on' : ''}" data-act="tab" data-v="${k}"><span class="tabic">${ic(i)}</span><span>${l}</span></button>`).join('')}</div></div>`;
 }
 function largeTitle(title, extra = '') { return `<div class="tbL"><div class="lt">${title}</div>${joinNow()}${extra}</div>`; }
 function card(t, w = 160, h = 252, act = 'openTpl', title = true) {
