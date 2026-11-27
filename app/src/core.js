@@ -23,6 +23,12 @@ const T = { // templates (video + photo)
   papercut: { id: 'papercut', name: 'Paper Cut Portrait', kind: 'photo', img: '3bf90c3605', price: 100, cat: 'Art', people: 2 },
   felt: { id: 'felt', name: 'Felt Doll', kind: 'photo', img: '030c9d320f', price: 100, cat: 'Cute' },
   midnight: { id: 'midnight', name: 'Midnight Glow', kind: 'photo', img: '0fcda8a89f', price: 100, cat: 'Portrait' },
+  chefs: { id: 'chefs', name: 'Tiny Chefs', kind: 'video', img: 'hero_03', v: '03', price: 100, cat: 'Trending' },
+  granny: { id: 'granny', name: 'Granny Rush', kind: 'video', img: 'hero_12', v: '12', price: 100, cat: 'Action' },
+  pool: { id: 'pool', name: 'Sky Pool Duo', kind: 'video', img: 'hero_06', v: '06', price: 100, cat: 'Couple', people: 2 },
+  whale: { id: 'whale', name: 'Whale Wake-up', kind: 'video', img: 'hero_14', v: '14', price: 100, cat: 'Funny' },
+  gameday: { id: 'gameday', name: 'Game Day Glow', kind: 'video', img: 'hero_08', v: '08', price: 100, cat: 'Trending' },
+  wolf: { id: 'wolf', name: 'Wolf Cut', kind: 'photo', tool: 'hair', img: '61f1c491d9', res: '93deccbe6a', price: 100, cat: 'Hairstyle' },
   noir: { id: 'noir', name: 'Film Noir', kind: 'photo', img: 'fe31119c36', price: 100, cat: 'Portrait' },
 };
 const SELFIE = '93c32947a2';           // full-body selfie used in flows
@@ -32,7 +38,7 @@ const AVATAR = '2a4f3e6bef';
 /* ---------- state ---------- */
 const S = {
   tab: 'video', galleryTab: 'video', signedIn: false, pro: false, coins: 480,
-  bookmarks: new Set(['neon']), collections: [
+  bookmarks: new Set(), collections: [
     { id: 'default', name: 'Default collection', items: ['neon', 'cosmic', 'lavender'], def: true },
     { id: 'bday', name: 'Birthday ideas', items: ['cake', 'thirty'] },
     { id: 'halloween', name: 'Halloween', items: [] },
@@ -147,3 +153,59 @@ document.addEventListener('click', e => {
   const el = e.target.closest('[data-act]'); if (!el || !document.getElementById('phone').contains(el)) return;
   const f = ACT[el.dataset.act]; if (f) { e.preventDefault(); f(el, e); }
 });
+
+/* ---------- motion helpers: smooth paging, mouse drag-to-swipe ---------- */
+const easeOutQuint = t => 1 - Math.pow(1 - t, 5);
+const easeInOutCubic = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+function smoothScroll(el, prop, to, dur = 520, fn, ease = easeInOutCubic) {
+  cancelAnimationFrame(el._raf); const from = el[prop]; if (Math.abs(to - from) < 1) { fn && fn(); return; }
+  if (el._snap === undefined) el._snap = el.style.scrollSnapType; el.style.scrollSnapType = 'none'; el._anim = true; const t0 = performance.now();
+  const step = now => { const k = Math.min(1, (now - t0) / dur); el[prop] = from + (to - from) * ease(k); if (k < 1) el._raf = requestAnimationFrame(step); else { el.style.scrollSnapType = el._snap; el._snap = undefined; el._anim = false; fn && fn(); } };
+  el._raf = requestAnimationFrame(step);
+}
+const phoneScale = el => { const r = el.getBoundingClientRect(); return el.offsetWidth ? r.width / el.offsetWidth : 1; };
+/* Mouse drag on horizontal rows (hero banner, category chips, card rows) — touch keeps native scrolling */
+document.addEventListener('pointerdown', e => {
+  if (e.pointerType !== 'mouse' || e.button !== 0) return;
+  const sc = e.target.closest('.hscroll'); if (!sc || !document.getElementById('phone').contains(sc)) return;
+  const k = phoneScale(sc), x0 = e.clientX, s0 = sc.scrollLeft; let moved = false, lastX = x0, lastT = performance.now(), v = 0;
+  const paged = sc.classList.contains('herotrack'); cancelAnimationFrame(sc._raf);
+  const move = ev => {
+    const dx = (ev.clientX - x0) / k; if (!moved && Math.abs(dx) < 5) return;
+    if (!moved) { moved = true; sc._drag = true; sc._snap = sc.style.scrollSnapType; sc.style.scrollSnapType = 'none'; sc.style.cursor = 'grabbing'; }
+    sc.scrollLeft = s0 - dx; const now = performance.now(); v = ((ev.clientX - lastX) / k) / Math.max(1, now - lastT); lastX = ev.clientX; lastT = now;
+  };
+  const up = () => {
+    window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); sc.style.cursor = '';
+    if (!moved) return; sc._drag = false; sc._touched = Date.now(); const snap = sc._snap; sc._snap = undefined;
+    window.addEventListener('click', ev => { ev.stopPropagation(); ev.preventDefault(); }, { capture: true, once: true });
+    if (paged) { const w = sc.clientWidth, n = Math.round(sc.scrollWidth / w); let i = Math.round(sc.scrollLeft / w); if (Math.abs(v) > .25) i = Math.round((s0 - (v > 0 ? w * .51 : -w * .51)) / w); i = Math.max(0, Math.min(n - 1, i)); sc.style.scrollSnapType = snap; smoothScroll(sc, 'scrollLeft', i * w, 480, null, easeOutQuint); }
+    else { const max = sc.scrollWidth - sc.clientWidth; const to = Math.max(0, Math.min(max, sc.scrollLeft - v * 260)); sc.style.scrollSnapType = snap; smoothScroll(sc, 'scrollLeft', to, 520, null, easeOutQuint); }
+  };
+  window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+});
+/* Vertical pager for the full-screen feed: wheel / drag / keys → one page per gesture, eased, with parallax between scenes */
+function attachPager(sc) {
+  const H = () => sc.clientHeight, pages = () => sc.querySelectorAll(':scope > section');
+  const goTo = i => { const n = pages().length; i = Math.max(0, Math.min(n - 1, i)); smoothScroll(sc, 'scrollTop', i * H(), 620, () => { sc._lock = Date.now(); }, easeOutQuint); };
+  const cur = () => Math.round(sc.scrollTop / H());
+  sc.addEventListener('wheel', e => {
+    e.preventDefault(); if (sc._anim || Date.now() - (sc._lock || 0) < 380 || Math.abs(e.deltaY) < 6) { sc._lock = sc._anim ? sc._lock : Date.now() - 300; return; }
+    goTo(cur() + (e.deltaY > 0 ? 1 : -1));
+  }, { passive: false });
+  sc.addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'mouse' || e.button !== 0 || e.target.closest('button')) return;
+    const k = phoneScale(sc), y0 = e.clientY, s0 = sc.scrollTop, t0 = performance.now(); let moved = false; cancelAnimationFrame(sc._raf);
+    const move = ev => { const dy = (ev.clientY - y0) / k; if (!moved && Math.abs(dy) < 5) return; if (!moved) { moved = true; sc._snap = sc.style.scrollSnapType; sc.style.scrollSnapType = 'none'; } sc.scrollTop = s0 - dy; };
+    const up = ev => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); if (!moved) return; sc.style.scrollSnapType = sc._snap; sc._snap = undefined;
+      const dy = (ev.clientY - y0) / k, vel = dy / Math.max(1, performance.now() - t0), i0 = Math.round(s0 / H());
+      goTo(Math.abs(dy) > H() * .18 || Math.abs(vel) > .45 ? i0 + (dy < 0 ? 1 : -1) : i0); };
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+  });
+  const key = e => { if (!document.body.contains(sc)) return document.removeEventListener('keydown', key); if (e.key === 'ArrowDown' || e.key === 'PageDown') { e.preventDefault(); goTo(cur() + 1); } if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); goTo(cur() - 1); } };
+  document.addEventListener('keydown', key);
+  const fx = () => { const h = H(); pages().forEach((p, i) => { const r = (sc.scrollTop - i * h) / h; if (Math.abs(r) > 1.05) return; const m = p.firstElementChild; const a = Math.min(1, Math.abs(r));
+    if (m) { m.style.transform = `translateY(${r * h * .3}px) scale(${1 + a * .08})`; m.style.filter = `brightness(${1 - a * .45})`; }
+    p.querySelectorAll('.fmeta,.fside,.fuse').forEach(n => { n.style.transform = `translateY(${-r * 40}px)`; }); }); };
+  sc.addEventListener('scroll', fx, { passive: true }); fx();
+}

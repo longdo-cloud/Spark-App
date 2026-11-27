@@ -1,5 +1,23 @@
 # Changelog
 
+## 2026-11-27 — Vuốt, chuyển cảnh, Try now
+
+- Hero banner, hàng category và các hàng thẻ kéo được bằng chuột (vuốt); hero tự trượt về đúng trang, tạm dừng tự chạy khi người dùng vuốt.
+- Try now trên hero mở thẳng flow Generate video (Tiny Chefs, Granny Rush, Sky Pool Duo, Whale Wake-up, Game Day Glow — clip v/03, 12, 06, 14, 08).
+- Feed: lăn chuột / kéo / phím ↑↓ chuyển đúng 1 cảnh mỗi lần, chuyển động mượt (ease-out) kèm parallax giữa 2 cảnh.
+- Toast "Removed from Saved" nằm dưới cùng vị trí với toast "Saved".
+- Mặc định không template nào được bookmark.
+
+## 2026-11-27 — Tools → Hairstyle, Gallery → Queue & Library, quà tặng; dùng ảnh/video có sẵn
+
+- **Ảnh & video**: dùng lại file đã có trong `img/`, `v/`, `p/` (banner_hair, beauty_1–3, selfie1–5, street, blackcat1/4, aivid02/16, cosmic, witchcat, tool_color/length/smooth). Chỉ thêm 12 ảnh Figma chưa có trong repo (hero Hairstyle, kết quả Wolf Cut, preset, Double Eyelids / V-Line / Brighten Skin, 4 ảnh tab Image).
+- **Tab Video**: hero thành carousel 5 video (v/03, 12, 06, 14, 08) tự chạy, có chấm trang. Cosmic Night phát v/05.
+- **Tab Tools** theo Figma flow Tools: banner Short Hair → Long Hair, các thẻ đúng ảnh; bấm Hairstyle / banner / thẻ Hairstyle mở flow mới.
+- **Flow Tools → Hairstyle**: Hairstyle detail (before/after kéo được, preset Pixie Cut…Space Buns), Create (Full body…), Generation settings (Ratio + Quality), Guidelines lần đầu (I understand), Choose a photo (Recent / No recent photos), Crop, Checking, Looks good, Making, Photo result và Failed.
+- **Flow Gallery**: Queue (Waiting / Making now / Didn’t work), Queue trống, Cancel creation (alert), Item ready (toast View), Video, Video trống, Video viewer (play, thanh tua, ⋯ Remake/Report/Delete), Image dạng grid 3 cột, chọn nhiều (nhấn giữ), Delete items (alert), Photo result.
+- **Quà tặng**: Gift received (trên tab Tools), Top-up success theo Option 1 – Spotlight, thêm Option 2 – Receipt.
+- Panel demo: thêm nhóm Tools → Hairstyle và Gallery → Queue & Library.
+
 ## 2026-11-27 — Khớp lại với Figma từng màn
 
 - Generate video/image: feed (bỏ dòng category, nút Save/More), trạng thái thu gọn (Use this viền lime + nút lọc cạnh tiêu đề), lần đầu bấm Use This Style mở Guidelines ngay trên feed rồi vào Create; thẻ ảnh 152, nút + lime 48, Checking / Looks good (Change trắng) / No clear face (Change lime, viền đỏ); Making (thẻ 312×554, ngôi sao, toast Notify nằm trong thẻ); Result video/ảnh và Failed đúng kích thước; giá Try again 160 (video) / 100 (ảnh); giá template 100.

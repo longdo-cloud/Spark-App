@@ -7,7 +7,7 @@ Clickable iOS prototype of **Spark** (Option 2) for presenting: Discover, Video,
 | Path | What |
 |---|---|
 | `index.html` | App đã build (HTML/CSS/JS tĩnh, deploy thẳng) |
-| `app/src/` | Source v2: `base.css`, `flow.css`, `profile.css`, `core.js` (router, sheet, alert, toast), `tabs.js`, `flow.js` (Generate video/image), `profile.js`, `bookmarks.js`, `main.js`, `icons.json` (Font Awesome Free) |
+| `app/src/` | Source v2: `base.css`, `flow.css`, `profile.css`, `core.js` (router, sheet, alert, toast), `tabs.js`, `flow.js` (Generate video/image), `hair.js` (Tools → Hairstyle), `gallery.js` (Gallery → Queue & Library), `profile.js`, `bookmarks.js`, `main.js`, `icons.json` (Font Awesome Free) |
 | `app/build.py` | Ghép `app/src/` → `index.html` (`python3 app/build.py`) |
 | `app/shot.js`, `app/multi.js` | Chụp màn hình kiểm tra bằng Playwright |
 | `img/` | Ảnh xuất từ Figma (tên theo hash ảnh) + ảnh của bản cũ |

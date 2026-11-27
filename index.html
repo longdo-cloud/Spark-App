@@ -241,6 +241,9 @@ img,video{display:block}
 .toast.bottom .act{color:var(--lime)}
 @keyframes toastUp{from{transform:translateY(40px);opacity:0}}
 
+.toast.bottom.out{animation:toastDown .35s ease both}
+@keyframes toastDown{to{transform:translateY(90px);opacity:0}}
+
 /* profile.css */
 .coinspin{animation:coinfloat 4s ease-in-out infinite}
 @keyframes coinfloat{50%{transform:translateY(-8px) rotate(-3deg)}}
@@ -335,6 +338,12 @@ const T = { // templates (video + photo)
   papercut: { id: 'papercut', name: 'Paper Cut Portrait', kind: 'photo', img: '3bf90c3605', price: 100, cat: 'Art', people: 2 },
   felt: { id: 'felt', name: 'Felt Doll', kind: 'photo', img: '030c9d320f', price: 100, cat: 'Cute' },
   midnight: { id: 'midnight', name: 'Midnight Glow', kind: 'photo', img: '0fcda8a89f', price: 100, cat: 'Portrait' },
+  chefs: { id: 'chefs', name: 'Tiny Chefs', kind: 'video', img: 'hero_03', v: '03', price: 100, cat: 'Trending' },
+  granny: { id: 'granny', name: 'Granny Rush', kind: 'video', img: 'hero_12', v: '12', price: 100, cat: 'Action' },
+  pool: { id: 'pool', name: 'Sky Pool Duo', kind: 'video', img: 'hero_06', v: '06', price: 100, cat: 'Couple', people: 2 },
+  whale: { id: 'whale', name: 'Whale Wake-up', kind: 'video', img: 'hero_14', v: '14', price: 100, cat: 'Funny' },
+  gameday: { id: 'gameday', name: 'Game Day Glow', kind: 'video', img: 'hero_08', v: '08', price: 100, cat: 'Trending' },
+  wolf: { id: 'wolf', name: 'Wolf Cut', kind: 'photo', tool: 'hair', img: '61f1c491d9', res: '93deccbe6a', price: 100, cat: 'Hairstyle' },
   noir: { id: 'noir', name: 'Film Noir', kind: 'photo', img: 'fe31119c36', price: 100, cat: 'Portrait' },
 };
 const SELFIE = '93c32947a2';           // full-body selfie used in flows
@@ -344,7 +353,7 @@ const AVATAR = '2a4f3e6bef';
 /* ---------- state ---------- */
 const S = {
   tab: 'video', galleryTab: 'video', signedIn: false, pro: false, coins: 480,
-  bookmarks: new Set(['neon']), collections: [
+  bookmarks: new Set(), collections: [
     { id: 'default', name: 'Default collection', items: ['neon', 'cosmic', 'lavender'], def: true },
     { id: 'bday', name: 'Birthday ideas', items: ['cake', 'thirty'] },
     { id: 'halloween', name: 'Halloween', items: [] },
@@ -460,6 +469,62 @@ document.addEventListener('click', e => {
   const f = ACT[el.dataset.act]; if (f) { e.preventDefault(); f(el, e); }
 });
 
+/* ---------- motion helpers: smooth paging, mouse drag-to-swipe ---------- */
+const easeOutQuint = t => 1 - Math.pow(1 - t, 5);
+const easeInOutCubic = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+function smoothScroll(el, prop, to, dur = 520, fn, ease = easeInOutCubic) {
+  cancelAnimationFrame(el._raf); const from = el[prop]; if (Math.abs(to - from) < 1) { fn && fn(); return; }
+  if (el._snap === undefined) el._snap = el.style.scrollSnapType; el.style.scrollSnapType = 'none'; el._anim = true; const t0 = performance.now();
+  const step = now => { const k = Math.min(1, (now - t0) / dur); el[prop] = from + (to - from) * ease(k); if (k < 1) el._raf = requestAnimationFrame(step); else { el.style.scrollSnapType = el._snap; el._snap = undefined; el._anim = false; fn && fn(); } };
+  el._raf = requestAnimationFrame(step);
+}
+const phoneScale = el => { const r = el.getBoundingClientRect(); return el.offsetWidth ? r.width / el.offsetWidth : 1; };
+/* Mouse drag on horizontal rows (hero banner, category chips, card rows) — touch keeps native scrolling */
+document.addEventListener('pointerdown', e => {
+  if (e.pointerType !== 'mouse' || e.button !== 0) return;
+  const sc = e.target.closest('.hscroll'); if (!sc || !document.getElementById('phone').contains(sc)) return;
+  const k = phoneScale(sc), x0 = e.clientX, s0 = sc.scrollLeft; let moved = false, lastX = x0, lastT = performance.now(), v = 0;
+  const paged = sc.classList.contains('herotrack'); cancelAnimationFrame(sc._raf);
+  const move = ev => {
+    const dx = (ev.clientX - x0) / k; if (!moved && Math.abs(dx) < 5) return;
+    if (!moved) { moved = true; sc._drag = true; sc._snap = sc.style.scrollSnapType; sc.style.scrollSnapType = 'none'; sc.style.cursor = 'grabbing'; }
+    sc.scrollLeft = s0 - dx; const now = performance.now(); v = ((ev.clientX - lastX) / k) / Math.max(1, now - lastT); lastX = ev.clientX; lastT = now;
+  };
+  const up = () => {
+    window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); sc.style.cursor = '';
+    if (!moved) return; sc._drag = false; sc._touched = Date.now(); const snap = sc._snap; sc._snap = undefined;
+    window.addEventListener('click', ev => { ev.stopPropagation(); ev.preventDefault(); }, { capture: true, once: true });
+    if (paged) { const w = sc.clientWidth, n = Math.round(sc.scrollWidth / w); let i = Math.round(sc.scrollLeft / w); if (Math.abs(v) > .25) i = Math.round((s0 - (v > 0 ? w * .51 : -w * .51)) / w); i = Math.max(0, Math.min(n - 1, i)); sc.style.scrollSnapType = snap; smoothScroll(sc, 'scrollLeft', i * w, 480, null, easeOutQuint); }
+    else { const max = sc.scrollWidth - sc.clientWidth; const to = Math.max(0, Math.min(max, sc.scrollLeft - v * 260)); sc.style.scrollSnapType = snap; smoothScroll(sc, 'scrollLeft', to, 520, null, easeOutQuint); }
+  };
+  window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+});
+/* Vertical pager for the full-screen feed: wheel / drag / keys → one page per gesture, eased, with parallax between scenes */
+function attachPager(sc) {
+  const H = () => sc.clientHeight, pages = () => sc.querySelectorAll(':scope > section');
+  const goTo = i => { const n = pages().length; i = Math.max(0, Math.min(n - 1, i)); smoothScroll(sc, 'scrollTop', i * H(), 620, () => { sc._lock = Date.now(); }, easeOutQuint); };
+  const cur = () => Math.round(sc.scrollTop / H());
+  sc.addEventListener('wheel', e => {
+    e.preventDefault(); if (sc._anim || Date.now() - (sc._lock || 0) < 380 || Math.abs(e.deltaY) < 6) { sc._lock = sc._anim ? sc._lock : Date.now() - 300; return; }
+    goTo(cur() + (e.deltaY > 0 ? 1 : -1));
+  }, { passive: false });
+  sc.addEventListener('pointerdown', e => {
+    if (e.pointerType !== 'mouse' || e.button !== 0 || e.target.closest('button')) return;
+    const k = phoneScale(sc), y0 = e.clientY, s0 = sc.scrollTop, t0 = performance.now(); let moved = false; cancelAnimationFrame(sc._raf);
+    const move = ev => { const dy = (ev.clientY - y0) / k; if (!moved && Math.abs(dy) < 5) return; if (!moved) { moved = true; sc._snap = sc.style.scrollSnapType; sc.style.scrollSnapType = 'none'; } sc.scrollTop = s0 - dy; };
+    const up = ev => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); if (!moved) return; sc.style.scrollSnapType = sc._snap; sc._snap = undefined;
+      const dy = (ev.clientY - y0) / k, vel = dy / Math.max(1, performance.now() - t0), i0 = Math.round(s0 / H());
+      goTo(Math.abs(dy) > H() * .18 || Math.abs(vel) > .45 ? i0 + (dy < 0 ? 1 : -1) : i0); };
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+  });
+  const key = e => { if (!document.body.contains(sc)) return document.removeEventListener('keydown', key); if (e.key === 'ArrowDown' || e.key === 'PageDown') { e.preventDefault(); goTo(cur() + 1); } if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); goTo(cur() - 1); } };
+  document.addEventListener('keydown', key);
+  const fx = () => { const h = H(); pages().forEach((p, i) => { const r = (sc.scrollTop - i * h) / h; if (Math.abs(r) > 1.05) return; const m = p.firstElementChild; const a = Math.min(1, Math.abs(r));
+    if (m) { m.style.transform = `translateY(${r * h * .3}px) scale(${1 + a * .08})`; m.style.filter = `brightness(${1 - a * .45})`; }
+    p.querySelectorAll('.fmeta,.fside,.fuse').forEach(n => { n.style.transform = `translateY(${-r * 40}px)`; }); }); };
+  sc.addEventListener('scroll', fx, { passive: true }); fx();
+}
+
 /* App · 4 tabs (Video · Photo · Tools · Gallery) — Figma 908:13051 */
 const ROWS_VIDEO = [
   ['🔥 Trending AI Video', ['billionaire', 'neon', 'cosmic']],
@@ -477,23 +542,35 @@ function top10() {
     <span style="position:absolute;left:0;bottom:-18px;font-size:176px;font-weight:900;letter-spacing:-10.5px;line-height:1;background:linear-gradient(#fff,rgba(140,140,148,.8) 55%,rgba(77,77,82,0));-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-stroke:1px rgba(255,255,255,.35)">${i + 1}</span>
     <span class="mcard" style="position:absolute;right:0;top:0;width:126px;height:224px;border-radius:16px"><img src="${IMG(T[id].img)}" alt="" loading="lazy"><span class="scrim" style="font-size:13px;line-height:16px;padding:40px 10px 12px;background:linear-gradient(transparent,rgba(0,0,0,.85))">${T[id].name}</span></span></button>`).join('')}</div></section>`;
 }
-function banner() {
-  return `<button class="press" data-act="tab" data-v="tools" style="position:relative;width:370px;height:278px;border-radius:24px;overflow:hidden;margin:0 16px;flex:none">
-  <img src="${IMG('5a2e1764e8')}" alt="" style="position:absolute;left:-12px;top:0;width:402px;height:301px;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:-1px;height:41px;background:linear-gradient(transparent,#000)"></span>
+function banner(img = '5a2e1764e8', act = 'tab') {
+  return `<button class="press" data-act="${act}" data-v="tools" style="position:relative;width:370px;height:278px;border-radius:24px;overflow:hidden;margin:0 16px;flex:none">
+  <img src="${IMG(img)}" alt="" style="position:absolute;left:-12px;top:0;width:402px;height:301px;object-fit:cover"><span style="position:absolute;left:0;right:0;bottom:-1px;height:41px;background:linear-gradient(transparent,#000)"></span>
   <span class="dots" style="position:absolute;left:0;right:0;bottom:18px"><i class="on"></i><i></i><i></i><i></i><i class="s"></i><i class="xs"></i></span></button>`;
+}
+/* Hero carousel — clips from v/ (same set and copy as the earlier prototype's Discover hero) */
+const HERO = [['03', 'A little imagination', 'Ordinary, meet art.', 'chefs'], ['12', 'Action Video', 'Grandma goes full blockbuster.', 'granny'], ['06', 'Couple', 'Two of you, one movie scene.', 'pool'], ['14', 'Funny', 'Wake up to something big.', 'whale'], ['08', 'Trending AI Video', 'Game day, main character.', 'gameday']];
+function videoHero() {
+  return `<div class="hscroll herotrack" style="position:absolute;inset:0;gap:0;scroll-snap-type:x mandatory">${HERO.map(([v, k, t, col], i) => `<div style="position:relative;flex:none;width:402px;height:536px;scroll-snap-align:start;overflow:hidden">
+    <video src="v/${v}.mp4" poster="p/${v}.jpg" muted loop playsinline autoplay preload="${i ? 'none' : 'auto'}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>
+    <div class="abs" style="left:0;top:0;width:100%;height:130px;background:linear-gradient(rgba(0,0,0,.6),transparent)"></div>
+    <div class="abs" style="left:0;top:236px;width:100%;height:300px;background:linear-gradient(transparent,rgba(0,0,0,.8) 70%,#000)"></div>
+    <div class="abs" style="left:0;right:0;bottom:34px;display:flex;flex-direction:column;align-items:center;gap:4px">
+      <div class="c1" style="font-weight:700;color:var(--n3)">${k}</div><div class="t1">${t}</div>
+      <button class="btn glass prom" style="width:222px;margin-top:10px" data-act="heroTry" data-v="${col}">Try now ${ic('arrowr')}</button></div></div>`).join('')}</div>
+  <div class="dots abs herodots" style="left:0;right:0;top:518px;pointer-events:none">${HERO.map((_, i) => `<i class="${i ? '' : 'on'}"></i>`).join('')}</div>`;
+}
+ACT.heroTry = el => startCreate(el.dataset.v);
+function mountHero(el) {
+  const tr = el.querySelector('.herotrack'); if (!tr) return; const dots = el.querySelectorAll('.herodots i'); const vids = tr.querySelectorAll('video');
+  let cur = 0; const show = i => { cur = i; dots.forEach((d, k) => d.className = k === i ? 'on' : ''); vids.forEach((v, k) => { if (k === i) { v.preload = 'auto'; v.play().catch(() => { }); } else v.pause(); }); };
+  tr.addEventListener('scroll', () => { const i = Math.round(tr.scrollLeft / 402); if (i !== cur) show(i); }, { passive: true });
+  el._hero = setInterval(() => { if (!document.body.contains(tr)) return clearInterval(el._hero); if (tr._drag || Date.now() - (tr._touched || 0) < 5000) return; smoothScroll(tr, 'scrollLeft', ((cur + 1) % HERO.length) * 402, 650); }, 6000);
+  show(0);
 }
 SCREENS.tab_video = () => ({
   html: `<div class="scroll"><div style="padding-bottom:140px;display:flex;flex-direction:column;gap:32px">
    <div style="display:flex;flex-direction:column;gap:24px">
-    <div style="position:relative;height:536px;overflow:hidden">
-      <img class="kb" src="${IMG('0e29a76592')}" alt="" style="position:absolute;left:-8px;top:42px;width:420px;height:747px;object-fit:cover;transform-origin:50% 40%">
-      <div class="abs" style="left:0;top:0;width:100%;height:130px;background:linear-gradient(rgba(0,0,0,.6),transparent)"></div>
-      <div class="abs" style="left:0;top:236px;width:100%;height:300px;background:linear-gradient(transparent,rgba(0,0,0,.8) 70%,#000)"></div>
-      <div class="abs" style="left:0;right:0;bottom:34px;display:flex;flex-direction:column;align-items:center;gap:4px">
-        <div class="c1" style="font-weight:700;color:var(--n3)">A little imagination</div><div class="t1">Ordinary, meet art.</div>
-        <button class="btn glass prom" style="width:222px;margin-top:10px" data-act="openTpl" data-v="neon">Try now ${ic('arrowr')}</button></div>
-      <div class="dots abs" style="left:0;right:0;top:518px"><i class="on"></i><i></i><i></i><i></i><i class="s"></i><i class="xs"></i></div>
-    </div>
+    <div style="position:relative;height:536px;overflow:hidden">${videoHero()}</div>
     <div class="hscroll" style="gap:8px;padding:0 16px">${['🔥 Trending AI Video', '⚡️ Action Video', '🎀 AI Hair Studio', 'Birthday'].map(c => `<button class="chip" data-act="grid" data-v="${c}">${c}</button>`).join('')}</div>
    </div>
    <div style="display:flex;flex-direction:column;gap:40px">${ROWS_VIDEO.map(r => rowSection(r[0], r[1])).join('')}
@@ -503,7 +580,8 @@ SCREENS.tab_video = () => ({
    ${rowSection('✨ Fantasy Video', ['cosmic', 'skyhero', 'neon'])}</div>
   </div></div>
   <div class="abs" style="left:0;top:0;width:100%;height:120px;background:linear-gradient(rgba(0,0,0,.55),transparent);pointer-events:none;z-index:25"></div>
-  ${largeTitle('Video')}${tabBar('video')}`
+  ${largeTitle('Video')}${tabBar('video')}`,
+  mount: mountHero
 });
 SCREENS.tab_photo = () => ({
   html: `<div class="scroll"><div style="padding-bottom:140px">
@@ -539,58 +617,21 @@ SCREENS.tab_photo = () => ({
 });
 SCREENS.tab_tools = () => {
   const tools = [['sparkles', 'Enhance'], ['brush', 'Stylist'], ['scissors', 'Hairstyle', 'New'], ['eyedrop', 'Makeup', 'Hot'], ['face', 'Face Slim'], ['person', 'Body Slim'], ['sun', 'Skin Tone'], ['halfcircle', 'Remove BG']];
-  const pc = (img, title, base = '8fa2b1b0eb') => `<button class="mcard press" style="width:132px;height:208px" data-act="soon"><img src="${IMG(img || base)}" alt="" loading="lazy"><div class="scrim" style="background:linear-gradient(transparent,rgba(0,0,0,.6))">${title}</div></button>`;
+  const pc = (img, title, act = 'soon') => `<button class="mcard press" style="width:132px;height:208px" data-act="${act}"><img src="${IMG(img)}" alt="" loading="lazy">${title ? `<div class="scrim" style="background:linear-gradient(transparent,rgba(0,0,0,.6))">${title}</div>` : ''}</button>`;
   const sec = (t, cards) => `<section style="display:flex;flex-direction:column;gap:12px"><div class="sech" style="padding:0 16px">${t} ${ic('chev')}</div><div class="hscroll" style="gap:12px;padding:0 16px">${cards}</div></section>`;
   return {
     html: `<div class="scroll"><div style="padding:118px 0 140px;display:flex;flex-direction:column;gap:24px">
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);row-gap:20px;padding:8px 16px">${tools.map(([i, l, b]) => `<button class="press" data-act="soon" style="position:relative;display:flex;flex-direction:column;align-items:center;gap:8px"><span class="circ l glass">${ic(i)}</span><span class="fns">${l}</span>${b ? `<span class="c2s" style="position:absolute;right:4px;top:-4px;background:var(--lime);color:#000;border-radius:8px;padding:0 8px">${b}</span>` : ''}</button>`).join('')}</div>
-    ${banner()}
-    ${sec('🎀 More Hairstyles', pc(0, 'Color Change') + pc(0, 'Hair Length') + pc(0, 'Smooth Hair'))}
-    ${sec('✨ More Beauty tools', pc('8495a865f8', 'Double Eyelids') + pc('db21aa5772', 'V-Line Face') + pc('aae04f701a', 'Brighten Skin'))}
-    ${sec('💄 Makeup with Spark', pc('3f38aee88d', 'Soft Glow') + pc('d9d50e1ff3', 'Soft Glow') + pc('f978d182a2', 'Douyin Doll'))}
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);row-gap:20px;padding:8px 16px">${tools.map(([i, l, b]) => `<button class="press" data-act="${l === 'Hairstyle' ? 'hairstyle' : 'soon'}" style="position:relative;display:flex;flex-direction:column;align-items:center;gap:8px"><span class="circ l glass">${ic(i)}</span><span class="fns">${l}</span>${b ? `<span class="c2s" style="position:absolute;right:4px;top:-4px;background:var(--lime);color:#000;border-radius:8px;padding:0 8px">${b}</span>` : ''}</button>`).join('')}</div>
+    ${banner('banner_hair', 'hairstyle')}
+    ${sec('🎀 More Hairstyles', pc('tool_color', '', 'hairstyle') + pc('tool_length', '', 'hairstyle') + pc('tool_smooth', '', 'hairstyle'))}
+    ${sec('✨ More Beauty tools', pc('a18c5a684d', 'Double Eyelids') + pc('bd8119b45f', 'V-Line Face') + pc('670c26d5b1', 'Brighten Skin'))}
+    ${sec('💄 Makeup with Spark', pc('beauty_1', 'Soft Glow') + pc('beauty_2', 'Soft Glow') + pc('beauty_3', 'Douyin Doll'))}
     </div></div>${largeTitle('Tools')}${tabBar('tools')}`
   };
 };
 ACT.soon = () => toast('This tool has its own flow (not in this build)', { icon: '' });
 ACT.grid = el => go('grid', { title: el.dataset.v });
 
-/* Gallery */
-const GAL_VIDEO = [
-  ['Today', [['cc8862499f', '0:08'], ['dd0d6a9b85', '0:10'], ['3188779628', '0:08']]],
-  ['Nov 16, 2026', [['0006932189', '0:10'], ['84861eff55', '0:06'], ['7852d2c76e', '0:12'], ['27c4cd7892', '0:08'], ['a0c009bf83', '0:10']]],
-];
-const GAL_IMAGE = [['Today', [['0e4cddc53b', ''], ['d4bd65a314', ''], ['4378f76bb3', '']]], ['Nov 16, 2026', [['37b2464de8', ''], ['3bf90c3605', ''], ['030c9d320f', ''], ['0fcda8a89f', '']]]];
-function galleryChips(cur) {
-  return `<div class="hscroll" style="gap:8px;padding:0 16px">${[['queue', 'Queue'], ['video', 'Video'], ['image', 'Image'], ['uploads', 'Uploads'], ['bookmarks', 'Bookmarks']].map(([k, l]) => `<button class="chip ${k === cur ? 'on' : 'a1'}" data-act="galTab" data-v="${k}">${l}</button>`).join('')}</div>`;
-}
-function galGroups(groups, dur = true) {
-  return groups.map(([h, items]) => `<section style="display:flex;flex-direction:column;gap:16px"><div class="t3" style="padding:0 16px">${h} ${ic('chev', 'n5')}</div>
-  <div class="hscroll" style="gap:12px;padding:0 16px">${items.map(([img, d]) => `<button class="mcard press" style="width:148px;height:264px" data-act="openResult" data-v="${img}"><img src="${IMG(img)}" alt="" loading="lazy">${dur && d ? `<span class="c2s" style="position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.48);border-radius:8px;padding:4px 8px">${d}</span>` : ''}</button>`).join('')}</div></section>`).join('');
-}
-function ring(p) { const r = 21, c = 2 * Math.PI * r; return `<svg width="48" height="48" viewBox="0 0 48 48" style="position:absolute;inset:0"><circle cx="24" cy="24" r="${r}" fill="none" stroke="rgba(255,255,255,.2)" stroke-width="3"/><circle cx="24" cy="24" r="${r}" fill="none" stroke="var(--green)" stroke-width="3" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - p / 100)}" transform="rotate(-90 24 24)"/></svg>`; }
-function queueBody() {
-  const making = [['5856cee567', 'Moonlight Witch Cat', 62, '~1 min'], ['3188779628', 'Neon Corridor', 20, '~2 min']];
-  const qc = (img, inner, info) => `<div class="mcard" style="width:148px;height:264px"><img src="${IMG(img)}" alt=""><span class="abs" style="inset:0;background:rgba(0,0,0,.6)"></span>${inner}<div class="abs" style="left:8px;right:8px;bottom:8px">${info}</div></div>`;
-  return `<section style="display:flex;flex-direction:column;gap:16px"><div class="t3" style="padding:0 16px">Making now</div><div class="hscroll" style="gap:12px;padding:0 16px">
-  ${making.map(([img, n, p, t]) => qc(img, `<span class="abs" style="left:50px;top:96px;width:48px;height:48px">${ring(p)}<span class="fns abs" style="inset:0;display:flex;align-items:center;justify-content:center">${p}%</span></span>`, `<div class="shs" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${n}</div><div class="fn n5">Making · ${t}</div>`)).join('')}</div></section>
-  <section style="display:flex;flex-direction:column;gap:16px"><div class="t3" style="padding:0 16px">Didn’t work</div><div class="hscroll" style="gap:12px;padding:0 16px">
-  ${qc('7852d2c76e', `<button class="btn xs glass abs" style="left:31px;top:106px" data-act="openTpl" data-v="neon">Try again</button>`, `<div class="shs">Mountain Ride</div><div class="fn red" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Didn’t work · refunded</div>`)}</div></section>`;
-}
-SCREENS.tab_gallery = () => {
-  const g = S.galleryTab;
-  let body = '';
-  if (g === 'video') body = galGroups(GAL_VIDEO);
-  else if (g === 'queue') body = queueBody();
-  else if (g === 'image') body = galGroups(GAL_IMAGE, false);
-  else if (g === 'uploads') body = galGroups([['Recent uploads', [[SELFIE, ''], [SELFIE2, ''], ['726146ff99', ''], ['2a841c84a2', '']]]], false);
-  else if (g === 'bookmarks') body = bookmarksBody();
-  const right = `<button class="circ s glass" data-act="profile" aria-label="Profile" style="overflow:hidden">${S.signedIn ? `<img src="${IMG(AVATAR)}" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;background:#fff">` : ic('gear')}</button>`;
-  return { html: `<div class="scroll"><div style="padding:124px 0 140px;display:flex;flex-direction:column;gap:23px">${galleryChips(g)}<div style="display:flex;flex-direction:column;gap:28px">${body}</div></div></div>
-  <div class="abs" style="left:0;top:0;width:100%;height:124px;background:linear-gradient(#000 70%,transparent);z-index:25;pointer-events:none"></div>${largeTitle('Gallery', right)}${tabBar('gallery')}` };
-};
-ACT.galTab = el => { S.galleryTab = el.dataset.v; rerender(); };
-ACT.profile = () => go('profile', {});
-ACT.openResult = el => go('result', { kind: 'video', img: el.dataset.v, from: 'gallery' });
 
 /* Generate video / Generate image flows — Figma 1365:77183 (video) & 1365:81391 (image) */
 const FEED_VIDEO = ['neon', 'cosmic', 'billionaire', 'street', 'skyhero'];
@@ -625,7 +666,7 @@ SCREENS.grid = ({ title = '🔥 Trending AI Video' }) => {
 ACT.pickCat = el => { const cur = stack[stack.length - 1]; if (cur.name === 'grid') { cur.args.title = el.dataset.v; rerender(); } else go('grid', { title: el.dataset.v }); };
 ACT.cats = () => sheet({ title: 'Categories', html: `<div class="grp">${CATS.map(([e, l], i) => `<button class="row" data-act="catRow" data-v="${l}"><span style="width:24px;text-align:center;font-size:18px">${e}</span>${l}${i === 0 ? `<span class="r" style="color:var(--lime)">${ic('check')}</span>` : ''}</button>`).join('')}</div>` });
 ACT.catRow = el => { closeSheet(); setTimeout(() => ACT.pickCat(el), 200); };
-ACT.toggleBm = (el, e) => { e.stopPropagation(); const id = el.dataset.v; if (S.bookmarks.has(id)) { S.bookmarks.delete(id); rerender(); toast('Removed from Saved', { icon: '' }); } else { S.bookmarks.add(id); addToDefault(id); rerender(); toast('Saved', { icon: BMI, pos: 'bottom', act: 'Collections', fn: () => saveToCollection(id) }); } };
+ACT.toggleBm = (el, e) => { e.stopPropagation(); const id = el.dataset.v; if (S.bookmarks.has(id)) { S.bookmarks.delete(id); rerender(); toast('Removed from Saved', { icon: BMO, pos: 'bottom' }); } else { S.bookmarks.add(id); addToDefault(id); rerender(); toast('Saved', { icon: BMI, pos: 'bottom', act: 'Collections', fn: () => saveToCollection(id) }); } };
 function addToDefault(id) { const d = S.collections.find(c => c.def); if (!d.items.includes(id)) d.items.unshift(id); }
 
 /* ---------- 02 · Template detail (full-screen feed) ---------- */
@@ -657,6 +698,7 @@ SCREENS.feed = ({ id = 'neon' }) => {
       <button class="circ s glass dark feedbm" data-act="feedSaveCur">${ic('bookmark')}</button></div>`,
     mount(el) {
       const sc = el.querySelector('.feedsc'), top = el.querySelector('.feedtop'), ttl = el.querySelector('.feedttl'), cp = el.querySelector('.compact'); const dots = el.querySelectorAll('.pager i');
+      attachPager(sc);
       let collapsed = false;
       sc.addEventListener('scroll', () => {
         const i = Math.round(sc.scrollTop / sc.clientHeight); el.dataset.cur = order[i];
@@ -671,7 +713,7 @@ SCREENS.feed = ({ id = 'neon' }) => {
   };
 };
 ACT.openTpl = el => go('feed', { id: el.dataset.v });
-ACT.feedSave = el => { const id = el.dataset.v; if (S.bookmarks.has(id)) { S.bookmarks.delete(id); toast('Removed from Saved', { icon: '' }); } else { S.bookmarks.add(id); addToDefault(id); toast('Saved', { icon: BMI, pos: 'bottom', act: 'Collections', fn: () => saveToCollection(id) }); }
+ACT.feedSave = el => { const id = el.dataset.v; if (S.bookmarks.has(id)) { S.bookmarks.delete(id); toast('Removed from Saved', { icon: BMO, pos: 'bottom' }); } else { S.bookmarks.add(id); addToDefault(id); toast('Saved', { icon: BMI, pos: 'bottom', act: 'Collections', fn: () => saveToCollection(id) }); }
   const c = el.querySelector('.circ'); c.innerHTML = ic(S.bookmarks.has(id) ? 'bookmarkf' : 'bookmark'); };
 ACT.feedSaveCur = el => { const cur = stack[stack.length - 1].el.dataset.cur; const b = stack[stack.length - 1].el.querySelector(`.fpage[data-id="${cur}"] [data-act="feedSave"]`); if (b) ACT.feedSave(b); el.innerHTML = ic(S.bookmarks.has(cur) ? 'bookmarkf' : 'bookmark'); };
 ACT.useStyle = el => startCreate(el.dataset.v);
@@ -699,13 +741,20 @@ ACT.contact = () => { closeSheet(); toast('Opening email…', { icon: '' }); };
 
 /* ---------- 03 · Create ---------- */
 function priceOf(st) { const t = T[st.id]; return isVid(t) ? (st.dur === 'Long' ? 160 : 120) : 100; }
-function newCreate(id, people) { const t = T[id]; return { id, people, photos: people === 2 ? [null, null] : [null], check: people === 2 ? ['', ''] : [''], sound: true, dur: 'Short', res: '480p', ratio: isVid(t) ? '9:16' : '4:5' }; }
+function newCreate(id, people) { const t = T[id]; return { id, people, photos: people === 2 ? [null, null] : [null], check: people === 2 ? ['', ''] : [''], sound: true, dur: 'Short', res: '480p', quality: 'Standard', ratio: isVid(t) ? '9:16' : '4:5' }; }
 const SETUP = {}; // per create session
 function settingsBar(st) {
   const t = T[st.id];
-  const items = isVid(t) ? [['sound', st.sound ? 'On' : 'Off'], ['clock', st.dur], ['film', st.res]] : [['ratio', st.ratio], ['film', st.res]];
+  const items = t.tool ? [['ratio', st.ratio], ['sparkles', st.quality]] : isVid(t) ? [['sound', st.sound ? 'On' : 'Off'], ['clock', st.dur], ['film', st.res]] : [['ratio', st.ratio], ['film', st.res]];
   return `<button class="press" data-act="openSettings" style="height:52px;border-radius:16px;background:var(--a100);display:flex;align-items:center;padding:0 16px 0 14px;width:100%">${items.map(([i, l], k) => `${k ? '<span style="width:1px;height:20px;background:var(--a200);margin:0 14px"></span>' : ''}<span class="sh" style="display:flex;align-items:center;gap:6px;font-weight:600"><span class="n5" style="font-size:14px">${ic(i)}</span>${l}</span>`).join('')}<span class="n5" style="margin-left:auto;font-size:13px">${ic('chev')}</span></button>`;
 }
+function toolHero(t) {
+  return `<div class="abs" style="left:0;top:0;width:402px;height:660px;overflow:hidden"><img src="${IMG(t.img)}" alt="" style="position:absolute;left:-1px;top:-1px;width:404px;height:663px;object-fit:cover">
+  <div class="abs" style="left:0;top:0;width:100%;height:140px;background:linear-gradient(rgba(0,0,0,.6),transparent)"></div>
+  <div class="abs" style="left:0;top:487px;width:100%;height:173px;background:linear-gradient(rgba(10,10,13,0),#0a0a0d)"></div></div>
+  <div class="abs" style="left:0;top:746px;width:100%;height:128px;background:linear-gradient(rgba(10,10,12,0),#0a0a0c 40%)"></div>`;
+}
+const isTool = st => !!(st && T[st.id] && T[st.id].tool);
 function thumb(img, w = 96, h = 120) { return `<span style="width:${w}px;height:${h}px;border-radius:16px;overflow:hidden;flex:none;display:block"><img src="${IMG(img)}" alt="" style="width:100%;height:100%;object-fit:cover"></span>`; }
 function emptyThumb(w = 96, h = 120, act = 'addPhoto', i = 0) { return `<button class="press" data-act="${act}" data-i="${i}" style="width:${w}px;height:${h}px;border-radius:16px;background:rgba(255,255,255,.04);border:1.5px dashed rgba(255,255,255,.3);position:relative;flex:none;display:flex;align-items:center;justify-content:center"><span class="ripple"></span><span class="addlime">${ic('plus')}</span></button>`; }
 function photoCard(st) {
@@ -722,10 +771,10 @@ function photoCard(st) {
   const ph = st.photos[0], c = st.check[0];
   let left, text, right = '';
   const sub = 'font-size:13px;line-height:18px;color:rgba(255,255,255,.6);margin-top:4px';
-  if (!ph) { left = emptyThumb(); text = `<div class="hl">Add your photo</div><div style="${sub};white-space:nowrap">A clear, front-facing selfie works best</div>`; }
+  if (!ph) { left = emptyThumb(); text = `<div class="hl">Add your photo</div><div style="${sub};white-space:nowrap">${isTool(st) ? 'Full body, head to toe works best' : 'A clear, front-facing selfie works best'}</div>`; }
   else if (c === 'checking') { left = `<span style="position:relative">${thumb(ph)}<span class="abs" style="inset:0;border-radius:16px;background:rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center"><span class="spin"></span></span></span>`; text = `<div class="hl">Checking photo...</div><div style="${sub}">Making sure your face is clear</div>`; }
   else if (c === 'bad') { left = `<span style="border-radius:16px;box-shadow:0 0 0 2px var(--red);display:block">${thumb(ph)}</span>`; text = `<div class="hl">Your photo</div><span class="pill bad" style="margin-top:8px">${ic('xcirc')} No clear face</span><div style="${sub};margin-top:8px">Try one person<br>facing the camera</div>`; right = `<button class="btn glass prom" style="height:36px;width:auto;padding:0 14px;font-size:15px" data-act="addPhoto" data-i="0">Change</button>`; }
-  else { left = thumb(ph); text = `<div class="hl">Your photo</div><span class="pill ok" style="margin-top:8px">${ic('checkc')} Looks good</span>`; right = `<button class="btn" style="height:36px;width:auto;padding:0 14px;font-size:15px;background:#fff;color:#000" data-act="addPhoto" data-i="0">Change</button>`; }
+  else { left = thumb(ph); text = `<div class="hl">Your photo</div><span class="pill ok" style="margin-top:8px">${ic('checkc')} Looks good</span>`; right = `<button class="btn" style="height:36px;width:auto;padding:0 14px;font-size:15px;${isTool(st) ? 'background:#2c2c2e;color:#fff' : 'background:#fff;color:#000'}" data-act="addPhoto" data-i="0">Change</button>`; }
   return `<div style="height:152px;border-radius:24px;background:rgba(255,255,255,.08);padding:0 16px;display:flex;align-items:center;gap:16px;-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px)">${left}<div style="flex:1;min-width:0">${text}</div>${right}</div>`;
 }
 SCREENS.create = ({ id = 'neon', people = 1, fresh = true }) => {
@@ -734,9 +783,9 @@ SCREENS.create = ({ id = 'neon', people = 1, fresh = true }) => {
   const ready = st.check.every(c => c === 'ok'); const checking = st.check.some(c => c === 'checking'); const any = st.photos.some(Boolean);
   const label = ready || checking || st.check.some(c => c === 'bad') ? 'Create with' : 'Create ·';
   return {
-    html: `${media(t, 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover')}
+    html: `${t.tool ? toolHero(t) : `${media(t, 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover')}
     <div class="abs" style="left:0;top:0;width:100%;height:140px;background:linear-gradient(rgba(0,0,0,.55),transparent)"></div>
-    <div class="abs" style="left:0;top:${people === 2 ? 380 : 469}px;width:100%;bottom:0;background:linear-gradient(rgba(10,10,12,0),#0a0a0c 37%)"></div>
+    <div class="abs" style="left:0;top:${people === 2 ? 380 : 469}px;width:100%;bottom:0;background:linear-gradient(rgba(10,10,12,0),#0a0a0c 37%)"></div>`}
     <div class="tb">${closeBtn('closeCreate')}<div class="ttl">${t.name}</div></div>
     <div class="abs" style="left:16px;right:16px;top:${people === 2 ? 437 : 530}px;display:flex;flex-direction:column;gap:12px">${photoCard(st)}${settingsBar(st)}</div>
     <div class="abs" style="left:16px;right:16px;top:762px">
@@ -745,6 +794,7 @@ SCREENS.create = ({ id = 'neon', people = 1, fresh = true }) => {
     mount(el) { el.dataset.key = key; }
   };
 };
+const curSetupSafe = () => { try { return curSetup(); } catch (e) { return null; } };
 const curSetup = () => SETUP[stack[stack.length - 1].el.dataset.key] || SETUP[Object.keys(SETUP).pop()];
 const refreshCreate = () => { const c = stack[stack.length - 1]; if (c.name === 'create') { c.args.fresh = false; rerender(); } };
 ACT.closeCreate = () => back();
@@ -754,6 +804,14 @@ ACT.addPhoto = el => { const st = curSetup(); st.slot = +(el.dataset.i || 0); if
 let guideNext = null;
 function guidelinesSheet(next) {
   guideNext = next || null;
+  if (isTool(curSetupSafe())) {
+    const ex = ['selfie1', 'selfie2', 'selfie3', 'selfie4'];
+    return sheet({ title: 'Before you add a photo', html: `<div style="display:flex;flex-direction:column;gap:16px;padding-bottom:4px">
+    <div><div class="hl" style="display:flex;align-items:center;gap:4px"><img src="img/lg_check.png" style="width:24px;height:24px" alt="">Works great</div>
+      <div style="display:flex;gap:8px;margin:8px 0">${ex.map(h => `<img src="${IMG(h)}" style="width:84px;height:104px;border-radius:16px;object-fit:cover" alt="">`).join('')}</div>
+      <div class="fn n5">Your own selfie · face the camera · one person</div></div>
+    <div><button class="btn glass prom" style="height:50px" data-act="agreeUnderstand">I understand</button><div class="fn n5 ctr" style="padding:7px">Read full guidelines</div></div></div>` });
+  }
   const ex = [SELFIE, '726146ff99', '2a841c84a2', '9f43c6d6b2'];
   const s = sheet({
     title: 'Before you add a photo', html: `<div style="display:flex;flex-direction:column;gap:24px;padding-bottom:4px">
@@ -769,12 +827,23 @@ function guidelinesSheet(next) {
   return s;
 }
 ACT.agreeTick = el => { const c = el.querySelector('.cbx'); c.classList.toggle('on'); const b = el.closest('.sheet').querySelector('.agreebtn'); const on = c.classList.contains('on'); b.classList.toggle('dis', !on); b.classList.toggle('prom', on); };
+ACT.agreeUnderstand = () => { S.guideAgreed = true; closeSheet(); const n = guideNext; guideNext = null; if (n) setTimeout(n, 320); };
 ACT.agreeGo = el => { if (el.classList.contains('dis')) return; S.guideAgreed = true; closeSheet(); const n = guideNext; guideNext = null; if (n) setTimeout(n, 320); };
 
 /* 05 · Choose a photo */
 let hasCreations = true;
+let hasRecent = true;
 function chooseSheet() {
-  const recent = [SELFIE, '726146ff99', '2a841c84a2', '9f43c6d6b2'];
+  const tool = isTool(curSetupSafe());
+  const recent = tool ? ['selfie1', 'selfie2', 'selfie3', 'selfie4', 'selfie5'] : [SELFIE, '726146ff99', '2a841c84a2', '9f43c6d6b2'];
+  if (tool) {
+    const body = hasRecent ? `<div class="hscroll" style="gap:8px;margin:0 -16px;padding:0 16px">${recent.map(h => `<button class="press rph" data-act="pickRecent" data-v="${h}" style="position:relative;width:110px;height:136px;border-radius:16px;overflow:hidden;flex:none"><img src="${IMG(h)}" style="width:100%;height:100%;object-fit:cover" alt=""></button>`).join('')}</div>`
+      : `<div style="height:136px;border-radius:16px;background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 1px;text-align:center"><span style="font-size:24px;color:rgba(255,255,255,.48);display:flex;height:32px;align-items:center">${ic('library')}</span><div class="hl" style="margin-top:8px">No recent photos</div><div class="fn n5" style="margin-top:8px">Photos you use will show up here next time.</div></div>`;
+    sheet({ title: 'Choose a photo', html: `<div style="display:flex;flex-direction:column;gap:12px;padding-bottom:20px">
+    <div style="display:flex;gap:12px">${[['camera', 'Take a selfie', 'selfie'], ['library', 'Photo library', 'library']].map(([i, l, a]) => `<button class="press" data-act="${a}" style="flex:1;height:58px;border-radius:20px;background:rgba(255,255,255,.09);display:flex;align-items:center;gap:12px;padding:0 16px"><span style="width:24px;font-size:20px;display:flex;justify-content:center">${ic(i)}</span><span class="shs">${l}</span></button>`).join('')}</div>
+    <div class="hl" style="margin-top:0">Recent</div>${body}</div>` });
+    return;
+  }
   const body = hasCreations ? `<div class="hscroll" style="gap:8px;margin:0 -16px;padding:0 16px">${recent.map(h => `<button class="press rph" data-act="pickRecent" data-v="${h}" style="position:relative;width:110px;height:136px;border-radius:16px;overflow:hidden;flex:none"><img src="${IMG(h)}" style="width:100%;height:100%;object-fit:cover" alt=""></button>`).join('')}</div>`
     : `<div style="height:136px;border-radius:16px;background:var(--a100);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0 24px;text-align:center"><span class="icbox" style="width:32px;height:32px;font-size:22px">${ic('sparkles')}</span><div class="hl">No creations yet</div><div class="fn n5">Photos you make in Spark will show up here.</div></div>`;
   sheet({
@@ -791,7 +860,7 @@ function setPhoto(img) {
   const st = curSetup(); const i = st.slot || 0; st.photos[i] = img; st.check[i] = 'checking'; refreshCreate();
   setTimeout(() => { st.check[i] = (img === '30b2d83d18' || img === 'a0c009bf83' || img === '3188779628') ? 'bad' : 'ok'; refreshCreate(); }, 1600);
 }
-ACT.selfie = () => { closeSheet(); setTimeout(() => go('crop', { img: SELFIE }), 250); };
+ACT.selfie = () => { const tool = isTool(curSetupSafe()); closeSheet(); setTimeout(() => go('crop', { img: tool ? 'selfie1' : SELFIE }), 250); };
 ACT.library = () => {
   const imgs = [SELFIE, 'ffec858615', '30b2d83d18', '726146ff99', '3188779628', 'a0c009bf83', '2a841c84a2', 'cc8862499f', '3b449190bc', '9f43c6d6b2', '15cd66e195', '23e1943ea1', '5e89bb2630', 'd4bd65a314', '0e4cddc53b', '4378f76bb3', '5a2e1764e8', '8fa2b1b0eb'];
   closeSheet(); setTimeout(() => {
@@ -823,27 +892,27 @@ function refreshSoon() { setTimeout(refreshCreate, 430); }
 /* 03a · Generation settings */
 ACT.openSettings = () => { const st = curSetup(); go('settings', { key: Object.keys(SETUP).find(k => SETUP[k] === st) }); };
 SCREENS.settings = ({ key }) => {
-  const st = SETUP[key]; const t = T[st.id]; const d = (st.draft = st.draft || { sound: st.sound, dur: st.dur, res: st.res, ratio: st.ratio });
+  const st = SETUP[key]; const t = T[st.id]; const d = (st.draft = st.draft || { sound: st.sound, dur: st.dur, res: st.res, ratio: st.ratio, quality: st.quality });
   const price = isVid(t) ? (d.dur === 'Long' ? 160 : 120) : 100;
   const seg = (k, opts) => `<div class="seg">${opts.map(o => `<button class="${d[k] === o ? 'on' : ''}" data-act="setOpt" data-k="${k}" data-v="${o}">${o}</button>`).join('')}</div>`;
   const row = (icon, label, ctl) => `<div class="row" style="min-height:56px;padding:0 16px"><span class="icbox n5" style="width:32px;height:32px;font-size:18px">${ic(icon)}</span><span style="flex:1">${label}</span>${ctl}</div>`;
-  const rows = isVid(t) ? [row('sound', 'Sound', `<button class="tog ${d.sound ? 'on' : ''}" data-act="setOpt" data-k="sound" data-v="${!d.sound}"></button>`), row('clock', 'Duration', seg('dur', ['Short', 'Long'])), row('film', 'Resolution', seg('res', ['480p', '720p']))]
+  const rows = t.tool ? [row('ratio', 'Ratio', seg('ratio', ['4:5', '1:1', '9:16'])), row('sparkles', 'Quality', seg('quality', ['Standard', 'HD']))] : isVid(t) ? [row('sound', 'Sound', `<button class="tog ${d.sound ? 'on' : ''}" data-act="setOpt" data-k="sound" data-v="${!d.sound}"></button>`), row('clock', 'Duration', seg('dur', ['Short', 'Long'])), row('film', 'Resolution', seg('res', ['480p', '720p']))]
     : [row('ratio', 'Ratio', seg('ratio', ['4:5', '1:1', '9:16'])), row('film', 'Resolution', seg('res', ['480p', '720p']))];
   return {
-    html: `${media(t, 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover')}
+    html: `${t.tool ? toolHero(t) : `${media(t, 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover')}
     <div class="abs" style="left:0;top:0;width:100%;height:140px;background:linear-gradient(rgba(0,0,0,.55),transparent)"></div>
-    <div class="abs" style="left:0;top:420px;width:100%;bottom:0;background:linear-gradient(rgba(10,10,12,0),#0a0a0c 40%)"></div>
+    <div class="abs" style="left:0;top:420px;width:100%;bottom:0;background:linear-gradient(rgba(10,10,12,0),#0a0a0c 40%)"></div>`}
     <div class="tb">${closeBtn('closeSettings')}<div class="ttl">${t.name}</div></div>
-    <div class="abs" style="left:16px;right:16px;top:535px"><div style="font-size:15px;font-weight:600;margin-bottom:12px">Generation settings</div><div class="grp">${rows.join('')}</div></div>
-    <div class="abs" style="left:16px;right:16px;top:760px"><button class="btn glass prom" style="height:50px;font-weight:600" data-act="saveSettings">Save</button>
-    <div class="fn ctr" style="color:rgba(255,255,255,.5);margin-top:12px;display:flex;align-items:center;justify-content:center;gap:4px"><img src="img/coin.png" style="width:16px;height:16px" alt="">${price} · ${isVid(t) ? 'Price changes with the length only.' : 'Same price for every setting.'}</div></div>`,
+    <div class="abs" style="left:16px;right:16px;top:${t.tool ? 602 : 535}px"><div style="font-size:15px;font-weight:600;margin-bottom:12px">Generation settings</div><div class="grp">${rows.join('')}</div></div>
+    <div class="abs" style="left:16px;right:16px;top:${t.tool ? 763 : 760}px"><button class="btn glass prom" style="height:50px;font-weight:600" data-act="saveSettings">Save</button>
+    <div class="fn ctr" style="${t.tool ? 'display:none!important;' : ''}color:rgba(255,255,255,.5);margin-top:12px;display:flex;align-items:center;justify-content:center;gap:4px"><img src="img/coin.png" style="width:16px;height:16px" alt="">${price} · ${isVid(t) ? 'Price changes with the length only.' : 'Same price for every setting.'}</div></div>`,
     mount(el) { el.dataset.key = key; }
   };
 };
 ACT.setOpt = el => { const st = SETUP[stack[stack.length - 1].el.dataset.key]; let v = el.dataset.v; if (v === 'true') v = true; if (v === 'false') v = false; st.draft[el.dataset.k] = v; rerender(); };
 ACT.saveSettings = () => { const st = SETUP[stack[stack.length - 1].el.dataset.key]; Object.assign(st, st.draft); delete st.draft; back(); setTimeout(refreshCreate, 430); };
 ACT.closeSettings = () => {
-  const st = SETUP[stack[stack.length - 1].el.dataset.key]; const d = st.draft; const changed = d && ['sound', 'dur', 'res', 'ratio'].some(k => d[k] !== st[k]);
+  const st = SETUP[stack[stack.length - 1].el.dataset.key]; const d = st.draft; const changed = d && ['sound', 'dur', 'res', 'ratio', 'quality'].some(k => d[k] !== st[k]);
   if (!changed) { delete st.draft; back(); return; }
   discardDialog(() => { delete st.draft; back(); });
 };
@@ -869,18 +938,18 @@ function notEnoughCoins(need) {
 
 /* 08 · Making */
 SCREENS.making = ({ id = 'neon', photo = SELFIE }) => {
-  const t = T[id]; const vid = isVid(t);
+  const t = T[id]; const vid = isVid(t); const mimg = t.res || t.img; if (t.tool && photo === SELFIE) photo = 'selfie1';
   const sp = [[48, 74, 1], [82, 118, 0], [133, 140, 0], [64, 214, 1], [252, 212, 0], [198, 230, 0], [38, 358, 0], [178, 324, 1], [251, 351, 1], [129, 408, 0], [223, 454, 0], [96, 30, 1]];
   return {
-    html: `<div class="abs" style="inset:0;background:#000"><img src="${IMG(t.img)}" alt="" style="position:absolute;inset:-60px;width:calc(100% + 120px);height:calc(100% + 120px);object-fit:cover;filter:blur(60px) brightness(.35)"></div>
+    html: `<div class="abs" style="inset:0;background:#000"><img src="${IMG(mimg)}" alt="" style="position:absolute;inset:-60px;width:calc(100% + 120px);height:calc(100% + 120px);object-fit:cover;filter:blur(60px) brightness(.35)"></div>
     <div class="tb">${closeBtn('leaveMaking')}</div>
-    <div class="abs mk-card" style="left:45px;top:113px;width:312px;height:554px;border-radius:40px;overflow:hidden">
+    <div class="abs mk-card" style="left:45px;top:${t.tool ? 136 : 113}px;width:312px;height:${t.tool ? 527 : 554}px;border-radius:40px;overflow:hidden">
       <span class="mk-edge"></span>
       <div class="abs" style="inset:2px;border-radius:38px;overflow:hidden;background:#0d0b14">
-        <img class="mk-img" src="${IMG(t.img)}" alt="" style="position:absolute;inset:-40px;width:calc(100% + 80px);height:calc(100% + 80px);object-fit:cover;filter:blur(18px) saturate(1.1)">
+        <img class="mk-img" src="${IMG(mimg)}" alt="" style="position:absolute;inset:-40px;width:calc(100% + 80px);height:calc(100% + 80px);object-fit:cover;filter:blur(18px) saturate(1.1)">
         <div class="abs" style="inset:0;background:rgba(0,0,0,.15)"></div>
         ${sp.map(([x, y, big], i) => `<span class="mk-star" style="left:${x}px;top:${y}px;font-size:${big ? 30 : 16}px;animation-delay:${(i * .27) % 1.8}s">✦</span>`).join('')}
-        <div class="abs glass dark" style="left:12px;right:12px;top:18px;height:44px;border-radius:100px;display:flex;align-items:center;gap:8px;padding:0 6px 0 16px">
+        <div class="abs glass dark" style="${t.tool ? 'display:none!important;' : ''}left:12px;right:12px;top:18px;height:44px;border-radius:100px;display:flex;align-items:center;gap:8px;padding:0 6px 0 16px">
           <span class="bellring" style="display:flex;font-size:15px">${ic('bell')}</span><span style="flex:1;font-size:13px;font-weight:600">Notify me when ready</span>
           <button class="notifybtn" style="height:32px;padding:0 12px;border-radius:100px;background:rgba(255,255,255,.2);font-size:13px;font-weight:600" data-act="notifyOn">Turn on</button></div>
         <span class="abs glass dark" style="left:50%;top:260px;transform:translateX(-50%);height:36px;border-radius:100px;padding:0 16px 0 12px;display:flex;align-items:center;gap:8px;white-space:nowrap"><span style="font-size:16px;display:flex">${ic('sparkles')}</span><span class="mk-chipt" style="font-size:15px;font-weight:600">Dreaming up your scene...</span></span>
@@ -898,13 +967,14 @@ SCREENS.making = ({ id = 'neon', photo = SELFIE }) => {
 };
 ACT.notifyOn = el => { el.textContent = 'On'; el.style.background = 'rgba(48,209,88,.25)'; el.style.color = 'var(--green)'; };
 ACT.leaveMaking = () => { back(); };
-ACT.keepBrowsing = () => { const vid = stack[stack.length - 1].args && T[stack[stack.length - 1].args.id] && isVid(T[stack[stack.length - 1].args.id]); reset(vid ? 'tab_video' : 'tab_photo'); };
+ACT.keepBrowsing = () => { const vid = stack[stack.length - 1].args && T[stack[stack.length - 1].args.id] && isVid(T[stack[stack.length - 1].args.id]); reset(T[stack[stack.length - 1].args.id] && T[stack[stack.length - 1].args.id].tool ? 'tab_tools' : vid ? 'tab_video' : 'tab_photo'); };
 ACT.goQueue = () => { S.galleryTab = 'queue'; reset('tab_gallery'); };
 
 /* 09 · Result */
 const RETRY_PRICE = { video: 160, photo: 100 }; // Figma 09-A / 09-E
 SCREENS.result = ({ id = 'neon', img, failed = false, kind }) => {
-  const t = T[id] || T.neon; const vid = kind ? kind === 'video' : isVid(t); const price = RETRY_PRICE[vid ? 'video' : 'photo']; const src = img || t.img;
+  const t = T[id] || T.neon; const vid = kind ? kind === 'video' : isVid(t); const price = RETRY_PRICE[vid ? 'video' : 'photo']; const src = img || t.res || t.img;
+  if (t.tool) return toolResult(t, src, failed, price);
   const w = vid ? (failed ? 304 : 266) : 320, h = vid ? (failed ? 540 : 472) : 400;
   const actsTop = 720; const y = vid ? (failed ? 144 : 132) : (failed ? 216 : 168);
   const soc = [['tiktok', 'TikTok'], ['instagram', 'Instagram'], ['facebook', 'Facebook'], ['whatsapp', 'WhatsApp'], ['more', 'Other']];
@@ -924,11 +994,180 @@ SCREENS.result = ({ id = 'neon', img, failed = false, kind }) => {
         : `<button class="btn glass prom" style="height:54px" data-act="saveAlbum">${ic('save')} Save to Album</button>` + coinBtn('', 'Try again')}</div>`
   };
 };
-ACT.resultBack = () => { const prev = stack[stack.length - 2]; if (prev && (prev.name === 'create' || prev.name === 'making')) { const vid = isVid(T[stack[stack.length - 1].args.id] || T.neon); reset(vid ? 'tab_video' : 'tab_photo'); } else back(); };
+/* Tools / 09 · Photo result (+ Failed) — Figma 1030:47252, 1390:149779 */
+function toolResult(t, src, failed, price) {
+  const soc = [['tiktok', 'TikTok'], ['instagram', 'Instagram'], ['facebook', 'Facebook'], ['whatsapp', 'WhatsApp'], ['more', 'Other']];
+  return {
+    html: `<div class="tb">${backBtn('resultBack')}<div class="ttl" style="font-size:20px;font-weight:600">${t.name}</div></div>
+    <div class="abs" style="left:77px;top:144px;width:248px;height:440px;border-radius:17.5px;overflow:hidden"><img src="${IMG(src)}" style="width:100%;height:100%;object-fit:cover${failed ? ';filter:blur(24px);transform:scale(1.15)' : ''}" alt="">${failed ? `<div class="abs" style="inset:0;background:rgba(0,0,0,.55)"></div>
+      <div class="abs" style="left:-12px;right:-12px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:0 12px"><img src="img/lg_error.png" style="width:56px;height:56px" alt="">
+      <div><div class="t3">Couldn't make your photo</div><div class="fn" style="color:rgba(255,255,255,.7);margin-top:6px">Something went wrong on our side. Please try again.</div></div>
+      <span class="pill" style="background:var(--yellow20);color:var(--yellow);height:28px;padding:0 12px">${ic('shield')} ${price} <img src="img/coin.png" style="width:16px;height:16px" alt=""> refunded</span></div>` : ''}</div>
+    <div class="abs" style="left:16px;right:16px;top:628px;display:flex;justify-content:center;gap:4px">${soc.map(([k, l]) => `<button class="press" data-act="shareTo" style="width:70px;display:flex;flex-direction:column;align-items:center;gap:4px"><img src="img/soc_${k}.png" style="width:48px;height:48px" alt=""><span class="c1" style="font-weight:700">${l}</span></button>`).join('')}</div>
+    <div class="abs" style="left:16px;right:16px;top:720px;display:flex;flex-direction:column;gap:12px">
+      <button class="btn glass prom" style="height:54px" data-act="saveAlbum">${ic('save')} Save to Album</button>
+      <button class="btn glass" data-act="tryAgain" data-v="${t.id}" style="height:54px;font-weight:600">Try again · ${COIN} ${price}</button></div>`
+  };
+}
+ACT.resultBack = () => { const prev = stack[stack.length - 2]; if (prev && (prev.name === 'create' || prev.name === 'making')) { const tt = T[stack[stack.length - 1].args.id] || T.neon; reset(tt.tool ? 'tab_tools' : isVid(tt) ? 'tab_video' : 'tab_photo'); } else back(); };
 ACT.saveAlbum = () => toast('Saved to Album', { act: 'Share', fn: () => ACT.more() });
 ACT.tryAgain = el => { const id = el.dataset.v; const price = isVid(T[id]) ? 120 : 100; if (S.coins < price) { notEnoughCoins(price - S.coins); return; } S.coins -= price; replace('making', { id }, 'fade'); };
-ACT.anotherPhoto = el => { const id = el.dataset.v; reset(isVid(T[id]) ? 'tab_video' : 'tab_photo'); go('create', { id }, 'none'); };
+ACT.anotherPhoto = el => { const id = el.dataset.v; reset(T[id].tool ? 'tab_tools' : isVid(T[id]) ? 'tab_video' : 'tab_photo'); go('create', { id }, 'none'); };
 ACT.playToggle = el => { const v = el.querySelector('video'), b = el.querySelector('.playbtn'); if (!v) { b.style.opacity = b.style.opacity === '0' ? 1 : 0; return; } if (v.paused) { v.play(); b.style.opacity = 0; } else { v.pause(); b.style.opacity = 1; } };
+
+/* Flow · Tools tab → Hairstyle — Figma 1030:42222 (02 Hairstyle detail; 03–09 reuse the shared create flow with T.wolf) */
+const HAIR_PRESETS = ['Pixie Cut', 'Bob', 'Wolf Cut', 'Beach Waves', 'Curtain Bangs', 'Space Buns'];
+S.hairPreset = 'Wolf Cut';
+SCREENS.hairDetail = () => {
+  const cur = S.hairPreset;
+  return {
+    html: `<div id="hba" class="abs" style="left:0;top:0;width:402px;height:660px;overflow:hidden;touch-action:pan-y">
+      <img src="${IMG('3e95598550')}" alt="" style="position:absolute;left:3px;top:0;width:402px;height:660px;object-fit:cover">
+      <div class="hb-clip abs" style="left:0;top:0;width:178px;height:664px;overflow:hidden"><img src="${IMG('347b928c97')}" alt="" style="position:absolute;left:0;top:0;width:402px;height:672px;object-fit:cover"></div>
+      <div class="abs" style="left:0;top:0;width:100%;height:140px;background:linear-gradient(rgba(0,0,0,.6),transparent)"></div>
+      <div class="abs" style="left:0;top:487px;width:100%;height:173px;background:linear-gradient(rgba(10,10,13,0),#0a0a0d)"></div>
+      <span class="abs shs" style="left:16px;top:484px;height:26px;padding:0 12px;border-radius:1000px;background:rgba(0,0,0,.09);display:flex;align-items:center;font-size:13px">Before</span>
+      <span class="abs shs" style="left:330px;top:484px;height:26px;padding:0 12px;border-radius:1000px;background:rgba(0,0,0,.09);display:flex;align-items:center;font-size:13px">After</span>
+      <i class="hb-line abs" style="left:177px;top:-6px;width:2px;height:672px;background:rgba(255,255,255,.36)"></i>
+      <span class="hb-handle abs circ glass" style="left:157px;top:301px;width:44px;height:44px;font-size:18px">${ic('lr')}</span></div>
+    <div class="abs" style="left:0;top:746px;width:100%;height:128px;background:linear-gradient(rgba(10,10,12,0),#0a0a0c 40%)"></div>
+    <div class="tb">${backBtn()}</div>
+    <div class="abs" style="left:16px;top:544px;width:370px;height:202px;border-radius:24px;background:rgba(255,255,255,.08);-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px);overflow:hidden">
+      <div style="display:flex;align-items:center;padding:16px 16px 0 18px"><div style="flex:1"><div style="font-size:22px;line-height:28px;font-weight:700">Hairstyle</div><div style="font-size:13px;line-height:18px;color:rgba(255,255,255,.7)">Preview a new cut before the salon</div></div>
+        <button class="circ s glass" data-act="hairSave" aria-label="Save" style="width:44px;height:44px">${ic(S.bookmarks.has('wolf') ? 'bookmarkf' : 'bookmark')}</button></div>
+      <div class="hscroll" style="gap:12px;padding:16px 16px 0;margin-top:0">${HAIR_PRESETS.map(p => `<button class="press" data-act="hairPick" data-v="${p}" style="width:72px;flex:none;display:flex;flex-direction:column;gap:6px;align-items:center">
+        <span style="width:72px;height:88px;border-radius:16px;overflow:hidden;display:block;position:relative"><img src="${IMG('2b00d32991')}" alt="" style="width:100%;height:100%;object-fit:cover">${p === cur ? '<i style="position:absolute;inset:0;border-radius:16px;box-shadow:inset 0 0 0 2.5px var(--lime)"></i>' : ''}</span>
+        <span style="font-size:12px;line-height:16px;font-weight:700;color:${p === cur ? '#fff' : '#a3a3a3'};white-space:nowrap">${p}</span></button>`).join('')}</div></div>
+    <button class="btn glass prom abs" style="left:16px;top:762px;width:370px;height:50px;font-weight:500;gap:8px" data-act="hairUse"><span style="font-size:18px;display:flex">${ic('sparkles')}</span>Use This Style</button>`,
+    mount(el) {
+      const ba = el.querySelector('#hba'), clip = el.querySelector('.hb-clip'), ln = el.querySelector('.hb-line'), hd = el.querySelector('.hb-handle');
+      const set = x => { x = Math.max(24, Math.min(378, x)); clip.style.width = x + 'px'; ln.style.left = (x - 1) + 'px'; hd.style.left = (x - 22) + 'px'; };
+      const scale = () => ba.getBoundingClientRect().width / 402; let drag = false;
+      hd.addEventListener('pointerdown', e => { drag = true; hd.setPointerCapture(e.pointerId); });
+      hd.addEventListener('pointermove', e => { if (drag) set((e.clientX - ba.getBoundingClientRect().left) / scale()); });
+      hd.addEventListener('pointerup', () => drag = false);
+    }
+  };
+};
+ACT.hairstyle = () => go('hairDetail');
+ACT.hairPick = el => { S.hairPreset = el.dataset.v; const sc = stack[stack.length - 1].el.querySelector('.hscroll').scrollLeft; rerender(); stack[stack.length - 1].el.querySelector('.hscroll').scrollLeft = sc; };
+ACT.hairSave = el => { if (S.bookmarks.has('wolf')) { S.bookmarks.delete('wolf'); toast('Removed from Saved', { icon: BMO, pos: 'bottom' }); } else { S.bookmarks.add('wolf'); toast('Saved', { icon: BMI, pos: 'bottom' }); } el.innerHTML = ic(S.bookmarks.has('wolf') ? 'bookmarkf' : 'bookmark'); };
+ACT.hairUse = () => { T.wolf.name = S.hairPreset; go('create', { id: 'wolf' }); };
+
+/* Flow · Gallery tab → Queue & Library — Figma 1030:48420 */
+const GAL_VIDEO = [
+  ['Today', [['street', '0:08', 'Neon Corridor'], ['909cb307c4', '0:10', 'Snow Angel'], ['588cb40b6d', '0:08', 'AI Video 06']]],
+  ['Nov 16, 2026', [['blackcat1', '0:10', 'Black Cat 01'], ['aivid16', '0:06', 'AI Video 16'], ['aivid02', '0:12', 'AI Video 02'], ['blackcat4', '0:08', 'Black Cat 04'], ['cosmic', '0:10', 'AI Video 08']]],
+];
+let GAL_IMAGE = ['beauty_1', '1b0f2344af', 'beauty_3', '06ccfcec0c', '412b08d966', '6bf99536b9', '84470c5150', 'beauty_2'];
+let QUEUE = {
+  waiting: [{ img: 'aivid02', name: 'Mountain Ride' }],
+  making: [{ img: 'witchcat', name: 'Moonlight Witch Cat', p: 62, eta: '~1 min' }, { img: '588cb40b6d', name: 'Neon Corridor', p: 20, eta: '~2 min' }],
+  failed: [{ img: 'aivid02', name: 'Mountain Ride' }],
+};
+S.galEmpty = false; S.galSelect = null;
+function galleryChips(cur) {
+  const dim = S.galSelect ? 'opacity:.35;pointer-events:none;' : '';
+  return `<div class="hscroll" style="gap:8px;padding:0 16px;${dim}">${[['queue', 'Queue'], ['video', 'Video'], ['image', 'Image'], ['uploads', 'Uploads'], ['bookmarks', 'Bookmarks']].map(([k, l]) => `<button class="chip ${k === cur ? 'on' : 'a1'}" style="font-weight:${k === cur ? 600 : 400}" data-act="galTab" data-v="${k}">${l}</button>`).join('')}</div>`;
+}
+const galHead = t => `<div style="font-size:20px;line-height:25px;font-weight:600;letter-spacing:-.45px;padding:0 16px">${t}</div>`;
+function galEmpty(title, msg, cta, act) {
+  return `<div style="display:flex;flex-direction:column;align-items:center;gap:24px;padding:114px 48px 0">
+    <div style="display:flex;flex-direction:column;align-items:center;gap:0"><img src="${IMG('778a081517')}" alt="" style="width:172px;height:172px;object-fit:cover">
+    <div style="font-size:22px;line-height:28px;font-weight:700;margin-top:-16px">${title}</div><div style="font-size:15px;line-height:20px;color:rgba(255,255,255,.7);margin-top:4px;text-align:center">${msg}</div></div>
+    <button class="btn glass prom" style="height:46px;width:auto;padding:0 28px;font-weight:600" data-act="${act}">${cta}</button></div>`;
+}
+function galVideoBody() {
+  if (S.galEmpty) return galEmpty('No videos yet', 'Videos you create will show up here.', 'Create a video', 'galCreateVideo');
+  return GAL_VIDEO.map(([h, items], gi) => `<section style="display:flex;flex-direction:column;gap:16px">${galHead(`${h} <span class="n5" style="font-size:17px">${ic('chev')}</span>`)}
+  <div class="hscroll" style="gap:12px;padding:0 16px">${items.map(([img, d], i) => `<button class="mcard press" style="width:148px;height:264px;border-radius:12px" data-act="galPlay" data-g="${gi}" data-i="${i}"><img src="${IMG(img)}" alt="" loading="lazy"><span class="abs" style="left:8px;bottom:8px;height:21px;padding:0 8px;border-radius:8px;background:rgba(0,0,0,.48);font-size:11px;font-weight:600;display:flex;align-items:center">${d}</span></button>`).join('')}</div></section>`).join('');
+}
+function galImageBody() {
+  const sel = S.galSelect;
+  return `<div style="display:grid;grid-template-columns:121px 120px 121px;gap:4px;padding:0 16px;margin-top:1px">${GAL_IMAGE.map((h, i) => {
+    const on = sel && sel.has(i);
+    return `<button class="press gimg" data-act="galImg" data-i="${i}" style="position:relative;height:180px;border-radius:10px;overflow:hidden">
+      <img src="${IMG(h)}" alt="" loading="lazy" style="position:absolute;${h === '84470c5150' ? 'left:-14px;width:144px' : 'left:0;width:100%'};top:0;height:100%;object-fit:cover">
+      ${sel ? (on ? `<i class="abs" style="inset:0;border-radius:8px;box-shadow:inset 0 0 0 3px var(--lime)"></i><span class="abs" style="right:8px;top:8px;width:24px;height:24px;border-radius:12px;background:var(--lime);color:#000;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center">✓</span>`
+        : `<span class="abs" style="right:8px;top:8px;width:24px;height:24px;border-radius:12px;background:rgba(0,0,0,.25);box-shadow:inset 0 0 0 2px #fff"></span>`) : ''}</button>`;
+  }).join('')}</div>`;
+}
+function qCard(it, inner, info) {
+  return `<div class="mcard" style="width:148px;height:264px;border-radius:12px"><img src="${IMG(it.img)}" alt=""><span class="abs" style="inset:0;background:rgba(0,0,0,.6)"></span>${inner}<div class="abs" style="left:8px;right:8px;bottom:8px">${info}</div></div>`;
+}
+const qInfo = (n, sub, col = '#a3a3a3') => `<div class="shs" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${n}</div><div style="font-size:13px;line-height:18px;color:${col};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${sub}</div>`;
+function ring(p) { const r = 22, c = 2 * Math.PI * r; return `<svg width="48" height="48" viewBox="0 0 48 48" style="position:absolute;inset:0"><circle cx="24" cy="24" r="${r}" fill="none" stroke="#fff" stroke-width="4"/><circle cx="24" cy="24" r="${r}" fill="none" stroke="#30d158" stroke-width="4" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - p / 100)}" transform="rotate(-90 24 24)"/></svg>`; }
+const qBtn = (t, act, i, w) => `<button class="btn glass abs" style="left:${(148 - w) / 2}px;top:106px;width:${w}px;height:28px;font-size:15px;font-weight:500;padding:0" data-act="${act}" data-i="${i}">${t}</button>`;
+function queueBody() {
+  const q = QUEUE; if (!q.waiting.length && !q.making.length && !q.failed.length) return galEmpty('Your queue is empty', 'Start creating and track your progress here.', 'Start creating', 'galCreateVideo');
+  const grp = (h, cards) => cards ? `<section style="display:flex;flex-direction:column;gap:16px">${galHead(h)}<div class="hscroll" style="gap:12px;padding:0 16px">${cards}</div></section>` : '';
+  return grp('Waiting', q.waiting.map((it, i) => qCard(it, qBtn('Cancel', 'qCancel', i, 70), qInfo(it.name, 'Waiting to start'))).join(''))
+    + grp('Making now', q.making.map((it, i) => `<button class="press" data-act="qOpen" data-i="${i}" style="flex:none">${qCard(it, `<span class="abs" style="left:50px;top:96px;width:48px;height:48px">${ring(it.p)}<span class="abs" style="inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600">${it.p}%</span></span>`, qInfo(it.name, 'Making · ' + it.eta))}</button>`).join(''))
+    + grp('Didn’t work', q.failed.map((it, i) => qCard(it, qBtn('Try again', 'qRetry', i, 87), qInfo(it.name, 'Didn’t work · refunded', '#ff453a'))).join(''));
+}
+SCREENS.tab_gallery = () => {
+  const g = S.galleryTab; let body = '';
+  if (g === 'video') body = galVideoBody();
+  else if (g === 'queue') body = queueBody();
+  else if (g === 'image') body = galImageBody();
+  else if (g === 'uploads') body = `<div style="display:grid;grid-template-columns:121px 120px 121px;gap:4px;padding:0 16px">${[SELFIE, SELFIE2, '726146ff99', '2a841c84a2'].map(h => `<span style="height:180px;border-radius:10px;overflow:hidden"><img src="${IMG(h)}" alt="" style="width:100%;height:100%;object-fit:cover"></span>`).join('')}</div>`;
+  else if (g === 'bookmarks') body = bookmarksBody();
+  const sel = S.galSelect;
+  const right = sel ? `<button data-act="galSelCancel" style="font-size:17px;font-weight:600;color:var(--lime);margin-left:auto">Cancel</button>`
+    : `<button class="circ s glass" data-act="profile" aria-label="Profile" style="overflow:hidden"><img src="${IMG(AVATAR)}" alt="" style="width:36px;height:36px;border-radius:50%;object-fit:cover;background:#fff"></button>`;
+  const head = sel ? `<div class="tbL"><div class="lt">${sel.size} selected</div>${right}</div>` : largeTitle('Gallery', right);
+  const bar = sel ? `<div class="abs" style="left:16px;right:16px;top:790px;display:flex;gap:12px;z-index:40"><button class="btn" style="flex:1;height:50px;background:#333338;color:#fff;font-weight:600" data-act="galSelSave">Save to Photos</button><button class="btn" style="flex:1;height:50px;background:#333338;color:#ff453b;font-weight:600" data-act="galSelDelete">Delete (${sel.size})</button></div>` : tabBar('gallery');
+  return { html: `<div class="scroll"><div style="padding:124px 0 140px;display:flex;flex-direction:column;gap:23px">${galleryChips(g)}<div style="display:flex;flex-direction:column;gap:28px">${body}</div></div></div>
+  <div class="abs" style="left:0;top:0;width:100%;height:124px;background:linear-gradient(#000 70%,transparent);z-index:25;pointer-events:none"></div>${head}${bar}`,
+    mount(el) {
+      if (g === 'image') el.querySelectorAll('.gimg').forEach(b => { let t; b.addEventListener('pointerdown', () => { t = setTimeout(() => { b.dataset.lp = 1; if (!S.galSelect) { S.galSelect = new Set([+b.dataset.i]); rerender(); } }, 450); }); ['pointerup', 'pointerleave', 'pointercancel'].forEach(ev => b.addEventListener(ev, () => clearTimeout(t))); });
+      if (g === 'queue' && QUEUE.making.some(m => m.name === 'Neon Corridor')) el._to = setTimeout(() => { if (stack[stack.length - 1].el !== el) return; const k = QUEUE.making.findIndex(m => m.name === 'Neon Corridor'); if (k < 0) return; QUEUE.making.splice(k, 1); rerender(); toast('Neon Corridor is ready', { icon: '', pos: 'bottom', act: 'View', fn: () => go('galView', { img: '93deccbe6a', title: 'Wolf Cut', kind: 'photo' }) }); }, 4000);
+    }
+  };
+};
+ACT.galTab = el => { S.galleryTab = el.dataset.v; S.galSelect = null; rerender(); };
+ACT.profile = () => go('profile', {});
+ACT.galCreateVideo = () => { S.tab = 'video'; reset('tab_video'); };
+ACT.galPlay = el => { const it = GAL_VIDEO[+el.dataset.g][1][+el.dataset.i]; go('galView', { img: it[0], title: it[2], dur: it[1], kind: 'video' }); };
+ACT.galImg = el => {
+  if (el.dataset.lp) { delete el.dataset.lp; return; }
+  const i = +el.dataset.i;
+  if (S.galSelect) { S.galSelect.has(i) ? S.galSelect.delete(i) : S.galSelect.add(i); if (!S.galSelect.size) S.galSelect = null; rerender(); return; }
+  go('galView', { img: GAL_IMAGE[i], title: 'Wolf Cut', kind: 'photo' });
+};
+ACT.galSelCancel = () => { S.galSelect = null; rerender(); };
+ACT.galSelSave = () => { const n = S.galSelect.size; S.galSelect = null; rerender(); toast(`Saved ${n} item${n > 1 ? 's' : ''} to Photos`); };
+function galAlert(title, msg, danger, keep, onDanger) {
+  const p = $phone(); const d = document.createElement('div'); d.className = 'alertdim';
+  d.innerHTML = `<div class="glass dark" style="width:300px;border-radius:34px;padding:14px;animation:pop .3s var(--ease) both">
+   <div style="padding:8px 8px 24px;text-align:center"><div style="font-size:20px;line-height:25px;font-weight:600">${title}</div><div style="font-size:17px;line-height:22px;color:rgba(255,255,255,.8);margin-top:10px">${msg}</div></div>
+   <div style="display:flex;flex-direction:column;gap:8px"><button class="btn" style="height:48px;background:rgba(255,69,58,.2);color:#ff383c;font-weight:600" data-x="d">${danger}</button><button class="btn" style="height:48px;background:rgba(255,255,255,.09);color:#fff;font-weight:600" data-x="k">${keep}</button></div></div>`;
+  d.querySelector('[data-x=k]').onclick = () => d.remove(); d.querySelector('[data-x=d]').onclick = () => { d.remove(); onDanger(); };
+  p.appendChild(d);
+}
+ACT.galSelDelete = () => { const n = S.galSelect.size; galAlert(`Delete ${n} item${n > 1 ? 's' : ''}?`, 'They\'ll be removed from your Gallery on all your devices. This can\'t be undone.', 'Delete', 'Cancel', () => { const s = S.galSelect; GAL_IMAGE = GAL_IMAGE.filter((_, i) => !s.has(i)); S.galSelect = null; rerender(); toast(`Deleted ${n} item${n > 1 ? 's' : ''}`); }); };
+ACT.qCancel = el => galAlert('Cancel this creation?', 'It hasn\'t started yet. The coins on hold go back to your balance and you are not charged.', 'Cancel creation', 'Keep it', () => { QUEUE.waiting.splice(+el.dataset.i, 1); rerender(); toast('Cancelled · coins returned'); });
+ACT.qRetry = el => { const it = QUEUE.failed.splice(+el.dataset.i, 1)[0]; QUEUE.waiting.push(it); rerender(); };
+ACT.qOpen = () => go('making', { id: 'wolf' });
+ACT.openResult = el => go('galView', { img: el.dataset.v, title: 'Wolf Cut', kind: 'photo' });
+
+/* 02c · Photo result / 06 · Video viewer (opened from Gallery) */
+SCREENS.galView = ({ img, title = 'Wolf Cut', kind = 'photo', dur = '0:08' }) => {
+  const vid = kind === 'video';
+  return {
+    html: `<div class="tb">${backBtn()}<div class="ttl" style="font-size:20px;font-weight:600">${title}</div>${vid ? `<span class="sp"></span><button class="circ s glass" data-act="galMore" aria-label="More">${ic('ellipsis')}</button>` : ''}</div>
+    <button class="abs" style="left:31px;top:134px;width:340px;height:604px;border-radius:24px;overflow:hidden" data-act="${vid ? 'galPP' : ''}"><img src="${IMG(img)}" alt="" style="width:100%;height:100%;object-fit:cover">
+      ${vid ? `<span class="abs gpp" style="left:138px;top:270px;width:64px;height:64px;border-radius:1000px;background:rgba(0,0,0,.28);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;font-size:22px">${ic('play')}</span>
+      <span class="abs" style="left:20px;top:570px;width:300px;height:4px;border-radius:2px;background:rgba(255,255,255,.3)"><i class="gprog" style="display:block;width:110px;height:4px;border-radius:2px;background:#fff"></i></span>
+      <span class="abs" style="left:20px;top:576px;font-size:12px;line-height:14px;font-weight:600;color:rgba(255,255,255,.85)">0:03 / ${dur}</span>` : ''}</button>
+    <div class="abs" style="left:16px;right:16px;top:762px;display:flex;gap:12px"><button class="btn" style="flex:1;height:50px;background:#2c2c2e;color:#fff;font-weight:600" data-act="shareTo">Share</button>
+      <button class="btn glass prom" style="flex:1;height:50px;font-weight:500" data-act="galSave">${vid ? 'Save to Photos' : 'Save'}</button></div>`
+  };
+};
+ACT.galPP = el => { const b = el.querySelector('.gpp'); b.style.opacity = b.style.opacity === '0' ? 1 : 0; };
+ACT.galSave = () => toast('Saved to Photos');
+ACT.galMore = () => sheet({ title: '', html: `<div class="grp noic">${[['Remake', 'retry'], ['Report', 'flag'], ['Delete', 'trash']].map(([l, i]) => `<button class="row" data-act="galMoreDo" data-v="${l}" style="${l === 'Delete' ? 'color:var(--red)' : ''}">${l}<span class="r">${ic(i)}</span></button>`).join('')}</div>` });
+ACT.galMoreDo = el => { closeSheet(); const v = el.dataset.v; if (v === 'Delete') setTimeout(() => galAlert('Delete this video?', 'It\'ll be removed from your Gallery on all your devices. This can\'t be undone.', 'Delete', 'Cancel', () => { back(); toast('Deleted 1 item'); }), 250); else toast(v === 'Report' ? 'Thanks — we’ll review it' : 'Opening template…', { icon: '' }); };
 
 /* Profile → Credits & Account — Figma 1222:114910 */
 const BIGCOIN = 'img/bigcoin.png';
@@ -1097,16 +1336,57 @@ ACT.pack = el => { stack[stack.length - 1].args.sel = +el.dataset.i; rerender();
 ACT.buyPack = () => { const [c, b] = PACKS[stack[stack.length - 1].args.sel ?? 2]; const add = c + b; S.coins += add; S.spent = true; replace('topup', { add, c, b }, 'fade'); };
 
 /* Top-up success (06b) */
-SCREENS.topup = ({ add = 1100, c = 1000, b = 100 }) => ({
-  html: `${raysBg()}<div class="tb">${backBtn()}</div>
-  <div class="abs" style="left:0;right:0;top:100px;display:flex;flex-direction:column;align-items:center;text-align:center">
-    <img src="${BIGCOIN}" class="coinpop" style="width:282px;height:282px" alt="">
-    <div class="sh" style="color:rgba(255,255,255,.7);margin-top:24px">Purchase complete</div><div class="t1" style="margin-top:4px">+${fmt(add)} coins</div>
-    <div class="fn" style="margin-top:24px">${fmt(c)} coins + ${b} bonus</div><div class="fn n5" style="margin-top:2px">New balance: ${fmt(S.coins)} coins · valid until Nov 27, 2027</div></div>
-  <div class="abs" style="left:16px;right:16px;bottom:46px"><button class="btn glass pastel" style="height:54px" data-act="continueCreating">Continue creating</button>
-  <div class="fns n5 ctr" style="margin-top:12px">View in · <button class="fns" style="color:#fff;text-decoration:underline;font-weight:700" data-act="histFromTopup">Coin history</button></div></div>`,
+SCREENS.topup = ({ add = 1100, c = 1000, b = 100 }) => ({ // Figma 1367:18953 · Gift · Claim offer · Option 1 – Spotlight
+  html: `<div class="abs" style="left:-16px;top:-2px;width:583px;height:576px;border-radius:50%;background:radial-gradient(closest-side,rgba(162,127,224,.9),rgba(74,47,134,.6) 55%,transparent);filter:blur(50px)"></div>
+  <div class="abs" style="left:-60px;top:-120px;width:520px;height:420px;border-radius:50%;background:rgba(189,168,250,.28);filter:blur(120px)"></div>
+  <div class="abs" style="left:-160px;top:420px;width:360px;height:360px;border-radius:50%;background:rgba(242,184,229,.16);filter:blur(120px)"></div>
+  <div class="abs" style="left:260px;top:480px;width:320px;height:360px;border-radius:50%;background:rgba(184,242,214,.14);filter:blur(120px)"></div>
+  ${[[40, 60, 46, 'bda8fa', .18], [300, 140, 90, 'b2d6ff', .12], [330, 420, 64, 'b8f2d6', .14], [20, 380, 50, 'f2b8e5', .14], [80, 620, 70, 'bda8fa', .12], [280, 640, 56, 'faf2bd', .10], [230, 40, 30, 'f2b8e5', .16]].map(([x, y, w, c, o]) => `<i class="abs" style="left:${x + 20}px;top:${y + 40}px;width:${w}px;height:${w}px;border-radius:50%;background:#${c};opacity:${o};filter:blur(4px)"></i>`).join('')}
+  ${[[70, 140, 22, 1], [312, 110, 18, 1], [58, 300, 14, .9], [340, 300, 16, .9], [96, 470, 12, .8], [318, 500, 20, .8], [200, 60, 40, .25], [20, 210, 34, .2], [350, 220, 30, .22]].map(([x, y, w, o]) => `<span class="abs mk-star" style="left:${x}px;top:${y}px;font-size:${w}px;line-height:1;opacity:${o};color:#fff">✦</span>`).join('')}
+  <img src="${BIGCOIN}" class="coinpop abs" style="left:73px;top:134px;width:257px;height:257px" alt="">
+  <div class="abs ctr" style="left:16px;right:16px;top:442px">
+    <div style="font-size:17px;line-height:22px;color:rgba(255,255,255,.62)">Purchase complete</div>
+    <div style="font-size:34px;line-height:41px;font-weight:700;margin-top:8px">+${fmt(add)} coins</div>
+    <div style="font-size:17px;line-height:22px;font-weight:600;color:rgba(255,255,255,.9);margin-top:8px">${fmt(c)} coins + ${b} coins bonus</div>
+    <div style="font-size:17px;line-height:22px;color:#999;margin-top:24px">Balance: ${S.coins} credits</div>
+    <div style="font-size:17px;line-height:22px;color:#999;margin-top:4px">Valid until 26 Nov, 2027</div></div>
+  <div class="abs" style="left:16px;right:16px;top:720px;display:flex;flex-direction:column;gap:12px"><button class="btn glass pastel" style="height:54px;font-weight:600" data-act="continueCreating">Continue creating</button>
+  <button class="btn glass" style="height:54px;font-weight:600" data-act="histFromTopup">View credit history</button></div>`,
   mount() { burst(); }
 });
+/* Gift · Claim offer · Option 2 – Receipt — Figma 1402:19364 */
+SCREENS.topup2 = ({ add = 1100, c = 1000, b = 100, paid = '$23.99' }) => ({
+  html: `<div class="abs" style="left:-80px;top:-100px;width:560px;height:460px;border-radius:50%;background:rgba(189,168,250,.3);filter:blur(120px)"></div>
+  <div class="abs" style="left:220px;top:300px;width:300px;height:300px;border-radius:50%;background:rgba(184,242,214,.12);filter:blur(120px)"></div>
+  <div class="abs" style="left:-140px;top:260px;width:300px;height:300px;border-radius:50%;background:rgba(242,184,229,.14);filter:blur(120px)"></div>
+  <div class="abs" style="left:-109px;top:-80px;width:620px;height:620px;border-radius:50%;opacity:.65;filter:blur(6px);background:repeating-conic-gradient(rgba(242,184,229,.22) 0 5deg,transparent 5deg 11.25deg,rgba(189,168,250,.22) 11.25deg 16.25deg,transparent 16.25deg 22.5deg,rgba(184,242,214,.22) 22.5deg 27.5deg,transparent 27.5deg 33.75deg,rgba(250,242,189,.22) 33.75deg 38.75deg,transparent 38.75deg 45deg)"></div>
+  <div class="abs" style="left:-109px;top:-80px;width:620px;height:620px;border-radius:50%;background:radial-gradient(closest-side,transparent,rgba(0,0,0,.25) 40%,#000)"></div>
+  ${[[50, 84, 13, 10, 'f2b8e5'], [328, 80, 15, 10, 'b8f2d6'], [80, 250, 9, 9, 'faf2bd'], [310, 250, 10, 13, 'bda8fa'], [30, 330, 7, 7, 'b3d6ff'], [348, 340, 13, 13, 'faf2bd'], [140, 70, 7, 7, 'b8f2d6'], [260, 57, 13, 8, 'f2b8e5'], [110, 351, 7, 11, 'bda8fa'], [290, 370, 8, 8, 'f2b8e5'], [187, 40, 8, 11, 'faf2bd'], [360, 180, 8, 8, 'bda8fa'], [24, 172, 12, 11, 'b8f2d6']].map(([x, y, w, h, c], i) => `<i class="abs" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-radius:3px;background:#${c};transform:rotate(${(i * 37) % 90 - 45}deg)"></i>`).join('')}
+  <img src="${BIGCOIN}" class="coinpop abs" style="left:96px;top:104px;width:211px;height:211px" alt="">
+  <div class="abs ctr" style="left:16px;right:16px;top:344px"><div style="font-size:15px;line-height:20px;font-weight:600;color:rgba(235,235,245,.7)">Purchase complete</div>
+    <div style="font-size:56px;line-height:62px;font-weight:700;margin-top:4px">+${fmt(add)}</div><div style="font-size:17px;line-height:22px;font-weight:600;margin-top:4px">coins added to your wallet</div></div>
+  <div class="abs" style="left:16px;right:16px;top:476px;border-radius:20px;background:#1c1c1e;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);padding:7px 17px">
+    ${[['Coin pack', `${fmt(c)} coins`], ['Bonus', `<span style="color:var(--lime)">+${b} coins</span>`], ['Paid', paid]].map(([l, v]) => `<div style="height:42px;display:flex;align-items:center;justify-content:space-between;font-size:15px"><span style="color:rgba(235,235,245,.7)">${l}</span><span>${v}</span></div>`).join('')}
+    <div style="height:1px;background:rgba(255,255,255,.09)"></div>
+    <div style="height:42px;display:flex;align-items:center;justify-content:space-between;font-size:15px"><span style="color:rgba(235,235,245,.7)">New balance</span><span style="display:flex;align-items:center;gap:6px;font-size:17px;font-weight:600">${fmt(S.coins)}<img src="img/coin.png" style="width:18px;height:18px" alt=""></span></div>
+    <div style="height:42px;display:flex;align-items:center;justify-content:space-between;font-size:15px"><span style="color:rgba(235,235,245,.7)">Valid until</span><span>Nov 26, 2027</span></div></div>
+  <div class="abs" style="left:16px;right:16px;top:720px;display:flex;flex-direction:column;gap:12px"><button class="btn glass pastel" style="height:54px;font-weight:600" data-act="continueCreating">Continue creating</button>
+  <button class="btn glass" style="height:54px;font-weight:600" data-act="histFromTopup">View credit history</button></div>`,
+  mount() { burst(); }
+});
+/* Reward / Gift received — Figma 1222:115339 (over the Tools tab) */
+function giftReceived() {
+  const p = $phone(); const d = document.createElement('div'); d.className = 'alertdim'; d.style.background = 'rgba(0,0,0,.72)'; d.style.backdropFilter = d.style.webkitBackdropFilter = 'blur(12px)';
+  d.innerHTML = `<div style="position:relative;width:338px;height:501px;border-radius:32px;background:#131417;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);overflow:hidden;animation:pop .35s var(--ease) both">
+    <div class="abs" style="left:-51px;top:-57px;width:440px;height:440px;border-radius:50%;background:radial-gradient(closest-side,rgba(237,237,237,.22),transparent);"></div>
+    <div class="abs" style="left:24px;right:24px;top:196px;text-align:center"><div style="font-size:22px;line-height:28px;font-weight:700">Your gift has arrived!</div>
+      <div style="font-size:13px;line-height:18px;color:#c4c6cb;margin-top:8px">Thanks for joining Spark. Try any AI tool — Hairstyle, Hair Color, Face Slim and more.</div>
+      <div style="height:78px;border-radius:20px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.12);margin-top:24px;display:flex;align-items:center;justify-content:center;gap:10px"><img src="img/coin.png" style="width:40px;height:40px" alt=""><span style="font-size:34px;line-height:41px;font-weight:700">+480</span><span style="font-size:17px;color:rgba(235,235,245,.7);margin-top:8px">coins</span></div>
+      <button class="btn" style="margin-top:24px;height:52px;background:linear-gradient(90deg,#efcbea,#cecbf4 38%,#cdefda 72%,#f6f3cb);color:#0b0e0e;font-weight:600" data-x="claim">Claim 480 credits</button>
+      <div style="font-size:13px;color:#979aa2;margin-top:12px">Credits never expire</div></div></div>`;
+  d.querySelector('[data-x=claim]').onclick = () => { d.remove(); S.coins += 480; toast('480 credits added'); };
+  p.appendChild(d);
+}
 function burst() { const p = $phone(); for (let i = 0; i < 26; i++) { const s = document.createElement('i'); s.className = 'confetti'; s.style.cssText = `left:${50 + (Math.random() - .5) * 20}%;top:30%;--dx:${(Math.random() - .5) * 360}px;--dy:${-80 - Math.random() * 260}px;background:${['#efcbea', '#cecbf4', '#cdefda', '#f6f3cb', '#f0fe65'][i % 5]};animation-delay:${Math.random() * .2}s`; p.appendChild(s); setTimeout(() => s.remove(), 1800); } }
 ACT.continueCreating = () => { const i = stack.findIndex(s => s.name === 'create'); if (i >= 0) back(stack.length - 1 - i); else back(); };
 ACT.histFromTopup = () => { S.signedIn = true; replace('coinHistory', {}); };
@@ -1136,6 +1416,7 @@ SCREENS.paywall = ({ sel = 1 } = {}) => ({
 ACT.plan = el => { stack[stack.length - 1].args.sel = +el.dataset.i; rerender(); };
 ACT.claim = () => { S.pro = true; S.signedIn = S.signedIn; S.coins += 4000; back(); setTimeout(() => toast('Welcome to Spark Pro', { icon: `<img src="img/crown.png" alt="" style="width:20px;height:20px">` }), 450); };
 
+const BMO = '<span style="color:#fff;font-size:18px;display:flex">' + ic('bookmark') + '</span>';
 const BMI = '<span style="color:var(--lime);font-size:18px;display:flex">' + ic('bookmarkf') + '</span>';
 /* Save to collection → Gallery › Bookmarks — Figma 1074:10037 */
 S.collections = [
@@ -1146,7 +1427,7 @@ S.collections = [
   { id: 'pets', name: 'Pets & me', items: ['cake'] },
   { id: 'halloween', name: 'Halloween', items: [] },
 ];
-S.bookmarks = new Set(S.collections[0].items);
+S.bookmarks = new Set(); // default: nothing bookmarked
 const plural = n => n === 1 ? '1 template' : n + ' templates';
 const colById = id => S.collections.find(c => c.id === id);
 
@@ -1241,10 +1522,12 @@ function nameSheet({ mode, id, tpl }) {
 
 /* boot + side jump list + phone scaling */
 const JUMPS = [
-  ['App · 4 tabs', [['Video tab', () => reset('tab_video')], ['Photo tab', () => { S.tab = 'photo'; reset('tab_photo'); }], ['Tools tab', () => reset('tab_tools')], ['Gallery · Video', () => { S.galleryTab = 'video'; reset('tab_gallery'); }], ['Gallery · Queue', () => { S.galleryTab = 'queue'; reset('tab_gallery'); }]]],
+  ['App · 4 tabs', [['Video tab', () => reset('tab_video')], ['Photo tab', () => { S.tab = 'photo'; reset('tab_photo'); }], ['Tools tab', () => reset('tab_tools')], ['Gallery · Video', () => { S.galEmpty = false; S.galleryTab = 'video'; reset('tab_gallery'); }], ['Gallery · Queue', () => { S.galleryTab = 'queue'; reset('tab_gallery'); }]]],
   ['Generate video', [['Collection grid', () => { reset('tab_video'); go('grid', { title: '🔥 Trending AI Video' }); }], ['Template feed', () => { reset('tab_video'); go('feed', { id: 'neon' }); }], ['Create (1 photo)', () => { reset('tab_video'); go('create', { id: 'neon' }); }], ['Create (2 photos)', () => { reset('tab_video'); go('create', { id: 'neon', people: 2 }); }], ['Making your video', () => { reset('tab_video'); go('making', { id: 'neon' }); }], ['Video result', () => { reset('tab_video'); go('result', { id: 'neon' }); }], ['Result · failed', () => { reset('tab_video'); go('result', { id: 'neon', failed: true }); }]]],
   ['Generate image', [['Create (1 photo)', () => { reset('tab_photo'); go('create', { id: 'lavender' }); }], ['Create (2 photos)', () => { reset('tab_photo'); go('create', { id: 'lavender', people: 2 }); }], ['Photo result', () => { reset('tab_photo'); go('result', { id: 'lavender' }); }], ['Result · failed', () => { reset('tab_photo'); go('result', { id: 'lavender', failed: true }); }]]],
-  ['Profile → Credits & Account', [['Guest · no credits', () => { S.signedIn = false; S.pro = false; S.coins = 0; reset('tab_gallery'); go('profile'); }], ['Guest · credits', () => { S.signedIn = false; S.pro = false; S.coins = 480; reset('tab_gallery'); go('profile'); }], ['Sign in sheet', () => { S.signedIn = false; S.pro = false; reset('tab_gallery'); go('profile'); setTimeout(ACT.signIn, 450); }], ['Signed in · Free', () => { S.signedIn = true; S.pro = false; reset('tab_gallery'); go('profile'); }], ['Signed in · Pro', () => { S.signedIn = true; S.pro = true; reset('tab_gallery'); go('profile'); }], ['Coin history · empty', () => { S.signedIn = true; S.pro = false; S.spent = false; S.coins = 480; reset('tab_gallery'); go('profile'); go('coinHistory'); }], ['Coin history · Pro', () => { S.signedIn = true; S.pro = true; reset('tab_gallery'); go('profile'); go('coinHistory'); }], ['Edit profile', () => { S.signedIn = true; reset('tab_gallery'); go('profile'); go('editProfile'); }], ['Refill credits', () => { reset('tab_gallery'); go('profile'); go('refill'); }], ['Top-up success', () => { reset('tab_gallery'); go('refill'); go('topup', {}, 'fade'); }], ['Paywall', () => { reset('tab_video'); go('paywall', {}, 'up'); }]]],
+  ['Tools → Hairstyle', [['Tools tab', () => reset('tab_tools')], ['Hairstyle detail', () => { reset('tab_tools'); go('hairDetail'); }], ['Create', () => { reset('tab_tools'); go('hairDetail', {}, 'none'); go('create', { id: 'wolf' }); }], ['First time · Guidelines', () => { S.guideAgreed = false; reset('tab_tools'); go('create', { id: 'wolf' }); setTimeout(() => ACT.addPhoto({ dataset: { i: 0 } }), 450); }], ['Choose a photo', () => { S.guideAgreed = true; hasRecent = true; reset('tab_tools'); go('create', { id: 'wolf' }); setTimeout(() => ACT.addPhoto({ dataset: { i: 0 } }), 450); }], ['Choose · no recent', () => { S.guideAgreed = true; hasRecent = false; reset('tab_tools'); go('create', { id: 'wolf' }); setTimeout(() => ACT.addPhoto({ dataset: { i: 0 } }), 450); }], ['Making your photo', () => { reset('tab_tools'); go('making', { id: 'wolf' }); }], ['Photo result', () => { reset('tab_tools'); go('result', { id: 'wolf' }); }], ['Result · failed', () => { reset('tab_tools'); go('result', { id: 'wolf', failed: true }); }], ['Gift received', () => { reset('tab_tools'); setTimeout(giftReceived, 300); }]]],
+  ['Gallery → Queue & Library', [['Queue · empty', () => { QUEUE = { waiting: [], making: [], failed: [] }; S.galleryTab = 'queue'; reset('tab_gallery'); }], ['Queue', () => { QUEUE = { waiting: [{ img: 'aivid02', name: 'Mountain Ride' }], making: [{ img: 'witchcat', name: 'Moonlight Witch Cat', p: 62, eta: '~1 min' }, { img: '588cb40b6d', name: 'Neon Corridor', p: 20, eta: '~2 min' }], failed: [{ img: 'aivid02', name: 'Mountain Ride' }] }; S.galleryTab = 'queue'; reset('tab_gallery'); }], ['Video', () => { S.galEmpty = false; S.galleryTab = 'video'; reset('tab_gallery'); }], ['Video · empty', () => { S.galEmpty = true; S.galleryTab = 'video'; reset('tab_gallery'); }], ['Video viewer', () => { S.galEmpty = false; S.galleryTab = 'video'; reset('tab_gallery'); go('galView', { img: 'street', title: 'Neon Corridor', kind: 'video' }); }], ['Image', () => { S.galSelect = null; S.galleryTab = 'image'; reset('tab_gallery'); }], ['Image · select mode', () => { S.galSelect = new Set([0, 2, 4]); S.galleryTab = 'image'; reset('tab_gallery'); }], ['Photo result', () => { S.galleryTab = 'queue'; reset('tab_gallery'); go('galView', { img: '93deccbe6a', title: 'Wolf Cut', kind: 'photo' }); }]]],
+  ['Profile → Credits & Account', [['Guest · no credits', () => { S.signedIn = false; S.pro = false; S.coins = 0; reset('tab_gallery'); go('profile'); }], ['Guest · credits', () => { S.signedIn = false; S.pro = false; S.coins = 480; reset('tab_gallery'); go('profile'); }], ['Sign in sheet', () => { S.signedIn = false; S.pro = false; reset('tab_gallery'); go('profile'); setTimeout(ACT.signIn, 450); }], ['Signed in · Free', () => { S.signedIn = true; S.pro = false; reset('tab_gallery'); go('profile'); }], ['Signed in · Pro', () => { S.signedIn = true; S.pro = true; reset('tab_gallery'); go('profile'); }], ['Coin history · empty', () => { S.signedIn = true; S.pro = false; S.spent = false; S.coins = 480; reset('tab_gallery'); go('profile'); go('coinHistory'); }], ['Coin history · Pro', () => { S.signedIn = true; S.pro = true; reset('tab_gallery'); go('profile'); go('coinHistory'); }], ['Edit profile', () => { S.signedIn = true; reset('tab_gallery'); go('profile'); go('editProfile'); }], ['Refill credits', () => { reset('tab_gallery'); go('profile'); go('refill'); }], ['Top-up success · Spotlight', () => { reset('tab_gallery'); go('refill'); setTimeout(() => go('topup', {}, 'fade'), 450); }], ['Top-up success · Receipt', () => { reset('tab_gallery'); go('refill'); setTimeout(() => go('topup2', {}, 'fade'), 450); }], ['Paywall', () => { reset('tab_video'); go('paywall', {}, 'up'); }]]],
   ['Save to collection → Bookmarks', [['Feed · Save', () => { reset('tab_video'); go('feed', { id: 'cosmic' }); }], ['Save to collection sheet', () => { reset('tab_video'); go('feed', { id: 'cosmic' }); setTimeout(() => saveToCollection('cosmic'), 450); }], ['Gallery › Bookmarks', () => { S.galleryTab = 'bookmarks'; reset('tab_gallery'); }], ['Default collection', () => { S.galleryTab = 'bookmarks'; reset('tab_gallery'); go('collection', { id: 'default' }); }], ['Birthday ideas', () => { S.galleryTab = 'bookmarks'; reset('tab_gallery'); go('collection', { id: 'bday' }); }], ['Empty collection', () => { S.galleryTab = 'bookmarks'; reset('tab_gallery'); go('collection', { id: 'halloween' }); }]]],
 ];
 function buildJump() {

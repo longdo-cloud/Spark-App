@@ -1,3 +1,4 @@
+const BMO = '<span style="color:#fff;font-size:18px;display:flex">' + ic('bookmark') + '</span>';
 const BMI = '<span style="color:var(--lime);font-size:18px;display:flex">' + ic('bookmarkf') + '</span>';
 /* Save to collection → Gallery › Bookmarks — Figma 1074:10037 */
 S.collections = [
@@ -8,7 +9,7 @@ S.collections = [
   { id: 'pets', name: 'Pets & me', items: ['cake'] },
   { id: 'halloween', name: 'Halloween', items: [] },
 ];
-S.bookmarks = new Set(S.collections[0].items);
+S.bookmarks = new Set(); // default: nothing bookmarked
 const plural = n => n === 1 ? '1 template' : n + ' templates';
 const colById = id => S.collections.find(c => c.id === id);
 

@@ -31,7 +31,7 @@ SCREENS.grid = ({ title = '🔥 Trending AI Video' }) => {
 ACT.pickCat = el => { const cur = stack[stack.length - 1]; if (cur.name === 'grid') { cur.args.title = el.dataset.v; rerender(); } else go('grid', { title: el.dataset.v }); };
 ACT.cats = () => sheet({ title: 'Categories', html: `<div class="grp">${CATS.map(([e, l], i) => `<button class="row" data-act="catRow" data-v="${l}"><span style="width:24px;text-align:center;font-size:18px">${e}</span>${l}${i === 0 ? `<span class="r" style="color:var(--lime)">${ic('check')}</span>` : ''}</button>`).join('')}</div>` });
 ACT.catRow = el => { closeSheet(); setTimeout(() => ACT.pickCat(el), 200); };
-ACT.toggleBm = (el, e) => { e.stopPropagation(); const id = el.dataset.v; if (S.bookmarks.has(id)) { S.bookmarks.delete(id); rerender(); toast('Removed from Saved', { icon: '' }); } else { S.bookmarks.add(id); addToDefault(id); rerender(); toast('Saved', { icon: BMI, pos: 'bottom', act: 'Collections', fn: () => saveToCollection(id) }); } };
+ACT.toggleBm = (el, e) => { e.stopPropagation(); const id = el.dataset.v; if (S.bookmarks.has(id)) { S.bookmarks.delete(id); rerender(); toast('Removed from Saved', { icon: BMO, pos: 'bottom' }); } else { S.bookmarks.add(id); addToDefault(id); rerender(); toast('Saved', { icon: BMI, pos: 'bottom', act: 'Collections', fn: () => saveToCollection(id) }); } };
 function addToDefault(id) { const d = S.collections.find(c => c.def); if (!d.items.includes(id)) d.items.unshift(id); }
 
 /* ---------- 02 · Template detail (full-screen feed) ---------- */
@@ -63,6 +63,7 @@ SCREENS.feed = ({ id = 'neon' }) => {
       <button class="circ s glass dark feedbm" data-act="feedSaveCur">${ic('bookmark')}</button></div>`,
     mount(el) {
       const sc = el.querySelector('.feedsc'), top = el.querySelector('.feedtop'), ttl = el.querySelector('.feedttl'), cp = el.querySelector('.compact'); const dots = el.querySelectorAll('.pager i');
+      attachPager(sc);
       let collapsed = false;
       sc.addEventListener('scroll', () => {
         const i = Math.round(sc.scrollTop / sc.clientHeight); el.dataset.cur = order[i];
@@ -77,7 +78,7 @@ SCREENS.feed = ({ id = 'neon' }) => {
   };
 };
 ACT.openTpl = el => go('feed', { id: el.dataset.v });
-ACT.feedSave = el => { const id = el.dataset.v; if (S.bookmarks.has(id)) { S.bookmarks.delete(id); toast('Removed from Saved', { icon: '' }); } else { S.bookmarks.add(id); addToDefault(id); toast('Saved', { icon: BMI, pos: 'bottom', act: 'Collections', fn: () => saveToCollection(id) }); }
+ACT.feedSave = el => { const id = el.dataset.v; if (S.bookmarks.has(id)) { S.bookmarks.delete(id); toast('Removed from Saved', { icon: BMO, pos: 'bottom' }); } else { S.bookmarks.add(id); addToDefault(id); toast('Saved', { icon: BMI, pos: 'bottom', act: 'Collections', fn: () => saveToCollection(id) }); }
   const c = el.querySelector('.circ'); c.innerHTML = ic(S.bookmarks.has(id) ? 'bookmarkf' : 'bookmark'); };
 ACT.feedSaveCur = el => { const cur = stack[stack.length - 1].el.dataset.cur; const b = stack[stack.length - 1].el.querySelector(`.fpage[data-id="${cur}"] [data-act="feedSave"]`); if (b) ACT.feedSave(b); el.innerHTML = ic(S.bookmarks.has(cur) ? 'bookmarkf' : 'bookmark'); };
 ACT.useStyle = el => startCreate(el.dataset.v);
@@ -105,13 +106,20 @@ ACT.contact = () => { closeSheet(); toast('Opening email…', { icon: '' }); };
 
 /* ---------- 03 · Create ---------- */
 function priceOf(st) { const t = T[st.id]; return isVid(t) ? (st.dur === 'Long' ? 160 : 120) : 100; }
-function newCreate(id, people) { const t = T[id]; return { id, people, photos: people === 2 ? [null, null] : [null], check: people === 2 ? ['', ''] : [''], sound: true, dur: 'Short', res: '480p', ratio: isVid(t) ? '9:16' : '4:5' }; }
+function newCreate(id, people) { const t = T[id]; return { id, people, photos: people === 2 ? [null, null] : [null], check: people === 2 ? ['', ''] : [''], sound: true, dur: 'Short', res: '480p', quality: 'Standard', ratio: isVid(t) ? '9:16' : '4:5' }; }
 const SETUP = {}; // per create session
 function settingsBar(st) {
   const t = T[st.id];
-  const items = isVid(t) ? [['sound', st.sound ? 'On' : 'Off'], ['clock', st.dur], ['film', st.res]] : [['ratio', st.ratio], ['film', st.res]];
+  const items = t.tool ? [['ratio', st.ratio], ['sparkles', st.quality]] : isVid(t) ? [['sound', st.sound ? 'On' : 'Off'], ['clock', st.dur], ['film', st.res]] : [['ratio', st.ratio], ['film', st.res]];
   return `<button class="press" data-act="openSettings" style="height:52px;border-radius:16px;background:var(--a100);display:flex;align-items:center;padding:0 16px 0 14px;width:100%">${items.map(([i, l], k) => `${k ? '<span style="width:1px;height:20px;background:var(--a200);margin:0 14px"></span>' : ''}<span class="sh" style="display:flex;align-items:center;gap:6px;font-weight:600"><span class="n5" style="font-size:14px">${ic(i)}</span>${l}</span>`).join('')}<span class="n5" style="margin-left:auto;font-size:13px">${ic('chev')}</span></button>`;
 }
+function toolHero(t) {
+  return `<div class="abs" style="left:0;top:0;width:402px;height:660px;overflow:hidden"><img src="${IMG(t.img)}" alt="" style="position:absolute;left:-1px;top:-1px;width:404px;height:663px;object-fit:cover">
+  <div class="abs" style="left:0;top:0;width:100%;height:140px;background:linear-gradient(rgba(0,0,0,.6),transparent)"></div>
+  <div class="abs" style="left:0;top:487px;width:100%;height:173px;background:linear-gradient(rgba(10,10,13,0),#0a0a0d)"></div></div>
+  <div class="abs" style="left:0;top:746px;width:100%;height:128px;background:linear-gradient(rgba(10,10,12,0),#0a0a0c 40%)"></div>`;
+}
+const isTool = st => !!(st && T[st.id] && T[st.id].tool);
 function thumb(img, w = 96, h = 120) { return `<span style="width:${w}px;height:${h}px;border-radius:16px;overflow:hidden;flex:none;display:block"><img src="${IMG(img)}" alt="" style="width:100%;height:100%;object-fit:cover"></span>`; }
 function emptyThumb(w = 96, h = 120, act = 'addPhoto', i = 0) { return `<button class="press" data-act="${act}" data-i="${i}" style="width:${w}px;height:${h}px;border-radius:16px;background:rgba(255,255,255,.04);border:1.5px dashed rgba(255,255,255,.3);position:relative;flex:none;display:flex;align-items:center;justify-content:center"><span class="ripple"></span><span class="addlime">${ic('plus')}</span></button>`; }
 function photoCard(st) {
@@ -128,10 +136,10 @@ function photoCard(st) {
   const ph = st.photos[0], c = st.check[0];
   let left, text, right = '';
   const sub = 'font-size:13px;line-height:18px;color:rgba(255,255,255,.6);margin-top:4px';
-  if (!ph) { left = emptyThumb(); text = `<div class="hl">Add your photo</div><div style="${sub};white-space:nowrap">A clear, front-facing selfie works best</div>`; }
+  if (!ph) { left = emptyThumb(); text = `<div class="hl">Add your photo</div><div style="${sub};white-space:nowrap">${isTool(st) ? 'Full body, head to toe works best' : 'A clear, front-facing selfie works best'}</div>`; }
   else if (c === 'checking') { left = `<span style="position:relative">${thumb(ph)}<span class="abs" style="inset:0;border-radius:16px;background:rgba(255,255,255,.35);display:flex;align-items:center;justify-content:center"><span class="spin"></span></span></span>`; text = `<div class="hl">Checking photo...</div><div style="${sub}">Making sure your face is clear</div>`; }
   else if (c === 'bad') { left = `<span style="border-radius:16px;box-shadow:0 0 0 2px var(--red);display:block">${thumb(ph)}</span>`; text = `<div class="hl">Your photo</div><span class="pill bad" style="margin-top:8px">${ic('xcirc')} No clear face</span><div style="${sub};margin-top:8px">Try one person<br>facing the camera</div>`; right = `<button class="btn glass prom" style="height:36px;width:auto;padding:0 14px;font-size:15px" data-act="addPhoto" data-i="0">Change</button>`; }
-  else { left = thumb(ph); text = `<div class="hl">Your photo</div><span class="pill ok" style="margin-top:8px">${ic('checkc')} Looks good</span>`; right = `<button class="btn" style="height:36px;width:auto;padding:0 14px;font-size:15px;background:#fff;color:#000" data-act="addPhoto" data-i="0">Change</button>`; }
+  else { left = thumb(ph); text = `<div class="hl">Your photo</div><span class="pill ok" style="margin-top:8px">${ic('checkc')} Looks good</span>`; right = `<button class="btn" style="height:36px;width:auto;padding:0 14px;font-size:15px;${isTool(st) ? 'background:#2c2c2e;color:#fff' : 'background:#fff;color:#000'}" data-act="addPhoto" data-i="0">Change</button>`; }
   return `<div style="height:152px;border-radius:24px;background:rgba(255,255,255,.08);padding:0 16px;display:flex;align-items:center;gap:16px;-webkit-backdrop-filter:blur(24px);backdrop-filter:blur(24px)">${left}<div style="flex:1;min-width:0">${text}</div>${right}</div>`;
 }
 SCREENS.create = ({ id = 'neon', people = 1, fresh = true }) => {
@@ -140,9 +148,9 @@ SCREENS.create = ({ id = 'neon', people = 1, fresh = true }) => {
   const ready = st.check.every(c => c === 'ok'); const checking = st.check.some(c => c === 'checking'); const any = st.photos.some(Boolean);
   const label = ready || checking || st.check.some(c => c === 'bad') ? 'Create with' : 'Create ·';
   return {
-    html: `${media(t, 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover')}
+    html: `${t.tool ? toolHero(t) : `${media(t, 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover')}
     <div class="abs" style="left:0;top:0;width:100%;height:140px;background:linear-gradient(rgba(0,0,0,.55),transparent)"></div>
-    <div class="abs" style="left:0;top:${people === 2 ? 380 : 469}px;width:100%;bottom:0;background:linear-gradient(rgba(10,10,12,0),#0a0a0c 37%)"></div>
+    <div class="abs" style="left:0;top:${people === 2 ? 380 : 469}px;width:100%;bottom:0;background:linear-gradient(rgba(10,10,12,0),#0a0a0c 37%)"></div>`}
     <div class="tb">${closeBtn('closeCreate')}<div class="ttl">${t.name}</div></div>
     <div class="abs" style="left:16px;right:16px;top:${people === 2 ? 437 : 530}px;display:flex;flex-direction:column;gap:12px">${photoCard(st)}${settingsBar(st)}</div>
     <div class="abs" style="left:16px;right:16px;top:762px">
@@ -151,6 +159,7 @@ SCREENS.create = ({ id = 'neon', people = 1, fresh = true }) => {
     mount(el) { el.dataset.key = key; }
   };
 };
+const curSetupSafe = () => { try { return curSetup(); } catch (e) { return null; } };
 const curSetup = () => SETUP[stack[stack.length - 1].el.dataset.key] || SETUP[Object.keys(SETUP).pop()];
 const refreshCreate = () => { const c = stack[stack.length - 1]; if (c.name === 'create') { c.args.fresh = false; rerender(); } };
 ACT.closeCreate = () => back();
@@ -160,6 +169,14 @@ ACT.addPhoto = el => { const st = curSetup(); st.slot = +(el.dataset.i || 0); if
 let guideNext = null;
 function guidelinesSheet(next) {
   guideNext = next || null;
+  if (isTool(curSetupSafe())) {
+    const ex = ['selfie1', 'selfie2', 'selfie3', 'selfie4'];
+    return sheet({ title: 'Before you add a photo', html: `<div style="display:flex;flex-direction:column;gap:16px;padding-bottom:4px">
+    <div><div class="hl" style="display:flex;align-items:center;gap:4px"><img src="img/lg_check.png" style="width:24px;height:24px" alt="">Works great</div>
+      <div style="display:flex;gap:8px;margin:8px 0">${ex.map(h => `<img src="${IMG(h)}" style="width:84px;height:104px;border-radius:16px;object-fit:cover" alt="">`).join('')}</div>
+      <div class="fn n5">Your own selfie · face the camera · one person</div></div>
+    <div><button class="btn glass prom" style="height:50px" data-act="agreeUnderstand">I understand</button><div class="fn n5 ctr" style="padding:7px">Read full guidelines</div></div></div>` });
+  }
   const ex = [SELFIE, '726146ff99', '2a841c84a2', '9f43c6d6b2'];
   const s = sheet({
     title: 'Before you add a photo', html: `<div style="display:flex;flex-direction:column;gap:24px;padding-bottom:4px">
@@ -175,12 +192,23 @@ function guidelinesSheet(next) {
   return s;
 }
 ACT.agreeTick = el => { const c = el.querySelector('.cbx'); c.classList.toggle('on'); const b = el.closest('.sheet').querySelector('.agreebtn'); const on = c.classList.contains('on'); b.classList.toggle('dis', !on); b.classList.toggle('prom', on); };
+ACT.agreeUnderstand = () => { S.guideAgreed = true; closeSheet(); const n = guideNext; guideNext = null; if (n) setTimeout(n, 320); };
 ACT.agreeGo = el => { if (el.classList.contains('dis')) return; S.guideAgreed = true; closeSheet(); const n = guideNext; guideNext = null; if (n) setTimeout(n, 320); };
 
 /* 05 · Choose a photo */
 let hasCreations = true;
+let hasRecent = true;
 function chooseSheet() {
-  const recent = [SELFIE, '726146ff99', '2a841c84a2', '9f43c6d6b2'];
+  const tool = isTool(curSetupSafe());
+  const recent = tool ? ['selfie1', 'selfie2', 'selfie3', 'selfie4', 'selfie5'] : [SELFIE, '726146ff99', '2a841c84a2', '9f43c6d6b2'];
+  if (tool) {
+    const body = hasRecent ? `<div class="hscroll" style="gap:8px;margin:0 -16px;padding:0 16px">${recent.map(h => `<button class="press rph" data-act="pickRecent" data-v="${h}" style="position:relative;width:110px;height:136px;border-radius:16px;overflow:hidden;flex:none"><img src="${IMG(h)}" style="width:100%;height:100%;object-fit:cover" alt=""></button>`).join('')}</div>`
+      : `<div style="height:136px;border-radius:16px;background:rgba(255,255,255,.04);box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0 1px;text-align:center"><span style="font-size:24px;color:rgba(255,255,255,.48);display:flex;height:32px;align-items:center">${ic('library')}</span><div class="hl" style="margin-top:8px">No recent photos</div><div class="fn n5" style="margin-top:8px">Photos you use will show up here next time.</div></div>`;
+    sheet({ title: 'Choose a photo', html: `<div style="display:flex;flex-direction:column;gap:12px;padding-bottom:20px">
+    <div style="display:flex;gap:12px">${[['camera', 'Take a selfie', 'selfie'], ['library', 'Photo library', 'library']].map(([i, l, a]) => `<button class="press" data-act="${a}" style="flex:1;height:58px;border-radius:20px;background:rgba(255,255,255,.09);display:flex;align-items:center;gap:12px;padding:0 16px"><span style="width:24px;font-size:20px;display:flex;justify-content:center">${ic(i)}</span><span class="shs">${l}</span></button>`).join('')}</div>
+    <div class="hl" style="margin-top:0">Recent</div>${body}</div>` });
+    return;
+  }
   const body = hasCreations ? `<div class="hscroll" style="gap:8px;margin:0 -16px;padding:0 16px">${recent.map(h => `<button class="press rph" data-act="pickRecent" data-v="${h}" style="position:relative;width:110px;height:136px;border-radius:16px;overflow:hidden;flex:none"><img src="${IMG(h)}" style="width:100%;height:100%;object-fit:cover" alt=""></button>`).join('')}</div>`
     : `<div style="height:136px;border-radius:16px;background:var(--a100);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0 24px;text-align:center"><span class="icbox" style="width:32px;height:32px;font-size:22px">${ic('sparkles')}</span><div class="hl">No creations yet</div><div class="fn n5">Photos you make in Spark will show up here.</div></div>`;
   sheet({
@@ -197,7 +225,7 @@ function setPhoto(img) {
   const st = curSetup(); const i = st.slot || 0; st.photos[i] = img; st.check[i] = 'checking'; refreshCreate();
   setTimeout(() => { st.check[i] = (img === '30b2d83d18' || img === 'a0c009bf83' || img === '3188779628') ? 'bad' : 'ok'; refreshCreate(); }, 1600);
 }
-ACT.selfie = () => { closeSheet(); setTimeout(() => go('crop', { img: SELFIE }), 250); };
+ACT.selfie = () => { const tool = isTool(curSetupSafe()); closeSheet(); setTimeout(() => go('crop', { img: tool ? 'selfie1' : SELFIE }), 250); };
 ACT.library = () => {
   const imgs = [SELFIE, 'ffec858615', '30b2d83d18', '726146ff99', '3188779628', 'a0c009bf83', '2a841c84a2', 'cc8862499f', '3b449190bc', '9f43c6d6b2', '15cd66e195', '23e1943ea1', '5e89bb2630', 'd4bd65a314', '0e4cddc53b', '4378f76bb3', '5a2e1764e8', '8fa2b1b0eb'];
   closeSheet(); setTimeout(() => {
@@ -229,27 +257,27 @@ function refreshSoon() { setTimeout(refreshCreate, 430); }
 /* 03a · Generation settings */
 ACT.openSettings = () => { const st = curSetup(); go('settings', { key: Object.keys(SETUP).find(k => SETUP[k] === st) }); };
 SCREENS.settings = ({ key }) => {
-  const st = SETUP[key]; const t = T[st.id]; const d = (st.draft = st.draft || { sound: st.sound, dur: st.dur, res: st.res, ratio: st.ratio });
+  const st = SETUP[key]; const t = T[st.id]; const d = (st.draft = st.draft || { sound: st.sound, dur: st.dur, res: st.res, ratio: st.ratio, quality: st.quality });
   const price = isVid(t) ? (d.dur === 'Long' ? 160 : 120) : 100;
   const seg = (k, opts) => `<div class="seg">${opts.map(o => `<button class="${d[k] === o ? 'on' : ''}" data-act="setOpt" data-k="${k}" data-v="${o}">${o}</button>`).join('')}</div>`;
   const row = (icon, label, ctl) => `<div class="row" style="min-height:56px;padding:0 16px"><span class="icbox n5" style="width:32px;height:32px;font-size:18px">${ic(icon)}</span><span style="flex:1">${label}</span>${ctl}</div>`;
-  const rows = isVid(t) ? [row('sound', 'Sound', `<button class="tog ${d.sound ? 'on' : ''}" data-act="setOpt" data-k="sound" data-v="${!d.sound}"></button>`), row('clock', 'Duration', seg('dur', ['Short', 'Long'])), row('film', 'Resolution', seg('res', ['480p', '720p']))]
+  const rows = t.tool ? [row('ratio', 'Ratio', seg('ratio', ['4:5', '1:1', '9:16'])), row('sparkles', 'Quality', seg('quality', ['Standard', 'HD']))] : isVid(t) ? [row('sound', 'Sound', `<button class="tog ${d.sound ? 'on' : ''}" data-act="setOpt" data-k="sound" data-v="${!d.sound}"></button>`), row('clock', 'Duration', seg('dur', ['Short', 'Long'])), row('film', 'Resolution', seg('res', ['480p', '720p']))]
     : [row('ratio', 'Ratio', seg('ratio', ['4:5', '1:1', '9:16'])), row('film', 'Resolution', seg('res', ['480p', '720p']))];
   return {
-    html: `${media(t, 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover')}
+    html: `${t.tool ? toolHero(t) : `${media(t, 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover')}
     <div class="abs" style="left:0;top:0;width:100%;height:140px;background:linear-gradient(rgba(0,0,0,.55),transparent)"></div>
-    <div class="abs" style="left:0;top:420px;width:100%;bottom:0;background:linear-gradient(rgba(10,10,12,0),#0a0a0c 40%)"></div>
+    <div class="abs" style="left:0;top:420px;width:100%;bottom:0;background:linear-gradient(rgba(10,10,12,0),#0a0a0c 40%)"></div>`}
     <div class="tb">${closeBtn('closeSettings')}<div class="ttl">${t.name}</div></div>
-    <div class="abs" style="left:16px;right:16px;top:535px"><div style="font-size:15px;font-weight:600;margin-bottom:12px">Generation settings</div><div class="grp">${rows.join('')}</div></div>
-    <div class="abs" style="left:16px;right:16px;top:760px"><button class="btn glass prom" style="height:50px;font-weight:600" data-act="saveSettings">Save</button>
-    <div class="fn ctr" style="color:rgba(255,255,255,.5);margin-top:12px;display:flex;align-items:center;justify-content:center;gap:4px"><img src="img/coin.png" style="width:16px;height:16px" alt="">${price} · ${isVid(t) ? 'Price changes with the length only.' : 'Same price for every setting.'}</div></div>`,
+    <div class="abs" style="left:16px;right:16px;top:${t.tool ? 602 : 535}px"><div style="font-size:15px;font-weight:600;margin-bottom:12px">Generation settings</div><div class="grp">${rows.join('')}</div></div>
+    <div class="abs" style="left:16px;right:16px;top:${t.tool ? 763 : 760}px"><button class="btn glass prom" style="height:50px;font-weight:600" data-act="saveSettings">Save</button>
+    <div class="fn ctr" style="${t.tool ? 'display:none!important;' : ''}color:rgba(255,255,255,.5);margin-top:12px;display:flex;align-items:center;justify-content:center;gap:4px"><img src="img/coin.png" style="width:16px;height:16px" alt="">${price} · ${isVid(t) ? 'Price changes with the length only.' : 'Same price for every setting.'}</div></div>`,
     mount(el) { el.dataset.key = key; }
   };
 };
 ACT.setOpt = el => { const st = SETUP[stack[stack.length - 1].el.dataset.key]; let v = el.dataset.v; if (v === 'true') v = true; if (v === 'false') v = false; st.draft[el.dataset.k] = v; rerender(); };
 ACT.saveSettings = () => { const st = SETUP[stack[stack.length - 1].el.dataset.key]; Object.assign(st, st.draft); delete st.draft; back(); setTimeout(refreshCreate, 430); };
 ACT.closeSettings = () => {
-  const st = SETUP[stack[stack.length - 1].el.dataset.key]; const d = st.draft; const changed = d && ['sound', 'dur', 'res', 'ratio'].some(k => d[k] !== st[k]);
+  const st = SETUP[stack[stack.length - 1].el.dataset.key]; const d = st.draft; const changed = d && ['sound', 'dur', 'res', 'ratio', 'quality'].some(k => d[k] !== st[k]);
   if (!changed) { delete st.draft; back(); return; }
   discardDialog(() => { delete st.draft; back(); });
 };
@@ -275,18 +303,18 @@ function notEnoughCoins(need) {
 
 /* 08 · Making */
 SCREENS.making = ({ id = 'neon', photo = SELFIE }) => {
-  const t = T[id]; const vid = isVid(t);
+  const t = T[id]; const vid = isVid(t); const mimg = t.res || t.img; if (t.tool && photo === SELFIE) photo = 'selfie1';
   const sp = [[48, 74, 1], [82, 118, 0], [133, 140, 0], [64, 214, 1], [252, 212, 0], [198, 230, 0], [38, 358, 0], [178, 324, 1], [251, 351, 1], [129, 408, 0], [223, 454, 0], [96, 30, 1]];
   return {
-    html: `<div class="abs" style="inset:0;background:#000"><img src="${IMG(t.img)}" alt="" style="position:absolute;inset:-60px;width:calc(100% + 120px);height:calc(100% + 120px);object-fit:cover;filter:blur(60px) brightness(.35)"></div>
+    html: `<div class="abs" style="inset:0;background:#000"><img src="${IMG(mimg)}" alt="" style="position:absolute;inset:-60px;width:calc(100% + 120px);height:calc(100% + 120px);object-fit:cover;filter:blur(60px) brightness(.35)"></div>
     <div class="tb">${closeBtn('leaveMaking')}</div>
-    <div class="abs mk-card" style="left:45px;top:113px;width:312px;height:554px;border-radius:40px;overflow:hidden">
+    <div class="abs mk-card" style="left:45px;top:${t.tool ? 136 : 113}px;width:312px;height:${t.tool ? 527 : 554}px;border-radius:40px;overflow:hidden">
       <span class="mk-edge"></span>
       <div class="abs" style="inset:2px;border-radius:38px;overflow:hidden;background:#0d0b14">
-        <img class="mk-img" src="${IMG(t.img)}" alt="" style="position:absolute;inset:-40px;width:calc(100% + 80px);height:calc(100% + 80px);object-fit:cover;filter:blur(18px) saturate(1.1)">
+        <img class="mk-img" src="${IMG(mimg)}" alt="" style="position:absolute;inset:-40px;width:calc(100% + 80px);height:calc(100% + 80px);object-fit:cover;filter:blur(18px) saturate(1.1)">
         <div class="abs" style="inset:0;background:rgba(0,0,0,.15)"></div>
         ${sp.map(([x, y, big], i) => `<span class="mk-star" style="left:${x}px;top:${y}px;font-size:${big ? 30 : 16}px;animation-delay:${(i * .27) % 1.8}s">✦</span>`).join('')}
-        <div class="abs glass dark" style="left:12px;right:12px;top:18px;height:44px;border-radius:100px;display:flex;align-items:center;gap:8px;padding:0 6px 0 16px">
+        <div class="abs glass dark" style="${t.tool ? 'display:none!important;' : ''}left:12px;right:12px;top:18px;height:44px;border-radius:100px;display:flex;align-items:center;gap:8px;padding:0 6px 0 16px">
           <span class="bellring" style="display:flex;font-size:15px">${ic('bell')}</span><span style="flex:1;font-size:13px;font-weight:600">Notify me when ready</span>
           <button class="notifybtn" style="height:32px;padding:0 12px;border-radius:100px;background:rgba(255,255,255,.2);font-size:13px;font-weight:600" data-act="notifyOn">Turn on</button></div>
         <span class="abs glass dark" style="left:50%;top:260px;transform:translateX(-50%);height:36px;border-radius:100px;padding:0 16px 0 12px;display:flex;align-items:center;gap:8px;white-space:nowrap"><span style="font-size:16px;display:flex">${ic('sparkles')}</span><span class="mk-chipt" style="font-size:15px;font-weight:600">Dreaming up your scene...</span></span>
@@ -304,13 +332,14 @@ SCREENS.making = ({ id = 'neon', photo = SELFIE }) => {
 };
 ACT.notifyOn = el => { el.textContent = 'On'; el.style.background = 'rgba(48,209,88,.25)'; el.style.color = 'var(--green)'; };
 ACT.leaveMaking = () => { back(); };
-ACT.keepBrowsing = () => { const vid = stack[stack.length - 1].args && T[stack[stack.length - 1].args.id] && isVid(T[stack[stack.length - 1].args.id]); reset(vid ? 'tab_video' : 'tab_photo'); };
+ACT.keepBrowsing = () => { const vid = stack[stack.length - 1].args && T[stack[stack.length - 1].args.id] && isVid(T[stack[stack.length - 1].args.id]); reset(T[stack[stack.length - 1].args.id] && T[stack[stack.length - 1].args.id].tool ? 'tab_tools' : vid ? 'tab_video' : 'tab_photo'); };
 ACT.goQueue = () => { S.galleryTab = 'queue'; reset('tab_gallery'); };
 
 /* 09 · Result */
 const RETRY_PRICE = { video: 160, photo: 100 }; // Figma 09-A / 09-E
 SCREENS.result = ({ id = 'neon', img, failed = false, kind }) => {
-  const t = T[id] || T.neon; const vid = kind ? kind === 'video' : isVid(t); const price = RETRY_PRICE[vid ? 'video' : 'photo']; const src = img || t.img;
+  const t = T[id] || T.neon; const vid = kind ? kind === 'video' : isVid(t); const price = RETRY_PRICE[vid ? 'video' : 'photo']; const src = img || t.res || t.img;
+  if (t.tool) return toolResult(t, src, failed, price);
   const w = vid ? (failed ? 304 : 266) : 320, h = vid ? (failed ? 540 : 472) : 400;
   const actsTop = 720; const y = vid ? (failed ? 144 : 132) : (failed ? 216 : 168);
   const soc = [['tiktok', 'TikTok'], ['instagram', 'Instagram'], ['facebook', 'Facebook'], ['whatsapp', 'WhatsApp'], ['more', 'Other']];
@@ -330,8 +359,23 @@ SCREENS.result = ({ id = 'neon', img, failed = false, kind }) => {
         : `<button class="btn glass prom" style="height:54px" data-act="saveAlbum">${ic('save')} Save to Album</button>` + coinBtn('', 'Try again')}</div>`
   };
 };
-ACT.resultBack = () => { const prev = stack[stack.length - 2]; if (prev && (prev.name === 'create' || prev.name === 'making')) { const vid = isVid(T[stack[stack.length - 1].args.id] || T.neon); reset(vid ? 'tab_video' : 'tab_photo'); } else back(); };
+/* Tools / 09 · Photo result (+ Failed) — Figma 1030:47252, 1390:149779 */
+function toolResult(t, src, failed, price) {
+  const soc = [['tiktok', 'TikTok'], ['instagram', 'Instagram'], ['facebook', 'Facebook'], ['whatsapp', 'WhatsApp'], ['more', 'Other']];
+  return {
+    html: `<div class="tb">${backBtn('resultBack')}<div class="ttl" style="font-size:20px;font-weight:600">${t.name}</div></div>
+    <div class="abs" style="left:77px;top:144px;width:248px;height:440px;border-radius:17.5px;overflow:hidden"><img src="${IMG(src)}" style="width:100%;height:100%;object-fit:cover${failed ? ';filter:blur(24px);transform:scale(1.15)' : ''}" alt="">${failed ? `<div class="abs" style="inset:0;background:rgba(0,0,0,.55)"></div>
+      <div class="abs" style="left:-12px;right:-12px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:0 12px"><img src="img/lg_error.png" style="width:56px;height:56px" alt="">
+      <div><div class="t3">Couldn't make your photo</div><div class="fn" style="color:rgba(255,255,255,.7);margin-top:6px">Something went wrong on our side. Please try again.</div></div>
+      <span class="pill" style="background:var(--yellow20);color:var(--yellow);height:28px;padding:0 12px">${ic('shield')} ${price} <img src="img/coin.png" style="width:16px;height:16px" alt=""> refunded</span></div>` : ''}</div>
+    <div class="abs" style="left:16px;right:16px;top:628px;display:flex;justify-content:center;gap:4px">${soc.map(([k, l]) => `<button class="press" data-act="shareTo" style="width:70px;display:flex;flex-direction:column;align-items:center;gap:4px"><img src="img/soc_${k}.png" style="width:48px;height:48px" alt=""><span class="c1" style="font-weight:700">${l}</span></button>`).join('')}</div>
+    <div class="abs" style="left:16px;right:16px;top:720px;display:flex;flex-direction:column;gap:12px">
+      <button class="btn glass prom" style="height:54px" data-act="saveAlbum">${ic('save')} Save to Album</button>
+      <button class="btn glass" data-act="tryAgain" data-v="${t.id}" style="height:54px;font-weight:600">Try again · ${COIN} ${price}</button></div>`
+  };
+}
+ACT.resultBack = () => { const prev = stack[stack.length - 2]; if (prev && (prev.name === 'create' || prev.name === 'making')) { const tt = T[stack[stack.length - 1].args.id] || T.neon; reset(tt.tool ? 'tab_tools' : isVid(tt) ? 'tab_video' : 'tab_photo'); } else back(); };
 ACT.saveAlbum = () => toast('Saved to Album', { act: 'Share', fn: () => ACT.more() });
 ACT.tryAgain = el => { const id = el.dataset.v; const price = isVid(T[id]) ? 120 : 100; if (S.coins < price) { notEnoughCoins(price - S.coins); return; } S.coins -= price; replace('making', { id }, 'fade'); };
-ACT.anotherPhoto = el => { const id = el.dataset.v; reset(isVid(T[id]) ? 'tab_video' : 'tab_photo'); go('create', { id }, 'none'); };
+ACT.anotherPhoto = el => { const id = el.dataset.v; reset(T[id].tool ? 'tab_tools' : isVid(T[id]) ? 'tab_video' : 'tab_photo'); go('create', { id }, 'none'); };
 ACT.playToggle = el => { const v = el.querySelector('video'), b = el.querySelector('.playbtn'); if (!v) { b.style.opacity = b.style.opacity === '0' ? 1 : 0; return; } if (v.paused) { v.play(); b.style.opacity = 0; } else { v.pause(); b.style.opacity = 1; } };

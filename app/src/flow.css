@@ -28,3 +28,6 @@
 .toast.bottom{top:auto;bottom:100px;animation:toastUp .45s var(--ease) both}
 .toast.bottom .act{color:var(--lime)}
 @keyframes toastUp{from{transform:translateY(40px);opacity:0}}
+
+.toast.bottom.out{animation:toastDown .35s ease both}
+@keyframes toastDown{to{transform:translateY(90px);opacity:0}}

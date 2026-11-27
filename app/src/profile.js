@@ -165,16 +165,57 @@ ACT.pack = el => { stack[stack.length - 1].args.sel = +el.dataset.i; rerender();
 ACT.buyPack = () => { const [c, b] = PACKS[stack[stack.length - 1].args.sel ?? 2]; const add = c + b; S.coins += add; S.spent = true; replace('topup', { add, c, b }, 'fade'); };
 
 /* Top-up success (06b) */
-SCREENS.topup = ({ add = 1100, c = 1000, b = 100 }) => ({
-  html: `${raysBg()}<div class="tb">${backBtn()}</div>
-  <div class="abs" style="left:0;right:0;top:100px;display:flex;flex-direction:column;align-items:center;text-align:center">
-    <img src="${BIGCOIN}" class="coinpop" style="width:282px;height:282px" alt="">
-    <div class="sh" style="color:rgba(255,255,255,.7);margin-top:24px">Purchase complete</div><div class="t1" style="margin-top:4px">+${fmt(add)} coins</div>
-    <div class="fn" style="margin-top:24px">${fmt(c)} coins + ${b} bonus</div><div class="fn n5" style="margin-top:2px">New balance: ${fmt(S.coins)} coins · valid until Nov 27, 2027</div></div>
-  <div class="abs" style="left:16px;right:16px;bottom:46px"><button class="btn glass pastel" style="height:54px" data-act="continueCreating">Continue creating</button>
-  <div class="fns n5 ctr" style="margin-top:12px">View in · <button class="fns" style="color:#fff;text-decoration:underline;font-weight:700" data-act="histFromTopup">Coin history</button></div></div>`,
+SCREENS.topup = ({ add = 1100, c = 1000, b = 100 }) => ({ // Figma 1367:18953 · Gift · Claim offer · Option 1 – Spotlight
+  html: `<div class="abs" style="left:-16px;top:-2px;width:583px;height:576px;border-radius:50%;background:radial-gradient(closest-side,rgba(162,127,224,.9),rgba(74,47,134,.6) 55%,transparent);filter:blur(50px)"></div>
+  <div class="abs" style="left:-60px;top:-120px;width:520px;height:420px;border-radius:50%;background:rgba(189,168,250,.28);filter:blur(120px)"></div>
+  <div class="abs" style="left:-160px;top:420px;width:360px;height:360px;border-radius:50%;background:rgba(242,184,229,.16);filter:blur(120px)"></div>
+  <div class="abs" style="left:260px;top:480px;width:320px;height:360px;border-radius:50%;background:rgba(184,242,214,.14);filter:blur(120px)"></div>
+  ${[[40, 60, 46, 'bda8fa', .18], [300, 140, 90, 'b2d6ff', .12], [330, 420, 64, 'b8f2d6', .14], [20, 380, 50, 'f2b8e5', .14], [80, 620, 70, 'bda8fa', .12], [280, 640, 56, 'faf2bd', .10], [230, 40, 30, 'f2b8e5', .16]].map(([x, y, w, c, o]) => `<i class="abs" style="left:${x + 20}px;top:${y + 40}px;width:${w}px;height:${w}px;border-radius:50%;background:#${c};opacity:${o};filter:blur(4px)"></i>`).join('')}
+  ${[[70, 140, 22, 1], [312, 110, 18, 1], [58, 300, 14, .9], [340, 300, 16, .9], [96, 470, 12, .8], [318, 500, 20, .8], [200, 60, 40, .25], [20, 210, 34, .2], [350, 220, 30, .22]].map(([x, y, w, o]) => `<span class="abs mk-star" style="left:${x}px;top:${y}px;font-size:${w}px;line-height:1;opacity:${o};color:#fff">✦</span>`).join('')}
+  <img src="${BIGCOIN}" class="coinpop abs" style="left:73px;top:134px;width:257px;height:257px" alt="">
+  <div class="abs ctr" style="left:16px;right:16px;top:442px">
+    <div style="font-size:17px;line-height:22px;color:rgba(255,255,255,.62)">Purchase complete</div>
+    <div style="font-size:34px;line-height:41px;font-weight:700;margin-top:8px">+${fmt(add)} coins</div>
+    <div style="font-size:17px;line-height:22px;font-weight:600;color:rgba(255,255,255,.9);margin-top:8px">${fmt(c)} coins + ${b} coins bonus</div>
+    <div style="font-size:17px;line-height:22px;color:#999;margin-top:24px">Balance: ${S.coins} credits</div>
+    <div style="font-size:17px;line-height:22px;color:#999;margin-top:4px">Valid until 26 Nov, 2027</div></div>
+  <div class="abs" style="left:16px;right:16px;top:720px;display:flex;flex-direction:column;gap:12px"><button class="btn glass pastel" style="height:54px;font-weight:600" data-act="continueCreating">Continue creating</button>
+  <button class="btn glass" style="height:54px;font-weight:600" data-act="histFromTopup">View credit history</button></div>`,
   mount() { burst(); }
 });
+/* Gift · Claim offer · Option 2 – Receipt — Figma 1402:19364 */
+SCREENS.topup2 = ({ add = 1100, c = 1000, b = 100, paid = '$23.99' }) => ({
+  html: `<div class="abs" style="left:-80px;top:-100px;width:560px;height:460px;border-radius:50%;background:rgba(189,168,250,.3);filter:blur(120px)"></div>
+  <div class="abs" style="left:220px;top:300px;width:300px;height:300px;border-radius:50%;background:rgba(184,242,214,.12);filter:blur(120px)"></div>
+  <div class="abs" style="left:-140px;top:260px;width:300px;height:300px;border-radius:50%;background:rgba(242,184,229,.14);filter:blur(120px)"></div>
+  <div class="abs" style="left:-109px;top:-80px;width:620px;height:620px;border-radius:50%;opacity:.65;filter:blur(6px);background:repeating-conic-gradient(rgba(242,184,229,.22) 0 5deg,transparent 5deg 11.25deg,rgba(189,168,250,.22) 11.25deg 16.25deg,transparent 16.25deg 22.5deg,rgba(184,242,214,.22) 22.5deg 27.5deg,transparent 27.5deg 33.75deg,rgba(250,242,189,.22) 33.75deg 38.75deg,transparent 38.75deg 45deg)"></div>
+  <div class="abs" style="left:-109px;top:-80px;width:620px;height:620px;border-radius:50%;background:radial-gradient(closest-side,transparent,rgba(0,0,0,.25) 40%,#000)"></div>
+  ${[[50, 84, 13, 10, 'f2b8e5'], [328, 80, 15, 10, 'b8f2d6'], [80, 250, 9, 9, 'faf2bd'], [310, 250, 10, 13, 'bda8fa'], [30, 330, 7, 7, 'b3d6ff'], [348, 340, 13, 13, 'faf2bd'], [140, 70, 7, 7, 'b8f2d6'], [260, 57, 13, 8, 'f2b8e5'], [110, 351, 7, 11, 'bda8fa'], [290, 370, 8, 8, 'f2b8e5'], [187, 40, 8, 11, 'faf2bd'], [360, 180, 8, 8, 'bda8fa'], [24, 172, 12, 11, 'b8f2d6']].map(([x, y, w, h, c], i) => `<i class="abs" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-radius:3px;background:#${c};transform:rotate(${(i * 37) % 90 - 45}deg)"></i>`).join('')}
+  <img src="${BIGCOIN}" class="coinpop abs" style="left:96px;top:104px;width:211px;height:211px" alt="">
+  <div class="abs ctr" style="left:16px;right:16px;top:344px"><div style="font-size:15px;line-height:20px;font-weight:600;color:rgba(235,235,245,.7)">Purchase complete</div>
+    <div style="font-size:56px;line-height:62px;font-weight:700;margin-top:4px">+${fmt(add)}</div><div style="font-size:17px;line-height:22px;font-weight:600;margin-top:4px">coins added to your wallet</div></div>
+  <div class="abs" style="left:16px;right:16px;top:476px;border-radius:20px;background:#1c1c1e;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);padding:7px 17px">
+    ${[['Coin pack', `${fmt(c)} coins`], ['Bonus', `<span style="color:var(--lime)">+${b} coins</span>`], ['Paid', paid]].map(([l, v]) => `<div style="height:42px;display:flex;align-items:center;justify-content:space-between;font-size:15px"><span style="color:rgba(235,235,245,.7)">${l}</span><span>${v}</span></div>`).join('')}
+    <div style="height:1px;background:rgba(255,255,255,.09)"></div>
+    <div style="height:42px;display:flex;align-items:center;justify-content:space-between;font-size:15px"><span style="color:rgba(235,235,245,.7)">New balance</span><span style="display:flex;align-items:center;gap:6px;font-size:17px;font-weight:600">${fmt(S.coins)}<img src="img/coin.png" style="width:18px;height:18px" alt=""></span></div>
+    <div style="height:42px;display:flex;align-items:center;justify-content:space-between;font-size:15px"><span style="color:rgba(235,235,245,.7)">Valid until</span><span>Nov 26, 2027</span></div></div>
+  <div class="abs" style="left:16px;right:16px;top:720px;display:flex;flex-direction:column;gap:12px"><button class="btn glass pastel" style="height:54px;font-weight:600" data-act="continueCreating">Continue creating</button>
+  <button class="btn glass" style="height:54px;font-weight:600" data-act="histFromTopup">View credit history</button></div>`,
+  mount() { burst(); }
+});
+/* Reward / Gift received — Figma 1222:115339 (over the Tools tab) */
+function giftReceived() {
+  const p = $phone(); const d = document.createElement('div'); d.className = 'alertdim'; d.style.background = 'rgba(0,0,0,.72)'; d.style.backdropFilter = d.style.webkitBackdropFilter = 'blur(12px)';
+  d.innerHTML = `<div style="position:relative;width:338px;height:501px;border-radius:32px;background:#131417;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08);overflow:hidden;animation:pop .35s var(--ease) both">
+    <div class="abs" style="left:-51px;top:-57px;width:440px;height:440px;border-radius:50%;background:radial-gradient(closest-side,rgba(237,237,237,.22),transparent);"></div>
+    <div class="abs" style="left:24px;right:24px;top:196px;text-align:center"><div style="font-size:22px;line-height:28px;font-weight:700">Your gift has arrived!</div>
+      <div style="font-size:13px;line-height:18px;color:#c4c6cb;margin-top:8px">Thanks for joining Spark. Try any AI tool — Hairstyle, Hair Color, Face Slim and more.</div>
+      <div style="height:78px;border-radius:20px;background:rgba(255,255,255,.06);box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.12);margin-top:24px;display:flex;align-items:center;justify-content:center;gap:10px"><img src="img/coin.png" style="width:40px;height:40px" alt=""><span style="font-size:34px;line-height:41px;font-weight:700">+480</span><span style="font-size:17px;color:rgba(235,235,245,.7);margin-top:8px">coins</span></div>
+      <button class="btn" style="margin-top:24px;height:52px;background:linear-gradient(90deg,#efcbea,#cecbf4 38%,#cdefda 72%,#f6f3cb);color:#0b0e0e;font-weight:600" data-x="claim">Claim 480 credits</button>
+      <div style="font-size:13px;color:#979aa2;margin-top:12px">Credits never expire</div></div></div>`;
+  d.querySelector('[data-x=claim]').onclick = () => { d.remove(); S.coins += 480; toast('480 credits added'); };
+  p.appendChild(d);
+}
 function burst() { const p = $phone(); for (let i = 0; i < 26; i++) { const s = document.createElement('i'); s.className = 'confetti'; s.style.cssText = `left:${50 + (Math.random() - .5) * 20}%;top:30%;--dx:${(Math.random() - .5) * 360}px;--dy:${-80 - Math.random() * 260}px;background:${['#efcbea', '#cecbf4', '#cdefda', '#f6f3cb', '#f0fe65'][i % 5]};animation-delay:${Math.random() * .2}s`; p.appendChild(s); setTimeout(() => s.remove(), 1800); } }
 ACT.continueCreating = () => { const i = stack.findIndex(s => s.name === 'create'); if (i >= 0) back(stack.length - 1 - i); else back(); };
 ACT.histFromTopup = () => { S.signedIn = true; replace('coinHistory', {}); };
