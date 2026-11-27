@@ -1,0 +1,10 @@
+
+/* profile.css */
+.coinspin{animation:coinfloat 4s ease-in-out infinite}
+@keyframes coinfloat{50%{transform:translateY(-8px) rotate(-3deg)}}
+.coinpop{animation:coinpop .9s var(--ease) both,coinfloat 4s 1s ease-in-out infinite}
+@keyframes coinpop{from{transform:scale(.4) rotateY(180deg);opacity:0}}
+.confetti{position:absolute;width:8px;height:12px;border-radius:2px;z-index:95;pointer-events:none;animation:conf 1.6s cubic-bezier(.2,.7,.4,1) both}
+@keyframes conf{to{transform:translate(var(--dx),calc(var(--dy) + 600px)) rotate(540deg);opacity:0}}
+.twk{position:absolute;color:#fff;font-size:24px;text-shadow:0 0 12px #fff;animation:twinkle 2s ease-in-out infinite}
+.wheel::-webkit-scrollbar{display:none}

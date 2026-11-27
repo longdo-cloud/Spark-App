@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-11-27 — v2: code lại web app từ section Main flow (5 section đã chốt)
+
+- **App · 4 tabs**: Video / Photo (before–after kéo được) / Tools / Gallery (Queue, Video, Image, Uploads, Bookmarks), tab bar Liquid Glass + Search.
+- **Flow · Collection grid → Generate video**: grid 2 cột + chip + sheet Categories; feed full màn hình (cuộn dọc, thu gọn thành "Use this" + viền lime chạy); sheet More (mạng xã hội + Copy link / Report / Contact us); Create 1 ảnh và 2 ảnh; Generation settings + dialog Discard changes; Guidelines + Permission (checkbox tròn); Choose a photo (có / chưa có creations); picker; Crop; Checking → Looks good / No clear face; Making (viền phát sáng, toast Notify có chuông rung); Result (share row, Save to Album, Try again · coin) và Result lỗi (chip vàng hoàn coin).
+- **Flow Generate image**: dùng chung flow, Ratio 4:5 / 1:1 / 9:16 + Resolution, 100 coin, kết quả 4:5.
+- **Flow · Profile → Credits & Account**: Guest (hết / ít / còn coin), sheet Sign in, Signed in Free / Pro (thẻ Credits), Coin history (trống / Pro, lọc All·Spent·Added), Edit profile (đổi tên, username có báo trùng, bio, giới tính, sinh nhật dạng wheel, ảnh đại diện, Switch account, Sign out), Refill credits, Top-up success, Paywall.
+- **Flow · Save to collection → Gallery › Bookmarks**: toast "Saved · Collections", sheet Save to collection, tạo collection mới (báo trùng tên), Bookmarks grid, chi tiết collection, menu ··· Rename / Delete (+ Undo), collection trống.
+- Bản cũ chuyển vào `legacy/`.
+
 ## 2026-11-23 — Prototype theo Figma (3 section: 4 tab · Flow tạo video · Flow tạo ảnh)
 
 ### Flow tạo video & tạo ảnh
